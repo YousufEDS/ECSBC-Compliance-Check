@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import re
 from datetime import datetime
+import requests
 
 # ECSBC compliance requirements with area-based exceptions
 ECSBC_REQUIREMENTS = {
@@ -284,8 +285,8 @@ def create_compliance_table(climate_zone, building_type, compliance_level,
         
         <tr class="sub-header">
             <td>Building Envelope</td>
-            <td class="center">Wall Compliance</td>
-            <td class="center">Roof Compliance</td>
+            <td class="center">Wall Compliance [W/m².K]</td>
+            <td class="center">Roof Compliance [W/m².K]</td>
             <td class="center">Values [W/m².K]</td>
         </tr>
         <tr>
@@ -324,50 +325,73 @@ def create_compliance_table(climate_zone, building_type, compliance_level,
     
     return html
 
-def main():
-    st.set_page_config(page_title="ECSBC Compliance Dashboard", layout="wide")
+def query_llm(question):
+    """Query the LLM API with a question"""
+    url = "https://api.vectorshift.ai/v1/pipeline/6954c79ba76af4b71858e962/run"
     
-    st.title("🏢 ECSBC Compliance Check Dashboard")
+    payload = {"inputs": {"Input": question}}
+    headers = {
+        "Authorization": "Bearer sk_UUzE2PgugFATCpHwS8mAenzgMowmV6RpSg02UhTMhTYY7w8z",
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        response = requests.post(url, json=payload, headers=headers, timeout=30)
+        response.raise_for_status()
+        
+        # Parse the JSON response
+        response_data = response.json()
+        
+        # Extract the actual message from the outputs
+        if "outputs" in response_data and "output_0" in response_data["outputs"]:
+            return response_data["outputs"]["output_0"]
+        else:
+            # Fallback: return the entire response if structure is different
+            return str(response_data)
+            
+    except requests.exceptions.RequestException as e:
+        return f"Error: {str(e)}"
+    except Exception as e:
+        return f"Error parsing response: {str(e)}"
+
+def compliance_page():
+    """Main compliance check page"""
+    # Create header with title and button
+    col1, col2 = st.columns([5, 1])
+    with col1:
+        st.title("   ECSBC Compliance Check Dashboard")
+    with col2:
+        st.markdown("<br>", unsafe_allow_html=True)  # Add spacing
+        if st.button("🤖 Ask AI Assistant", type="primary", use_container_width=False, width=300):
+            st.session_state.page = "AI Assistant"
+            st.rerun()
+    
     st.markdown("---")
     
-    # Create two columns for inputs
+    # Create three columns for inputs
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.subheader("📤 Upload SIM File")
-        uploaded_file = st.file_uploader("Choose a SIM file", type=['sim', 'txt'], width=400)
-        
-        # st.subheader("🌍 Project Details")
-        # climate_zone = st.selectbox(
-        #     "Select Climate Zone",
-        #     ["Composite", "Hot-Dry", "Warm-Humid", "Moderate", "Cold"], width=400
-        # )
-        
-        # project_area = st.number_input(
-        #     "Project Built-up Area (m²)",
-        #     min_value=0.0,
-        #     value=10000.0,
-        #     step=100.0,
-        #     help="Enter the total built-up area. Requirements vary for areas below 10,000 m²", width=400
-        # )
+        uploaded_file = st.file_uploader("Choose a SIM file", type=['sim', 'txt'], width=300)
     
     with col2:
         st.subheader("🏗️ Building Classification")
         building_type = st.selectbox(
             "Select Building Type",
-            ["Hospitality", "Business", "Health Care", "Educational", "Assembly", "Shopping Complex"], width=400
+            ["Hospitality", "Business", "Health Care", "Educational", "Assembly", "Shopping Complex"], width=300
         )
         
         compliance_level = st.selectbox(
             "Compliance Level Sought",
-            ["ECSBC Compliant", "ECSBC+ Compliant", "Super ECSBC Compliant"], width=400
+            ["ECSBC Compliant", "ECSBC+ Compliant", "Super ECSBC Compliant"], width=300
         )
     
     with col3:
         st.subheader("🌍 Project Details")
         climate_zone = st.selectbox(
             "Select Climate Zone",
-            ["Composite", "Hot-Dry", "Warm-Humid", "Moderate", "Cold"], width=400
+            ["Composite", "Hot-Dry", "Warm-Humid", "Moderate", "Cold"], width=300   
         )
         
         project_area = st.number_input(
@@ -375,12 +399,12 @@ def main():
             min_value=0.0,
             value=10000.0,
             step=100.0,
-            help="Enter the total built-up area. Requirements vary for areas below 10,000 m²", width=400
+            help="Enter the total built-up area. Requirements vary for areas below 10,000 m²", width=300
         )
 
     st.markdown("---")
     
-    if st.button("🔍 Check Compliance", type="primary", use_container_width=False, width=400):
+    if st.button("🔍 Check Compliance", type="primary"):
         if uploaded_file is None:
             st.error("⚠️ Please upload a SIM file first!")
             return
@@ -470,12 +494,74 @@ def main():
                     use_container_width=True,
                     type="secondary"
                 )
+
+def chatbot_page():
+    """AI Assistant chatbot page"""
+    
+    # Add back button
+    if st.button("← Back to Compliance Check", type="secondary"):
+        st.session_state.page = "Compliance Check"
+        st.rerun()
+    
+    st.title("🤖 ECSBC AI Assistant")
+    st.markdown("Ask questions about ECSBC compliance, building codes, and energy efficiency.")
+    st.markdown("---")
+    
+    # Initialize chat history in session state
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+    
+    # Display chat history
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+    
+    # Chat input
+    if prompt := st.chat_input("Ask a question about ECSBC compliance..."):
+        # Add user message to chat history
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        
+        # Display user message
+        with st.chat_message("user"):
+            st.markdown(prompt)
+        
+        # Get AI response
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking..."):
+                response = query_llm(prompt)
+                st.markdown(response)
+        
+        # Add assistant response to chat history
+        st.session_state.messages.append({"role": "assistant", "content": response})
+    
+    # Clear chat button
+    st.markdown("---")
+    if st.button("🗑️ Clear Chat History"):
+        st.session_state.messages = []
+        st.rerun()
+
+def main():
+    st.set_page_config(
+        page_title="ECSBC Compliance Dashboard", 
+        layout="wide",
+        page_icon="🏢"
+    )
+    
+    # Initialize page state
+    if "page" not in st.session_state:
+        st.session_state.page = "Compliance Check"
+    
+    # Page routing based on session state
+    if st.session_state.page == "Compliance Check":
+        compliance_page()
+    elif st.session_state.page == "AI Assistant":
+        chatbot_page()
     
     # Footer
     st.markdown("---")
     st.markdown("""
     <div style='text-align: center; color: gray;'>
-    <small>ECSBC Compliance Dashboard v1.0 | Energy Conservation Building Code</small>
+    <small>ECSBC Compliance Dashboard v2.0 | Energy Conservation Building Code</small>
     </div>
     """, unsafe_allow_html=True)
 
