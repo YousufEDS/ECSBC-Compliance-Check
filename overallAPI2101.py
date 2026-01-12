@@ -58,7 +58,7 @@ st.markdown("""
         border-radius: 12px;
         padding: 25px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        height: 100%;
+        height: 80%;
         transition: transform 0.2s, box-shadow 0.2s;
     }
     
@@ -187,6 +187,16 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         z-index: 999;
     }
+    /* Reduce top padding of the main page */
+    .block-container {
+        padding-top: 1rem;
+    }
+
+    /* Reduce space above and below the title */
+    h1 {
+        margin-top: 0rem;
+        padding-top: 0rem;
+        }
 </style>
 """, unsafe_allow_html=True)
 
@@ -233,7 +243,7 @@ with col1:
         </div>
         """, unsafe_allow_html=True)
     else:
-        st.info("Drag and drop file here\n\nLimit 200MB per file • SIM, TXT")
+        st.info("Drag and drop file here\nLimit 200MB per file • SIM, TXT")
     
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -246,14 +256,14 @@ with col2:
         </div>
     """, unsafe_allow_html=True)
     
-    st.markdown('<p class="section-label">Select Building Type</p>', unsafe_allow_html=True)
+    st.markdown('<p class="section-label" style="margin-top: 10px;">Select Building Type</p>', unsafe_allow_html=True)
     building_type = st.selectbox(
         "Select Building Type",
         ["No Star Hotel", "School", "Business", "Residential", "Healthcare"],
         label_visibility="collapsed"
     )
     
-    st.markdown('<p class="section-label" style="margin-top: 20px;">Compliance Level Sought</p>', unsafe_allow_html=True)
+    st.markdown('<p class="section-label" style="margin-top: 2px;">Compliance Level Sought</p>', unsafe_allow_html=True)
     compliance_level = st.selectbox(
         "Compliance Level Sought",
         ["ECSBC Compliant", "Partially Compliant", "Non-Compliant"],
@@ -271,14 +281,14 @@ with col3:
         </div>
     """, unsafe_allow_html=True)
     
-    st.markdown('<p class="section-label">Select Climate Zone</p>', unsafe_allow_html=True)
+    st.markdown('<p class="section-label" style="margin-top: 10px;">Select Climate Zone</p>', unsafe_allow_html=True)
     climate_zone = st.selectbox(
         "Select Climate Zone",
         ["Composite", "Hot & Dry", "Warm & Humid", "Cold", "Temperate"],
         label_visibility="collapsed"
     )
     
-    st.markdown('<p class="section-label" style="margin-top: 20px;">Project Built-up Area (m²)</p>', unsafe_allow_html=True)
+    st.markdown('<p class="section-label" style="margin-top: 2px;">Project Built-up Area (m²)</p>', unsafe_allow_html=True)
     built_up_area = st.number_input(
         "Project Built-up Area (m²)",
         min_value=0.0,
@@ -383,9 +393,8 @@ if st.session_state.compliance_result:
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("""
     <div class="card">
-        <div class="card-header">
-            <span class="card-icon">📊</span>
-            <h2 class="card-title">Compliance Check Results</h2>
+        <div>
+            <h3>Compliance Check Results</h3>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -402,7 +411,7 @@ if st.session_state.compliance_result:
             data=st.session_state.compliance_result,
             file_name="ecsbc_compliance_report.txt",
             mime="text/plain",
-            use_container_width=True
+            use_container_width=False
         )
 
 # Footer
