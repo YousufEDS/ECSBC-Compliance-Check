@@ -56,10 +56,11 @@ st.markdown("""
     .card {
         background: white;
         border-radius: 12px;
-        padding: 25px;
+        padding: 10px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         height: 80%;
         transition: transform 0.2s, box-shadow 0.2s;
+        width: 350px;
     }
     
     .card:hover {
@@ -223,13 +224,14 @@ with col1:
         </div>
     """, unsafe_allow_html=True)
     
-    st.markdown('<p class="section-label">Choose a SIM file</p>', unsafe_allow_html=True)
+    st.markdown('<p class="section-label" style="margin-top: 10px;">Choose a SIM file</p>', unsafe_allow_html=True)
+
     
     uploaded_file = st.file_uploader(
         "Choose a SIM file",
         type=['sim', 'txt'],
         label_visibility="collapsed",
-        help="Limit 200MB per file • SIM, TXT"
+        help="Limit 200MB per file • SIM, TXT", width=350
     )
     
     if uploaded_file:
@@ -242,8 +244,8 @@ with col1:
             </div>
         </div>
         """, unsafe_allow_html=True)
-    else:
-        st.info("Drag and drop file here\nLimit 200MB per file • SIM, TXT")
+    # else:
+        # st.info("Drag and drop file here\nLimit 200MB per file • SIM, TXT")
     
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -260,14 +262,16 @@ with col2:
     building_type = st.selectbox(
         "Select Building Type",
         ["No Star Hotel", "School", "Business", "Residential", "Healthcare"],
-        label_visibility="collapsed"
+        label_visibility="collapsed",
+        width=350
     )
     
-    st.markdown('<p class="section-label" style="margin-top: 2px;">Compliance Level Sought</p>', unsafe_allow_html=True)
+    st.markdown('<p class="section-label" style="margin-top: 2px;">Compliance Level </p>', unsafe_allow_html=True)
     compliance_level = st.selectbox(
         "Compliance Level Sought",
         ["ECSBC Compliant", "Partially Compliant", "Non-Compliant"],
-        label_visibility="collapsed"
+        label_visibility="collapsed",
+        width=350
     )
     
     st.markdown("</div>", unsafe_allow_html=True)
@@ -285,7 +289,8 @@ with col3:
     climate_zone = st.selectbox(
         "Select Climate Zone",
         ["Composite", "Hot & Dry", "Warm & Humid", "Cold", "Temperate"],
-        label_visibility="collapsed"
+        label_visibility="collapsed",
+        width=350
     )
     
     st.markdown('<p class="section-label" style="margin-top: 2px;">Project Built-up Area (m²)</p>', unsafe_allow_html=True)
@@ -295,7 +300,8 @@ with col3:
         value=10000.00,
         step=100.0,
         format="%.2f",
-        label_visibility="collapsed"
+        label_visibility="collapsed",
+        width=350
     )
     
     st.markdown("</div>", unsafe_allow_html=True)
