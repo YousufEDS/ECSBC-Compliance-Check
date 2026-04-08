@@ -3,42 +3,61 @@ import pandas as pd
 import re
 from datetime import datetime
 import requests
+import os
+from io import BytesIO
+
+# Page configuration
+st.set_page_config(
+    page_title="ECSBC Compliance Dashboard", 
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
+# Initialize session state for navigation
+if "current_page" not in st.session_state:
+    st.session_state.current_page = "compliance"
+if "chat_messages" not in st.session_state:
+    st.session_state.chat_messages = []
+if "uploaded_sim_file" not in st.session_state:
+    st.session_state.uploaded_sim_file = None
+if "project_context" not in st.session_state:
+    st.session_state.project_context = {}
 
 # ECSBC compliance requirements with area-based exceptions
 ECSBC_REQUIREMENTS = {
     "Composite": {
-        "default": {"wall": 0.40, "roof": 0.26},
-        "Hospitality_below_10000": {"wall": 0.63, "roof": 0.20},
-        "Business_below_10000": {"wall": 0.63, "roof": 0.26},
-        "Educational_below_10000": {"wall": 0.85, "roof": 0.26},
-        "Assembly_above_10000": {"wall": 0.40, "roof": 0.20}
+        "default": {"wall": 0.44, "roof": 0.20},
+        "Hospitality_below_10000": {"wall": 0.44, "roof": 0.20},  # Roof exception applies, wall unchanged
+        "Business_below_10000": {"wall": 0.63, "roof": 0.20},     # Wall exception applies
+        "Educational_below_10000": {"wall": 0.63, "roof": 0.20},  # Wall exception for School
+        "Assembly_above_10000": {"wall": 0.44, "roof": 0.20}
     },
     "Hot-Dry": {
-        "default": {"wall": 0.40, "roof": 0.26},
-        "Hospitality_below_10000": {"wall": 0.63, "roof": 0.20},
-        "Business_below_10000": {"wall": 0.63, "roof": 0.26},
-        "Educational_below_10000": {"wall": 0.85, "roof": 0.26},
-        "Assembly_above_10000": {"wall": 0.40, "roof": 0.20}
+        "default": {"wall": 0.44, "roof": 0.20},
+        "Hospitality_below_10000": {"wall": 0.44, "roof": 0.20},  # Roof exception applies, wall unchanged
+        "Business_below_10000": {"wall": 0.63, "roof": 0.20},     # Wall exception applies
+        "Educational_below_10000": {"wall": 0.63, "roof": 0.20},  # Wall exception for School
+        "Assembly_above_10000": {"wall": 0.44, "roof": 0.20}
     },
     "Warm-Humid": {
-        "default": {"wall": 0.40, "roof": 0.26},
-        "Hospitality_below_10000": {"wall": 0.63, "roof": 0.20},
-        "Business_below_10000": {"wall": 0.63, "roof": 0.26},
-        "Educational_below_10000": {"wall": 0.85, "roof": 0.26},
-        "Assembly_above_10000": {"wall": 0.40, "roof": 0.20}
+        "default": {"wall": 0.44, "roof": 0.20},
+        "Hospitality_below_10000": {"wall": 0.44, "roof": 0.20},  # Roof exception applies, wall unchanged
+        "Business_below_10000": {"wall": 0.63, "roof": 0.20},     # Wall exception applies
+        "Educational_below_10000": {"wall": 0.63, "roof": 0.20},  # Wall exception for School
+        "Assembly_above_10000": {"wall": 0.44, "roof": 0.20}
     },
     "Moderate": {
-        "default": {"wall": 0.55, "roof": 0.26},
-        "Hospitality_below_10000": {"wall": 0.63, "roof": 0.20},
-        "Business_below_10000": {"wall": 0.63, "roof": 0.26},
-        "Educational_below_10000": {"wall": 1.00, "roof": 0.26},
+        "default": {"wall": 0.55, "roof": 0.20},
+        "Hospitality_below_10000": {"wall": 0.55, "roof": 0.20},  # Roof exception applies, wall unchanged
+        "Business_below_10000": {"wall": 0.63, "roof": 0.20},     # Wall exception applies
+        "Educational_below_10000": {"wall": 0.75, "roof": 0.20},  # Wall exception for School
         "Assembly_above_10000": {"wall": 0.55, "roof": 0.20}
     },
     "Cold": {
         "default": {"wall": 0.34, "roof": 0.20},
-        "Hospitality_below_10000": {"wall": 0.40, "roof": 0.20},
-        "Business_below_10000": {"wall": 0.40, "roof": 0.20},
-        "Educational_below_10000": {"wall": 0.40, "roof": 0.20},
+        "Hospitality_below_10000": {"wall": 0.34, "roof": 0.20},  # Roof exception applies, wall unchanged
+        "Business_below_10000": {"wall": 0.40, "roof": 0.20},     # Wall exception applies
+        "Educational_below_10000": {"wall": 0.40, "roof": 0.20},  # Wall exception for School
         "Assembly_above_10000": {"wall": 0.34, "roof": 0.20}
     }
 }
@@ -47,7 +66,6 @@ def get_ecsbc_requirements(climate_zone, building_type, area):
     """Get ECSBC requirements based on climate zone, building type, and area"""
     requirements_dict = ECSBC_REQUIREMENTS.get(climate_zone, {})
     
-    # Special case for Assembly and Hospitality with area > 10,000 m²
     if area >= 10000:
         if building_type == "Assembly":
             exception_key = "Assembly_above_10000"
@@ -58,27 +76,24 @@ def get_ecsbc_requirements(climate_zone, building_type, area):
             if exception_key in requirements_dict:
                 return requirements_dict[exception_key]
     
-    # Check if area-based exception applies for buildings < 10,000 m²
     if area < 10000:
-        # Map building types to their requirement keys
         type_mapping = {
             "Hospitality": "Hospitality_below_10000",
             "Business": "Business_below_10000",
             "Educational": "Educational_below_10000",
-            "Health Care": "Business_below_10000",  # Treat same as Business
-            "Assembly": "Business_below_10000",  # Treat same as Business for < 10k
-            "Shopping Complex": "Business_below_10000"  # Treat same as Business
+            "Health Care": "Business_below_10000",
+            "Assembly": "Business_below_10000",
+            "Shopping Complex": "Business_below_10000"
         }
         
         exception_key = type_mapping.get(building_type)
         if exception_key and exception_key in requirements_dict:
             return requirements_dict[exception_key]
     
-    # Return default requirements
     return requirements_dict.get("default", {"wall": 0.40, "roof": 0.26})
 
 def extract_u_values_from_sim(sim_file_content):
-    """Extract U-values from SIM file for walls and roofs"""
+    """Extract U-values from SIM file for walls, roofs, and windows"""
     
     if isinstance(sim_file_content, bytes):
         file_content = sim_file_content.decode("utf-8", errors="ignore")
@@ -97,7 +112,6 @@ def extract_u_values_from_sim(sim_file_content):
         if start_key in line:
             capture = True
         
-        # Only capture lines after the summary table header
         if capture and summary_start in line:
             summary_section = True
         
@@ -109,35 +123,33 @@ def extract_u_values_from_sim(sim_file_content):
 
     filtered_text = "".join(filtered_lines)
     
-    # Extract U-values for ALL WALLS and ROOF from the specific table format
     wall_u_value = None
     roof_u_value = None
+    window_u_value = None
     
     lines = filtered_text.split('\n')
     for line in lines:
-        # Look for the "ALL WALLS" line
         if 'ALL WALLS' in line.upper():
             parts = line.split()
             try:
                 numeric_values = [float(p) for p in parts if is_float(p)]
                 if len(numeric_values) >= 2:
-                    # Convert from BTU/HR-SQFT-F to W/m².K
+                    # First value is window U-value, second is wall U-value
+                    window_u_value = numeric_values[0] * 5.678  # Convert to W/m².K
                     wall_u_value = numeric_values[1] * 5.678
             except:
                 pass
         
-        # Look for the "ROOF" line
         elif line.strip().startswith('ROOF') and 'ROOF' in line.upper():
             parts = line.split()
             try:
                 numeric_values = [float(p) for p in parts if is_float(p)]
                 if len(numeric_values) >= 2:
-                    # Convert from BTU/HR-SQFT-F to W/m².K
                     roof_u_value = numeric_values[1] * 5.678
             except:
                 pass
     
-    return wall_u_value, roof_u_value, filtered_text
+    return wall_u_value, roof_u_value, window_u_value, filtered_text
 
 def is_float(value):
     """Check if a string can be converted to float"""
@@ -158,33 +170,30 @@ def check_compliance(actual_value, required_value):
         return "Not Compliant"
 
 def create_compliance_table(climate_zone, building_type, compliance_level, 
-                           wall_u_actual, roof_u_actual, wall_u_required, roof_u_required,
+                           wall_u_actual, roof_u_actual, window_u_actual, wall_u_required, roof_u_required,
                            project_area):
     """Create a formatted compliance table matching the reference format"""
     
-    # Check compliance status
     wall_status = check_compliance(wall_u_actual, wall_u_required)
     roof_status = check_compliance(roof_u_actual, roof_u_required)
+    window_status = "N/A"  # Placeholder until requirements are added
     
-    # Format values
     wall_actual_str = f"{wall_u_actual:.3f}" if wall_u_actual else "N/A"
     roof_actual_str = f"{roof_u_actual:.3f}" if roof_u_actual else "N/A"
+    window_actual_str = f"{window_u_actual:.3f}" if window_u_actual else "N/A"
     wall_required_str = f"{wall_u_required:.3f}"
     roof_required_str = f"{roof_u_required:.3f}"
     
-    # Determine CSS classes
     wall_class = "compliant" if wall_status == "Compliant" else ("not-compliant" if wall_status == "Not Compliant" else "na")
     roof_class = "compliant" if roof_status == "Compliant" else ("not-compliant" if roof_status == "Not Compliant" else "na")
+    window_class = "na"
     
-    # Check marks for compliance level
     ecsbc_check = "✓" if compliance_level == "ECSBC Compliant" else ""
     ecsbc_plus_check = "✓" if compliance_level == "ECSBC+ Compliant" else ""
     super_ecsbc_check = "✓" if compliance_level == "Super ECSBC Compliant" else ""
     
-    # Get current date
     current_date = datetime.now().strftime("%Y-%m-%d")
     
-    # Create HTML table using f-string
     html = f'''
     <style>
         .compliance-table {{
@@ -285,8 +294,8 @@ def create_compliance_table(climate_zone, building_type, compliance_level,
         
         <tr class="sub-header">
             <td>Building Envelope</td>
-            <td class="center">Wall Compliance [W/m².K]</td>
-            <td class="center">Roof Compliance [W/m².K]</td>
+            <td class="center">Wall Compliance</td>
+            <td class="center">Roof Compliance</td>
             <td class="center">Values [W/m².K]</td>
         </tr>
         <tr>
@@ -309,6 +318,37 @@ def create_compliance_table(climate_zone, building_type, compliance_level,
         </tr>
         
         <tr class="sub-header">
+            <td>Vertical Fenestration</td>
+            <td class="center">U-factor [W/m².K]</td>
+            <td class="center">SHGC</td>
+            <td class="center">VLT</td>
+        </tr>
+        <tr>
+            <td class="field-name">Actual Value</td>
+            <td class="center">{window_actual_str}</td>
+            <td class="center">-</td>
+            <td class="center">-</td>
+        </tr>
+        <tr>
+            <td class="field-name">ECSBC Required Value</td>
+            <td class="center">-</td>
+            <td class="center">-</td>
+            <td class="center">-</td>
+        </tr>
+        <tr>
+            <td class="field-name">WWR (%)</td>
+            <td class="center">-</td>
+            <td class="center">-</td>
+            <td class="center">-</td>
+        </tr>
+        <tr>
+            <td class="field-name">Compliance Status</td>
+            <td class="center {window_class}">{window_status}</td>
+            <td class="center na">N/A</td>
+            <td class="center na">N/A</td>
+        </tr>
+        
+        <tr class="sub-header">
             <td>Compliance sought for</td>
             <td class="center">ECSBC Compliant</td>
             <td class="center">ECSBC+ Compliant</td>
@@ -325,55 +365,85 @@ def create_compliance_table(climate_zone, building_type, compliance_level,
     
     return html
 
-def query_llm(question):
-    """Query the LLM API with a question"""
-    url = "https://api.vectorshift.ai/v1/pipeline/6954c79ba76af4b71858e962/run"
-    
-    payload = {"inputs": {"Input": question}}
-    headers = {
-        "Authorization": "Bearer sk_UUzE2PgugFATCpHwS8mAenzgMowmV6RpSg02UhTMhTYY7w8z",
-        "Content-Type": "application/json"
-    }
-    
+def call_vectorshift_api(api_key, pipeline_id, sim_file_content, sim_filename, typology, climate):
+    """Call VectorShift API with SIM file and parameters"""
     try:
-        response = requests.post(url, json=payload, headers=headers, timeout=30)
+        run_url = f"https://api.vectorshift.ai/v1/pipeline/{pipeline_id}/run"
+        
+        headers = {
+            "Authorization": f"Bearer {api_key}"
+        }
+        
+        data = {
+            "inputs.Typology": typology,
+            "inputs.Climate": climate
+        }
+        
+        files = {
+            "SIM": (
+                sim_filename,
+                BytesIO(sim_file_content),
+                "application/octet-stream"
+            )
+        }
+        
+        response = requests.post(
+            run_url,
+            headers=headers,
+            data=data,
+            files=files,
+            timeout=300
+        )
+        
         response.raise_for_status()
+        response_json = response.json()
         
-        # Parse the JSON response
-        response_data = response.json()
+        formatted_text = response_json.get("outputs", {}).get("output_0", "No response from API")
         
-        # Extract the actual message from the outputs
-        if "outputs" in response_data and "output_0" in response_data["outputs"]:
-            return response_data["outputs"]["output_0"]
-        else:
-            # Fallback: return the entire response if structure is different
-            return str(response_data)
-            
-    except requests.exceptions.RequestException as e:
-        return f"Error: {str(e)}"
-    except Exception as e:
-        return f"Error parsing response: {str(e)}"
-
-def compliance_page():
-    """Main compliance check page"""
-    # Create header with title and button
-    col1, col2 = st.columns([5, 1])
-    with col1:
-        st.title("   ECSBC Compliance Check Dashboard")
-    with col2:
-        st.markdown("<br>", unsafe_allow_html=True)  # Add spacing
-        if st.button("🤖 Ask AI Assistant", type="primary", use_container_width=False, width=300):
-            st.session_state.page = "AI Assistant"
-            st.rerun()
+        return {
+            "status": "success",
+            "response": formatted_text,
+            "status_code": response.status_code
+        }
     
+    except requests.exceptions.RequestException as e:
+        return {
+            "status": "error",
+            "response": f"API Error: {str(e)}",
+            "status_code": None
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "response": f"Unexpected error: {str(e)}",
+            "status_code": None
+        }
+
+# ===== PAGE 1: COMPLIANCE CHECKER =====
+def compliance_page():
+    st.title("🏢 ECSBC Compliance Check Dashboard")
     st.markdown("---")
     
-    # Create three columns for inputs
+    st.markdown("""
+    <style>
+        .stButton > button {
+            width: 100%;
+            height: 3em;
+            font-size: 18px;
+            font-weight: 600;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+    
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.subheader("📤 Upload SIM File")
         uploaded_file = st.file_uploader("Choose a SIM file", type=['sim', 'txt'], width=300)
+        
+        if uploaded_file:
+            st.session_state.uploaded_sim_file = uploaded_file.getvalue()
+            st.session_state.sim_filename = uploaded_file.name
     
     with col2:
         st.subheader("🏗️ Building Classification")
@@ -391,7 +461,7 @@ def compliance_page():
         st.subheader("🌍 Project Details")
         climate_zone = st.selectbox(
             "Select Climate Zone",
-            ["Composite", "Hot-Dry", "Warm-Humid", "Moderate", "Cold"], width=300   
+            ["Composite", "Hot-Dry", "Warm-Humid", "Moderate", "Cold"], width=300
         )
         
         project_area = st.number_input(
@@ -402,46 +472,48 @@ def compliance_page():
             help="Enter the total built-up area. Requirements vary for areas below 10,000 m²", width=300
         )
 
-    st.markdown("---")
+    st.markdown("<br>", unsafe_allow_html=True)
     
-    if st.button("🔍 Check Compliance", type="primary"):
+    st.session_state.project_context = {
+        "building_type": building_type,
+        "climate_zone": climate_zone,
+        "project_area": project_area,
+        "compliance_level": compliance_level
+    }
+    
+    col_left, col_center, col_right = st.columns([1, 2, 1])
+    with col_left:
+        check_button = st.button("🔍 Check Compliance", type="primary", use_container_width=False, width=300)
+    
+    if check_button:
         if uploaded_file is None:
             st.error("⚠️ Please upload a SIM file first!")
             return
         
         with st.spinner("Analyzing SIM file..."):
-            # Read the uploaded file
             file_content = uploaded_file.read()
             
-            # Extract U-values
-            wall_u_value, roof_u_value, extracted_text = extract_u_values_from_sim(file_content)
+            wall_u_value, roof_u_value, window_u_value, extracted_text = extract_u_values_from_sim(file_content)
             
-            # Get ECSBC requirements based on area
             requirements = get_ecsbc_requirements(climate_zone, building_type, project_area)
             required_wall_u = requirements["wall"]
             required_roof_u = requirements["roof"]
             
-            # Display area exception notice if applicable
             if project_area < 10000:
                 st.info(f"ℹ️ Area-based exception applied: Project area ({project_area:.0f} m²) is below 10,000 m². Using relaxed U-value requirements.")
             
-            # Display results
             st.success("✅ Analysis Complete!")
             st.markdown("---")
             
-            # Create and display compliance table
             table_html = create_compliance_table(
                 climate_zone, building_type, compliance_level,
-                wall_u_value, roof_u_value, required_wall_u, required_roof_u,
+                wall_u_value, roof_u_value, window_u_value, required_wall_u, required_roof_u,
                 project_area
             )
             
-            # Display the table with proper HTML rendering
             st.markdown("### 📋 ECSBC Compliance Report")
-            # Use components.html for better rendering
             import streamlit.components.v1 as components
             
-            # Wrap the table in a complete HTML document for proper rendering
             full_html = f"""
             <!DOCTYPE html>
             <html>
@@ -455,18 +527,16 @@ def compliance_page():
             </html>
             """
             
-            # Render with components.html for pixel-perfect display
-            components.html(full_html, height=900, scrolling=True)
+            components.html(full_html, height=1100, scrolling=True)
             
-            # Show extracted text in expander
             with st.expander("📄 View Extracted SIM File Content"):
                 st.text(extracted_text if extracted_text else "No content extracted")
             
-            # Download button for report
             st.markdown("<br>", unsafe_allow_html=True)
-            col_left, col_center, col_right = st.columns([1, 2, 1])
-            with col_center:
-                # Create complete HTML document for download
+            
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
                 download_html = f"""
                 <!DOCTYPE html>
                 <html>
@@ -487,81 +557,118 @@ def compliance_page():
                 """
                 
                 st.download_button(
-                    label="📥 Download Compliance Report",
+                    label="📥 Download Report",
                     data=download_html,
-                    file_name=f"ECSBC_Compliance_Report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html",
+                    file_name=f"ECSBC_Report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html",
                     mime="text/html",
                     use_container_width=True,
                     type="secondary"
                 )
+            
+            with col2:
+                pass
+            
+            with col3:
+                if st.button("💬 Chat with AI Assistant", use_container_width=True, type="primary"):
+                    st.session_state.current_page = "chat"
+                    st.rerun()
 
-def chatbot_page():
-    """AI Assistant chatbot page"""
+# ===== PAGE 2: AI CHAT =====
+def chat_page():
+    st.title("💬 AI Assistant - ECSBC Compliance Chat")
     
-    # Add back button
-    if st.button("← Back to Compliance Check", type="secondary"):
-        st.session_state.page = "Compliance Check"
-        st.rerun()
+    col1, col2, col3 = st.columns([1, 4, 1])
+    with col1:
+        if st.button("⬅️ Back to Compliance", use_container_width=True):
+            st.session_state.current_page = "compliance"
+            st.rerun()
     
-    st.title("🤖 ECSBC AI Assistant")
-    st.markdown("Ask questions about ECSBC compliance, building codes, and energy efficiency.")
     st.markdown("---")
     
-    # Initialize chat history in session state
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+    with st.expander("⚙️ API Configuration", expanded=False):
+        col1, col2 = st.columns(2)
+        with col1:
+            api_key = st.text_input(
+                "VectorShift API Key",
+                type="password",
+                value=os.getenv("VECTORSHIFT_API_KEY", ""),
+                help="Enter your VectorShift API key"
+            )
+        with col2:
+            pipeline_id = st.text_input(
+                "Pipeline ID",
+                value="6954c79ba76af4b71858e962",
+                help="Enter your VectorShift Pipeline ID"
+            )
     
-    # Display chat history
-    for message in st.session_state.messages:
+    if st.session_state.project_context:
+        st.info(f"""
+        **Current Project Context:**  
+        📋 Building Type: {st.session_state.project_context.get('building_type', 'N/A')}  
+        🌍 Climate Zone: {st.session_state.project_context.get('climate_zone', 'N/A')}  
+        📐 Project Area: {st.session_state.project_context.get('project_area', 'N/A')} m²
+        """)
+    
+    st.markdown("---")
+    
+    st.subheader("Ask me anything about ECSBC compliance")
+    
+    for message in st.session_state.chat_messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
     
-    # Chat input
-    if prompt := st.chat_input("Ask a question about ECSBC compliance..."):
-        # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": prompt})
+    user_input = st.chat_input("Type your question here...")
+    
+    if user_input:
+        st.session_state.chat_messages.append({"role": "user", "content": user_input})
         
-        # Display user message
         with st.chat_message("user"):
-            st.markdown(prompt)
+            st.markdown(user_input)
         
-        # Get AI response
         with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
-                response = query_llm(prompt)
-                st.markdown(response)
+            with st.spinner("Analyzing with AI..."):
+                if not api_key:
+                    response_text = "⚠️ Please configure your VectorShift API key in the API Configuration section above."
+                elif not st.session_state.uploaded_sim_file:
+                    response_text = "⚠️ No SIM file uploaded. Please go back and upload a SIM file first."
+                else:
+                    context = st.session_state.project_context
+                    result = call_vectorshift_api(
+                        api_key=api_key,
+                        pipeline_id=pipeline_id,
+                        sim_file_content=st.session_state.uploaded_sim_file,
+                        sim_filename=st.session_state.sim_filename,
+                        typology=context.get("building_type", "Business"),
+                        climate=context.get("climate_zone", "Composite")
+                    )
+                    
+                    if result["status"] == "success":
+                        response_text = result["response"]
+                    else:
+                        response_text = f"❌ {result['response']}"
+                
+                st.markdown(response_text)
         
-        # Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": response})
+        st.session_state.chat_messages.append({"role": "assistant", "content": response_text})
     
-    # Clear chat button
     st.markdown("---")
-    if st.button("🗑️ Clear Chat History"):
-        st.session_state.messages = []
-        st.rerun()
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col2:
+        if st.button("🗑️ Clear Chat History", use_container_width=True, type="secondary"):
+            st.session_state.chat_messages = []
+            st.rerun()
 
+# ===== MAIN APP =====
 def main():
-    st.set_page_config(
-        page_title="ECSBC Compliance Dashboard", 
-        layout="wide",
-        page_icon="🏢"
-    )
-    
-    # Initialize page state
-    if "page" not in st.session_state:
-        st.session_state.page = "Compliance Check"
-    
-    # Page routing based on session state
-    if st.session_state.page == "Compliance Check":
+    if st.session_state.current_page == "compliance":
         compliance_page()
-    elif st.session_state.page == "AI Assistant":
-        chatbot_page()
+    elif st.session_state.current_page == "chat":
+        chat_page()
     
-    # Footer
     st.markdown("---")
     st.markdown("""
     <div style='text-align: center; color: gray;'>
-    <small>ECSBC Compliance Dashboard v2.0 | Energy Conservation Building Code</small>
+    <small>ECSBC Compliance Dashboard v1.0 | Energy Conservation Building Code</small>
     </div>
     """, unsafe_allow_html=True)
 

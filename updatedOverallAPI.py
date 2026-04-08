@@ -60,7 +60,7 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         height: 80%;
         transition: transform 0.2s, box-shadow 0.2s;
-        width: 350px;
+        width: 300px;
     }
     
     .card:hover {
@@ -85,22 +85,7 @@ st.markdown("""
         color: #6c757d;
         margin-bottom: 8px;
     }
-    
-    /* Upload area styling */
-    .upload-area {
-        border: 2px dashed #dee2e6;
-        border-radius: 8px;
-        padding: 40px 20px;
-        text-align: center;
-        background-color: #f8f9fa;
-        transition: all 0.3s;
-        cursor: pointer;
-    }
-    
-    .upload-area:hover {
-        border-color: #667eea;
-        background-color: #f0f2ff;
-    }
+
     
     .upload-text {
         font-size: 14px;
@@ -155,7 +140,7 @@ st.markdown("""
         color: white !important;
         border: none !important;
         border-radius: 8px !important;
-        padding: 10px 24px !important;
+        padding: 8px 20px !important;
         font-size: 14px !important;
         font-weight: 600 !important;
         transition: all 0.3s !important;
@@ -185,7 +170,7 @@ st.markdown("""
     
     /* Reduce top padding of the main page */
     .block-container {
-        padding-top: 1rem;
+        padding-top: 2rem;
     }
 
     /* Reduce space above and below the title */
@@ -326,7 +311,7 @@ def compliance_check_page():
             type=['sim', 'txt'],
             label_visibility="collapsed",
             help="Limit 200MB per file • SIM, TXT", 
-            width=350
+            width=300
         )
         
         if uploaded_file:
@@ -356,7 +341,7 @@ def compliance_check_page():
             "Select Building Type",
             ["No Star Hotel", "School", "Business", "Residential", "Healthcare"],
             label_visibility="collapsed",
-            width=350
+            width=300
         )
         
         st.markdown('<p class="section-label" style="margin-top: 2px;">Compliance Level </p>', unsafe_allow_html=True)
@@ -364,7 +349,7 @@ def compliance_check_page():
             "Compliance Level Sought",
             ["ECSBC Compliant", "Partially Compliant", "Non-Compliant"],
             label_visibility="collapsed",
-            width=350
+            width=300
         )
         
         st.markdown("</div>", unsafe_allow_html=True)
@@ -383,7 +368,7 @@ def compliance_check_page():
             "Select Climate Zone",
             ["Composite", "Hot & Dry", "Warm & Humid", "Cold", "Temperate"],
             label_visibility="collapsed",
-            width=350
+            width=300
         )
         
         st.markdown('<p class="section-label" style="margin-top: 2px;">Project Built-up Area (m²)</p>', unsafe_allow_html=True)
@@ -394,7 +379,7 @@ def compliance_check_page():
             step=100.0,
             format="%.2f",
             label_visibility="collapsed",
-            width=350
+            width=300
         )
         
         st.markdown("</div>", unsafe_allow_html=True)
@@ -412,7 +397,7 @@ def compliance_check_page():
             "Location",
             ["Pune", "Delhi", "Mumbai"],
             label_visibility="collapsed",
-            width=350
+            width=300
         )
         
         st.markdown("</div>", unsafe_allow_html=True)

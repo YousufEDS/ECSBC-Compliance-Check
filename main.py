@@ -4,41 +4,42 @@ import re
 from datetime import datetime
 import requests
 
+st.write("Through Programming")
 # ECSBC compliance requirements with area-based exceptions
 ECSBC_REQUIREMENTS = {
     "Composite": {
-        "default": {"wall": 0.40, "roof": 0.26},
-        "Hospitality_below_10000": {"wall": 0.63, "roof": 0.20},
-        "Business_below_10000": {"wall": 0.63, "roof": 0.26},
-        "Educational_below_10000": {"wall": 0.85, "roof": 0.26},
-        "Assembly_above_10000": {"wall": 0.40, "roof": 0.20}
+        "default": {"wall": 0.44, "roof": 0.20},
+        "Hospitality_below_10000": {"wall": 0.44, "roof": 0.20},  # Roof exception applies, wall unchanged
+        "Business_below_10000": {"wall": 0.63, "roof": 0.20},     # Wall exception applies
+        "Educational_below_10000": {"wall": 0.63, "roof": 0.20},  # Wall exception for School
+        "Assembly_above_10000": {"wall": 0.44, "roof": 0.20}
     },
     "Hot-Dry": {
-        "default": {"wall": 0.40, "roof": 0.26},
-        "Hospitality_below_10000": {"wall": 0.63, "roof": 0.20},
-        "Business_below_10000": {"wall": 0.63, "roof": 0.26},
-        "Educational_below_10000": {"wall": 0.85, "roof": 0.26},
-        "Assembly_above_10000": {"wall": 0.40, "roof": 0.20}
+        "default": {"wall": 0.44, "roof": 0.20},
+        "Hospitality_below_10000": {"wall": 0.44, "roof": 0.20},  # Roof exception applies, wall unchanged
+        "Business_below_10000": {"wall": 0.63, "roof": 0.20},     # Wall exception applies
+        "Educational_below_10000": {"wall": 0.63, "roof": 0.20},  # Wall exception for School
+        "Assembly_above_10000": {"wall": 0.44, "roof": 0.20}
     },
     "Warm-Humid": {
-        "default": {"wall": 0.40, "roof": 0.26},
-        "Hospitality_below_10000": {"wall": 0.63, "roof": 0.20},
-        "Business_below_10000": {"wall": 0.63, "roof": 0.26},
-        "Educational_below_10000": {"wall": 0.85, "roof": 0.26},
-        "Assembly_above_10000": {"wall": 0.40, "roof": 0.20}
+        "default": {"wall": 0.44, "roof": 0.20},
+        "Hospitality_below_10000": {"wall": 0.44, "roof": 0.20},  # Roof exception applies, wall unchanged
+        "Business_below_10000": {"wall": 0.63, "roof": 0.20},     # Wall exception applies
+        "Educational_below_10000": {"wall": 0.63, "roof": 0.20},  # Wall exception for School
+        "Assembly_above_10000": {"wall": 0.44, "roof": 0.20}
     },
     "Moderate": {
-        "default": {"wall": 0.55, "roof": 0.26},
-        "Hospitality_below_10000": {"wall": 0.63, "roof": 0.20},
-        "Business_below_10000": {"wall": 0.63, "roof": 0.26},
-        "Educational_below_10000": {"wall": 1.00, "roof": 0.26},
+        "default": {"wall": 0.55, "roof": 0.20},
+        "Hospitality_below_10000": {"wall": 0.55, "roof": 0.20},  # Roof exception applies, wall unchanged
+        "Business_below_10000": {"wall": 0.63, "roof": 0.20},     # Wall exception applies
+        "Educational_below_10000": {"wall": 0.75, "roof": 0.20},  # Wall exception for School
         "Assembly_above_10000": {"wall": 0.55, "roof": 0.20}
     },
     "Cold": {
         "default": {"wall": 0.34, "roof": 0.20},
-        "Hospitality_below_10000": {"wall": 0.40, "roof": 0.20},
-        "Business_below_10000": {"wall": 0.40, "roof": 0.20},
-        "Educational_below_10000": {"wall": 0.40, "roof": 0.20},
+        "Hospitality_below_10000": {"wall": 0.34, "roof": 0.20},  # Roof exception applies, wall unchanged
+        "Business_below_10000": {"wall": 0.40, "roof": 0.20},     # Wall exception applies
+        "Educational_below_10000": {"wall": 0.40, "roof": 0.20},  # Wall exception for School
         "Assembly_above_10000": {"wall": 0.34, "roof": 0.20}
     }
 }
@@ -372,11 +373,11 @@ def compliance_page():
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.subheader("📤 Upload SIM File")
+        st.subheader("Upload SIM File")
         uploaded_file = st.file_uploader("Choose a SIM file", type=['sim', 'txt'], width=300)
     
     with col2:
-        st.subheader("🏗️ Building Classification")
+        st.subheader("Building Classification")
         building_type = st.selectbox(
             "Select Building Type",
             ["Hospitality", "Business", "Health Care", "Educational", "Assembly", "Shopping Complex"], width=300
@@ -388,7 +389,7 @@ def compliance_page():
         )
     
     with col3:
-        st.subheader("🌍 Project Details")
+        st.subheader("Project Details")
         climate_zone = st.selectbox(
             "Select Climate Zone",
             ["Composite", "Hot-Dry", "Warm-Humid", "Moderate", "Cold"], width=300   
@@ -426,7 +427,7 @@ def compliance_page():
                 st.info(f"ℹ️ Area-based exception applied: Project area ({project_area:.0f} m²) is below 10,000 m². Using relaxed U-value requirements.")
             
             # Display results
-            st.success("✅ Analysis Complete!")
+            st.success("Analysis Complete!")
             st.markdown("---")
             
             # Create and display compliance table
@@ -437,7 +438,7 @@ def compliance_page():
             )
             
             # Display the table with proper HTML rendering
-            st.markdown("### 📋 ECSBC Compliance Report")
+            st.markdown("### ECSBC Compliance Report")
             # Use components.html for better rendering
             import streamlit.components.v1 as components
             
@@ -459,7 +460,7 @@ def compliance_page():
             components.html(full_html, height=900, scrolling=True)
             
             # Show extracted text in expander
-            with st.expander("📄 View Extracted SIM File Content"):
+            with st.expander("View Extracted SIM File Content"):
                 st.text(extracted_text if extracted_text else "No content extracted")
             
             # Download button for report
@@ -487,7 +488,7 @@ def compliance_page():
                 """
                 
                 st.download_button(
-                    label="📥 Download Compliance Report",
+                    label="Download Compliance Report",
                     data=download_html,
                     file_name=f"ECSBC_Compliance_Report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html",
                     mime="text/html",
@@ -517,7 +518,7 @@ def chatbot_page():
             st.markdown(message["content"])
     
     # Chat input
-    if prompt := st.chat_input("Ask a question about ECSBC compliance..."):
+    if prompt := st.chat_input("Ask a question about ECSBC compliance...", ):
         # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": prompt})
         
@@ -525,16 +526,13 @@ def chatbot_page():
         with st.chat_message("user"):
             st.markdown(prompt)
         
-        # Get AI response
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 response = query_llm(prompt)
                 st.markdown(response)
         
-        # Add assistant response to chat history
         st.session_state.messages.append({"role": "assistant", "content": response})
     
-    # Clear chat button
     st.markdown("---")
     if st.button("🗑️ Clear Chat History"):
         st.session_state.messages = []
@@ -547,11 +545,9 @@ def main():
         page_icon="🏢"
     )
     
-    # Initialize page state
     if "page" not in st.session_state:
         st.session_state.page = "Compliance Check"
     
-    # Page routing based on session state
     if st.session_state.page == "Compliance Check":
         compliance_page()
     elif st.session_state.page == "AI Assistant":
