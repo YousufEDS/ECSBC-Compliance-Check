@@ -462,10 +462,11 @@ with tabs[0]:
         c1, c2 = st.columns([2, 1])
         with c1:
             ts1 = st.selectbox("Fertility test report (ICAR-accredited lab)?",           ["Yes","No","N/A"], key="ts1")
-            ts2 = st.selectbox("Calculations of topsoil quantity preserved?",            ["Yes","No","N/A"], key="ts2")
-            ts3 = st.selectbox("Site plan (DWG) highlighting preservation areas?",       ["Yes","No","N/A"], key="ts3")
+            ts2 = st.selectbox("Calculations of topsoil quantity preserved and used in landscape activity post construction?",            ["Yes","No","N/A"], key="ts2")
+            ts3 = st.selectbox("Site plan (DWG) highlighting excavation and preservation areas?",       ["Yes","No","N/A"], key="ts3")
+            ts4 = st.selectbox("Upload date-stamped photographs with description of the measures taken?", ["Yes","No","N/A"], key="ts4")
         with c2:
-            p = all(x=="Yes" for x in [ts1,ts2,ts3])
+            p = all(x=="Yes" for x in [ts1,ts2,ts3,ts4])
             site_results["4.2.1 Topsoil Preservation"] = p
             st.markdown(f"**Status:** {check_icon(p)} {'PASS' if p else 'FAIL'}")
 
@@ -474,9 +475,10 @@ with tabs[0]:
         with c1:
             tr1 = st.selectbox("Survey & landscape plan with tree indications?",          ["Yes","No","N/A"], key="tr1")
             tr2 = st.selectbox("Authority letter for tree cutting?",                      ["Yes","No","N/A"], key="tr2")
-            tr3 = st.selectbox("Calculations for new/existing trees?",                   ["Yes","No","N/A"], key="tr3")
+            tr3 = st.selectbox("Purchase orders that clearly reflect the full quantities of new plantation materials procured?",         ["Yes","No","N/A"], key="tr3")
+            tr4 = st.selectbox("Submit detailed calculations specifying the number of new trees planted and the existing trees preserved, ensuring adherence to the code's requirements?", ["Yes","No","N/A"], key="tr4")
         with c2:
-            p = all(x=="Yes" for x in [tr1,tr2,tr3])
+            p = all(x=="Yes" for x in [tr1,tr2,tr3,tr4])
             site_results["4.2.2 Tree Preservation"] = p
             st.markdown(f"**Status:** {check_icon(p)} {'PASS' if p else 'FAIL'}")
 
@@ -492,10 +494,10 @@ with tabs[0]:
     with st.expander("**4.2.4 & 4.3.3 – Design for Differently Abled**"):
         c1, c2 = st.columns([2, 1])
         with c1:
-            da1 = st.selectbox("Ramps, elevator & washroom per NBC 2016 Part 3 B-3.5?", ["Yes","No","N/A"], key="da1")
-            da2 = st.selectbox("Dedicated parking per NBC 2016 Part 3?",                 ["Yes","No","N/A"], key="da2")
+            da1 = st.selectbox("Ramps, elevator & washroom is design as per requirements indicated in Code?", ["Yes","No","N/A"], key="da1")
+            # da2 = st.selectbox("Provide photographic indication of Paved, unpaved area, uncovered parking area nad pathways of the site, building foor print area and there percentage coverage of total site area.?",                 ["Yes","No","N/A"], key="da2")
         with c2:
-            p = all(x=="Yes" for x in [da1,da2])
+            p = all(x=="Yes" for x in da1)
             site_results["4.2.4 Differently Abled"] = p
             st.markdown(f"**Status:** {check_icon(p)} {'PASS' if p else 'FAIL'}")
 
@@ -507,28 +509,83 @@ with tabs[0]:
             p = hi1=="Yes"
             site_results["4.2.5 Heat Island Non-Roof"] = p
             st.markdown(f"**Status:** {check_icon(p)} {'PASS' if p else 'FAIL'}")
+    
+    with st.expander("**4.2.6 – Brownfield Remediation**"):
+        c1, c2 = st.columns([2, 1])
+        with c1:
+            br1 = st.selectbox("Indicates brownfield remediation techniques following local building bylaws?",          ["Yes","No","N/A"], key="br1")
+            br2 = st.selectbox("Approval of local statutory body for its intended use?",       ["Yes","No","N/A"], key="br2")
+        with c2:
+            p = all(x=="Yes" for x in [br1,br2])
+            site_results["4.2.6 Brownfield Remediation"] = p
+            st.markdown(f"**Status:** {check_icon(p)} {'PASS' if p else 'FAIL'}")
+        
+    # Title for Additional Mandatory Requirements
+    st.markdown("#### Additional Mandatory Requirements")
 
-    with st.expander("**4.3.5–4.3.7 – Amenities & Public Transport**"):
+    with st.expander("**4.3.1– Topsoil preservation **"):
+        c1, c2 = st.columns([2, 1])
+        with c1:
+            ts5 = st.selectbox("The tender document specifying the measures to be undertaken by the contractor to prevent soil pollution during the construction phase. This must include provisions for the consturction of soil erosion channels and sedimentation tanks as a part of the compliance demonstration?", ["Yes","No","N/A"], key="ts5")
+            ts6 = st.selectbox("A detailed site management paln in .dwg formate, highlighting the on-ste streategies implemented to mitigate air and soil pollution during construction?", ["Yes","No","N/A"], key="ts6")
+            ts7 = st.selectbox("Date-stamped photographs, with descriptions, showcasing the implemented streategies to minimize soil pollution, as well as the construction of soil erosion channels and sedimentation tanks, during the contruction phase for compliance verification?", ["Yes","No","N/A"], key="ts7")
+            ts8 = st.selectbox("A section drawing of the sedimentation tank in .dwg formate, illustration design, with a minimum depth of 1 meter to accommodate stormwater runoff, as required for compliance?", ["Yes","No","N/A"], key="ts8")
+        with c2:
+            p = all(x=="Yes" for x in [ts5,ts6,ts7,ts8])
+            site_results["4.3.1– Topsoil preservation"] = p
+            st.markdown(f"**Status:** {check_icon(p)} {'PASS' if p else 'FAIL'}")
+
+    with st.expander("**4.3.2 –  4.3.3 – Dedicated Parking for Differently Abled**"):
+        c1, c2 = st.columns([2, 1])
+        with c1:
+            dp1 = st.selectbox("Dedicated parking for differently abled provided as per NBC 2016 - Part 3, Annexure B-3.5?", ["Yes","No","N/A"], key="dp1")
+            dp2 = st.selectbox("Access for Differently Abled?", ["Yes", "NO", "N/A"], key="dp2")
+        with c2:
+            p = dp1 == "Yes" and dp2 == "Yes"
+            site_results["4.3.2- Dedicated Parking"] = p
+            st.markdown(f"**Status:** {check_icon(p)} {'PASS' if p else 'FAIL'}")
+
+    with st.expander("**4.3.4–4.3.5 – Amenities & Public Transport**"):
         c1, c2 = st.columns([2, 1])
         with c1:
             am1 = st.selectbox("Google Map images with distances to amenities?",          ["Yes","No","N/A"], key="am1")
-            am2 = st.selectbox("Public transport by road/rail/water indicated?",          ["Yes","No","N/A"], key="am2")
-            am3 = st.selectbox("Bicycle lane & parking within 300 m of entrance?",       ["Yes","No","N/A"], key="am3")
+            am2 = st.selectbox("Calculation detaling the average distance travelled to reach basic amenities from the project site to demonstrate compliance?", ["Yes","No","N/A"], key="am2")
+            am3 = st.selectbox(" Google Map images highlighting public transport by road/rail/water indicated?",          ["Yes","No","N/A"], key="am3")
+            am4 = st.selectbox("Bicycle lane & parking area distance form the building entrance on site plane?",       ["Yes","No","N/A"], key="am4")
         with c2:
-            p = all(x=="Yes" for x in [am1,am2,am3])
+            p = all(x=="Yes" for x in [am1,am2,am3,am4])
             site_results["4.3 Access & Transport"] = p
             st.markdown(f"**Status:** {check_icon(p)} {'PASS' if p else 'FAIL'}")
 
-    with st.expander("**4.3.8 – Heat Island Reduction (Roof)**"):
+    with st.expander("**4.3.6 – In-situ transit**"):
         c1, c2 = st.columns([2, 1])
         with c1:
-            cr1 = st.selectbox("Exposed roof area vs vegetated/cool roof documented?",    ["Yes","No","N/A"], key="cr1")
+            it1 = st.selectbox("Indicate bicycle lane network and bicycle parking area distance from building entrance on site plane?", ["Yes","No","N/A"], key="it1")
+        with c2:
+            p = it1 == "Yes"
+            site_results["4.3.6 In-situ Transit"] = p
+            st.markdown(f"**Status:** {check_icon(p)} {'PASS' if p else 'FAIL'}")
+
+    with st.expander("**4.3.7 – Heat Island Reduction (Roof)**"):
+        c1, c2 = st.columns([2, 1])
+        with c1:
+            cr1 = st.selectbox("Net exposed roof area vs vegetated/cool roof documented?",    ["Yes","No","N/A"], key="cr1")
             cr2 = st.selectbox("Cool roof paint SRI properties & purchase order?",        ["Yes","No","N/A"], key="cr2")
         with c2:
             p = all(x=="Yes" for x in [cr1,cr2])
-            site_results["4.3.8 Roof Heat Island"] = p
+            site_results["4.3.7 Roof Heat Island"] = p
             st.markdown(f"**Status:** {check_icon(p)} {'PASS' if p else 'FAIL'}")
-
+    
+    with st.expander("**4.3.8 – Heat Island Reduction (Non Roof)**"):
+        c1, c2 = st.columns([2, 1])
+        with c1:
+            hr1 = st.selectbox("Submit Photographs showing the paved/unpaved areas, uncovered parking, pathways and the buidling footpring area, along with their corresponding percentage coverage of the total site area?",    ["Yes","No","N/A"], key="hr1")
+            hr2 = st.selectbox("Separete indication of non-roof coverage, which can include vegetation or structural shaind with a cool roof?",    ["Yes","No","N/A"], key="hr2")
+            hr3 = st.selectbox("Documenteation of the cool roof paint properties (SolarReflectance Index) and purchase order?",    ["Yes","No","N/A"], key="hr3")
+        with c2:
+            p = all(x=="Yes" for x in [hr1,hr2,hr3])
+            site_results["4.3.8 Non-Roof Heat Island"] = p
+            st.markdown(f"**Status:** {check_icon(p)} {'PASS' if p else 'FAIL'}")
     results["Site & Planning"] = site_results
 
 # ══════════════════════════════════════════════════════════════════════════════
