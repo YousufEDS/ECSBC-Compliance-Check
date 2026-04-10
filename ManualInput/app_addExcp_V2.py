@@ -5,7 +5,7 @@ from datetime import date
 
 # ─── PAGE CONFIG ───────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="ECSBC 2024 Compliance Dashboard",
+    page_title="ECSBC 2024 Compliance Dashboard - Exceptions V2.0",
     page_icon="🏢",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -50,9 +50,9 @@ st.markdown("""
 # ══════════════════════════════════════════════════════════════════════════════
 
 ROOF_U = {
-    "ECSBC":       {"Composite":0.20,"Hot and Dry":0.20,"Warm and Humid":0.20,"Temperate":0.20,"Cold":0.20},
+    "ECSBC":       {"Composite":0.26,"Hot and Dry":0.26,"Warm and Humid":0.26,"Temperate":0.26,"Cold":0.26},
     "ECSBC+":      {"Composite":0.20,"Hot and Dry":0.20,"Warm and Humid":0.20,"Temperate":0.20,"Cold":0.20},
-    "Super ECSBC": {"Composite":0.20,"Hot and Dry":0.20,"Warm and Humid":0.20,"Temperate":0.20,"Cold":0.20},
+    "Super ECSBC": {"Composite":0.18,"Hot and Dry":0.18,"Warm and Humid":0.18,"Temperate":0.18,"Cold":0.18},
 }
 ROOF_U_EXCEPTION_Hospitality = {
     "ECSBC":       {"Composite":0.20,"Hot and Dry":0.20,"Warm and Humid":0.20,"Temperate":0.20,"Cold":0.20},
@@ -82,14 +82,14 @@ WALL_U_EXCEPTION_School = {
 }
 
 FENE_U = {
-    "ECSBC":       {"Composite":1.80,"Hot and Dry":1.80,"Warm and Humid":1.80,"Temperate":2.20,"Cold":1.80},
+    "ECSBC":       {"Composite":2.20,"Hot and Dry":2.20,"Warm and Humid":2.20,"Temperate":3.0,"Cold":1.80},
     "ECSBC+":      {"Composite":1.80,"Hot and Dry":1.80,"Warm and Humid":1.80,"Temperate":2.20,"Cold":1.80},
     "Super ECSBC": {"Composite":1.80,"Hot and Dry":1.80,"Warm and Humid":1.80,"Temperate":2.20,"Cold":1.80},
 }
 
 SHGC_NON_NORTH = {
     "ECSBC":       {"Composite":0.25,"Hot and Dry":0.25,"Warm and Humid":0.25,"Temperate":0.25,"Cold":0.62},
-    "ECSBC+":      {"Composite":0.25,"Hot and Dry":0.25,"Warm and Humid":0.25,"Temperate":0.25,"Cold":0.62},
+    "ECSBC+":      {"Composite":0.20,"Hot and Dry":0.20,"Warm and Humid":0.20,"Temperate":0.20,"Cold":0.62},
     "Super ECSBC": {"Composite":0.25,"Hot and Dry":0.25,"Warm and Humid":0.25,"Temperate":0.25,"Cold":0.62},
 }
 SHGC_NORTH_GE15 = {"Composite":0.50,"Hot and Dry":0.50,"Warm and Humid":0.50,"Temperate":0.50,"Cold":0.62}
@@ -385,9 +385,9 @@ def new_badge():
 # ─── HEADER ───────────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="main-header">
-    <h1 style="margin:0;font-size:1.9rem">🏢 ECSBC 2024 Building Compliance Check</h1>
+    <h1 style="margin:0;font-size:1.9rem">🏢 ECSBC 2024 Building Compliance Check - Exceptions V2.0</h1>
     <p style="margin:4px 0 0 0;opacity:0.85;font-size:0.95rem">
-        Energy Conservation and Sustainable Building Code 2024 — Full Exception Logic (v2.0)
+        Energy Conservation and Sustainable Building Code 2024
     </p>
 </div>
 """, unsafe_allow_html=True)
@@ -634,7 +634,7 @@ with tabs[1]:
     req_roof_u  = ROOF_U[compliance_level][climate_zone]
     req_wall_u  = WALL_U[compliance_level][climate_zone]
 
-    if building_type == "Hospitality" and aga < 10000:
+    if building_type == "Hospitality" and aga >= 10000:
         req_roof_u = ROOF_U_EXCEPTION_Hospitality[compliance_level][climate_zone]
 
     if aga < 10000:
@@ -678,8 +678,8 @@ with tabs[1]:
 
     # Exception notifications
     exception_applied = False
-    if building_type == "Hospitality" and aga < 10000:
-        st.markdown(f'<div class="exc-box">🔶 <b>Roof U-Factor Exception</b>: Hospitality AGA < 10,000 m² → max roof U = <b>{req_roof_u} W/m²·K</b></div>', unsafe_allow_html=True)
+    if building_type == "Hospitality" and aga >= 10000:
+        st.markdown(f'<div class="exc-box">🔶 <b>Roof U-Factor Exception</b>: Hospitality AGA >= 10,000 m² → max roof U = <b>{req_roof_u} W/m²·K</b></div>', unsafe_allow_html=True)
         exception_applied = True
     if aga < 10000:
         if building_subtype == "No Star Hotel":
@@ -798,8 +798,8 @@ with tabs[1]:
     env_results["Fenestration VLT ≥ 0.27"] = vlt_pass
     st.markdown(f"{check_icon(vlt_pass)} Effective VLT: {vlt_prop} vs min {MIN_VLT}")
 
-    if shgc_input_method != "Product SHGC (accredited lab / manufacturer label)":
-        st.markdown(f'<div class="exc-box">🔶 <b>5.2.1(b) Exception active</b>: Using <i>{shgc_input_method}</i> — effective Non-North SHGC = <b>{shgc_nn_prop}</b>, North SHGC = <b>{shgc_n_prop}</b></div>', unsafe_allow_html=True)
+    # if shgc_input_method != "Product SHGC (accredited lab / manufacturer label)":
+    #     st.markdown(f'<div class="exc-box">🔶 <b>5.2.1(b) Exception active</b>: Using <i>{shgc_input_method}</i> — effective Non-North SHGC = <b>{shgc_nn_prop}</b>, North SHGC = <b>{shgc_n_prop}</b></div>', unsafe_allow_html=True)
 
     # ── Exception 1: PF-based SEF shading ────────────────────────────────────
     st.markdown("##### Exception 1: Permanent External Projection (5.3.3 Exc.1 / SEF Method)")
@@ -922,6 +922,14 @@ with tabs[1]:
             env_results[f"Daylighting ≥{day_req}% AGA"] = day_pass
             st.markdown(f"**Result:** {check_icon(day_pass)} {daylit_pct:.0f}% vs required {day_req}%")
 
+    # ─ ENVELOPE SEALING ───────────────────────────────────────────────────────
+    st.markdown("---")
+    st.markdown("#### 🌞 Building envelop sealing ")
+    seal = st.selectbox("Envelope sealing, caulking, gasketing provided (§5.2.4)?", ["Yes","No","N/A"], key="env_seal")
+    env_results["Envelope Sealing §5.2.4"] = seal == "Yes"
+
+    results["Building Envelope"] = env_results
+
     # ─ ENVELOPE TRADE-OFF (EPF) ───────────────────────────────────────────────
     st.markdown("---")
     st.markdown("#### 📉 Building Envelope Trade-Off Method (5.3.5) — EPF Calculation")
@@ -1018,12 +1026,6 @@ with tabs[1]:
             #                 '<b>(c)</b> Schedules may differ Baseline vs Proposed only for non-standard efficiency measures; manual controls never eligible; AHJ approval required.<br>'
             #                 '<b>(d)</b> Identical HVAC zones (same occupancy, loads, setpoints, HVAC type, glazing within ±45°) may be combined.</div>', unsafe_allow_html=True)
 
-    # ─ ENVELOPE SEALING ───────────────────────────────────────────────────────
-    st.markdown("---")
-    seal = st.selectbox("Envelope sealing, caulking, gasketing provided (5.2.4)?", ["Yes","No","N/A"], key="env_seal")
-    env_results["Envelope Sealing 5.2.4"] = seal == "Yes"
-
-    results["Building Envelope"] = env_results
 
 
 # ══════════════════════════════════════════════════════════════════════════════

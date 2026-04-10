@@ -759,8 +759,8 @@ with tabs[1]:
     env_results["Fenestration VLT ≥ 0.27"] = vlt_pass
     st.markdown(f"{check_icon(vlt_pass)} Effective VLT: {vlt_prop} vs min {MIN_VLT}")
 
-    if shgc_input_method != "Product SHGC (accredited lab / manufacturer label)":
-        st.markdown(f'<div class="exc-box">🔶 <b>5.2.1(b) Exception active</b>: Using <i>{shgc_input_method}</i> — effective Non-North SHGC = <b>{shgc_nn_prop}</b>, North SHGC = <b>{shgc_n_prop}</b></div>', unsafe_allow_html=True)
+    # if shgc_input_method != "Product SHGC (accredited lab / manufacturer label)":
+    #     st.markdown(f'<div class="exc-box">🔶 <b>5.2.1(b) Exception active</b>: Using <i>{shgc_input_method}</i> — effective Non-North SHGC = <b>{shgc_nn_prop}</b>, North SHGC = <b>{shgc_n_prop}</b></div>', unsafe_allow_html=True)
 
     # ── Exception 1: PF-based SEF shading ────────────────────────────────────
     st.markdown("##### Exception 1: Permanent External Projection (5.3.3 Exc.1 / SEF Method)")
