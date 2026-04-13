@@ -1062,7 +1062,7 @@ with tabs[2]:
         ["Standardized Compliance Method","Total System Efficiency Approach","Integrative Compliance Method"],
         horizontal=True)
 
-    st.markdown("#### Mandatory Requirements (6.2)")
+    st.markdown("#### Mandatory Requirements")
 
 # ── NEW EXCEPTION 5: Ventilation 6.2.1(c) with two sub-exceptions ────────
 with st.expander("**6.2.1 – Ventilation**", expanded=True):
@@ -1087,7 +1087,7 @@ with st.expander("**6.2.1 – Ventilation**", expanded=True):
         v2 = st.selectbox(
             "Ventilation system type:",
             ["Natural Ventilation", "Mechanical Ventilation", "Mixed Model Ventilation"],
-            key="v2"
+            key="v2",placeholder=None,
         )
 
         # ---------------- NATURAL VENTILATION ----------------
@@ -1320,8 +1320,8 @@ with st.expander("**6.2.2(b) – Unitary, Split & Packaged Air-Conditioners**"):
         has_unitary = st.checkbox("Project has unitary/split/packaged AC units?", key="has_unitary")
         if has_unitary:
             st.markdown(
-                '<div class="info-box">Per IS 1391 (Part 1 & 2): Window/Split AC up to 18,000 Wr must meet '
-                'minimum BEE 3-Star. Ducted/Packaged AC &gt;3,500 Wr must comply with IS 8148 per Table 6.1.</div>',
+                '<div class="info-box">Per IS 1391 (Part 1 & 2): Window/Split AC which are non ducted and have a capacity up to 10499 Wr and light commercial AC from 10500 to 18,000 Wr (All Air cooled systems) must meet '
+                'minimum BEE 3-Star. Ducted/Packaged AC &gt;3,500 Wr must comply with IS 8148.</div>',
                 unsafe_allow_html=True
             )
 
@@ -1335,7 +1335,7 @@ with st.expander("**6.2.2(b) – Unitary, Split & Packaged Air-Conditioners**"):
             st.markdown(f"{check_icon(nonduc_pass)} BEE {nonduc_bee}★ (min: 3★)")
 
             # Ducted/Packaged > 3500 Wr - Table 6.1
-            st.markdown("**Ducted/Packaged AC — above 3,500 Wr (IS 8148 / Table 6.1):**")
+            st.markdown("**Ducted/Packaged AC — above 3,500 Wr (IS 8148):**")
             has_ducted = st.checkbox("Ducted/Packaged AC above 3,500 Wr present?", key="has_duc")
             ducted_pass = True
             if has_ducted:
@@ -1392,8 +1392,8 @@ with st.expander("**6.2.2(c) – Variable Refrigerant Flow (VRF) Air-Conditioner
         has_vrf = st.checkbox("Project has VRF/VRV systems?", key="has_vrf")
         if has_vrf:
             st.markdown(
-                '<div class="info-box">VRF systems (Air Cooled) must meet minimum ISEER requirements '
-                'per Table 6.2. Rating per BIS standard (under development).</div>',
+                '<div class="info-box">VRF systems (Air Cooled) must meet minimum ISEER requirements. '
+                ' Rating per BIS standard (under development).</div>',
                 unsafe_allow_html=True
             )
 
@@ -1426,7 +1426,6 @@ with st.expander("**6.2.2(c) – Variable Refrigerant Flow (VRF) Air-Conditioner
             st.markdown(f"{check_icon(vrf_pass)} ISEER: {vrf_iseer} vs min {req_vrf_iseer} ({cap_range})")
             st.caption(
                 "Note: ISEER and EER calculation shall be as per BIS standard as and when published. "
-                "Full load and part load ratings shall be as per BIS Standard for VRF Air Conditioners."
             )
         else:
             vrf_pass = True
@@ -1528,7 +1527,7 @@ with st.expander("**6.2.2(e) – Hot Water Production for HVAC Heating / Reheat*
                     "Heat recovery from air/water cooled condensers",
                     "Air-to-water heat pump",
                     "Water-to-water heat pump",
-                    "Electric/Gas/Oil-fired boiler (discouraged — special justification required)",
+                    # "Electric/Gas/Oil-fired boiler (discouraged — special justification required)",
                 ],
                 key="hw_method"
             )
@@ -1590,11 +1589,15 @@ with st.expander("**6.2.3 – Controls**"):
             help="6.2.3(a): Single-zone systems are exempt from VAV/demand control requirements."
         )
 
+
         if timeclock_exempt:
             st.markdown('<div class="exc-box">🔶 Exception 6.2.3(a): System capacity &lt;17.5 kWr → timeclock NOT required.</div>', unsafe_allow_html=True)
             tc1 = "N/A"
         elif is_single_zone:
             st.markdown('<div class="exc-box">🔶 <b>Exception 6.2.3(a) — Single Zone</b>: Single-zone system → VAV/demand control requirement is NOT applicable.</div>', unsafe_allow_html=True)
+            tc1 = "N/A"
+        elif building_type == "Health Care":
+            st.markdown('<div class="exc-box">🔶 Exception 6.2.3(a): Healthcare facility → timeclock NOT required.</div>', unsafe_allow_html=True)
             tc1 = "N/A"
         else:
             tc1 = st.selectbox("6.2.3(a) Timeclock with night setback, 3 day-types, 2-hr override?", ["Yes","No","N/A"], key="tc1")
