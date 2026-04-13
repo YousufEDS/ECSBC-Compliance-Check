@@ -882,6 +882,14 @@ with tabs[1]:
             day_pass = daylit_pct >= day_req
             env_results[f"Daylighting ≥{day_req}% AGA"] = day_pass
             st.markdown(f"**Result:** {check_icon(day_pass)} {daylit_pct:.0f}% vs required {day_req}%")
+        
+    # ─ ENVELOPE SEALING ───────────────────────────────────────────────────────
+    st.markdown("---")
+    st.markdown("#### 🌞 Building envelop sealing ")
+    seal = st.selectbox("Envelope sealing, caulking, gasketing provided (§5.2.4)?", ["Yes","No","N/A"], key="env_seal")
+    env_results["Envelope Sealing §5.2.4"] = seal == "Yes"
+
+    results["Building Envelope"] = env_results
 
     # ─ ENVELOPE TRADE-OFF (EPF) ───────────────────────────────────────────────
     st.markdown("---")
@@ -978,13 +986,6 @@ with tabs[1]:
             #                 '<b>(b)</b> Surfaces within ±45° orientation/tilt may be combined.<br>'
             #                 '<b>(c)</b> Schedules may differ Baseline vs Proposed only for non-standard efficiency measures; manual controls never eligible; AHJ approval required.<br>'
             #                 '<b>(d)</b> Identical HVAC zones (same occupancy, loads, setpoints, HVAC type, glazing within ±45°) may be combined.</div>', unsafe_allow_html=True)
-
-    # ─ ENVELOPE SEALING ───────────────────────────────────────────────────────
-    st.markdown("---")
-    seal = st.selectbox("Envelope sealing, caulking, gasketing provided (5.2.4)?", ["Yes","No","N/A"], key="env_seal")
-    env_results["Envelope Sealing 5.2.4"] = seal == "Yes"
-
-    results["Building Envelope"] = env_results
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1333,7 +1334,7 @@ with tabs[3]:
         min_value=0.0, value=0.0, step=50.0)
 
     # ── NEW EXCEPTION 10: Multiple non-simultaneous lighting systems 7.3.3 ──
-    st.markdown(f'##### Multiple Independent Lighting Systems <span class="new-badge">NEW 7.3.3</span>', unsafe_allow_html=True)
+    st.markdown(f'##### Multiple Independent Lighting Systems', unsafe_allow_html=True)
     multi_lighting_systems = st.checkbox(
         "Are there multiple independent non-simultaneous lighting systems in any space?",
         help="7.3.3: If two or more independently operating systems are controlled to prevent simultaneous operation, LPD is based only on the highest-wattage system."
