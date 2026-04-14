@@ -328,6 +328,92 @@ EPF_COEF = {
     },
 }
 
+# ═══════════════════════════════════════════════════════
+# PIPE INSULATION DATA — Tables 6.4 / 6.5 / 6.6
+# Keys: compliance_level → list of (temp_label, temp_condition_fn, r_small, r_large)
+# r_small = pipe <40mm, r_large = pipe ≥40mm
+# ═══════════════════════════════════════════════════════
+
+PIPE_INSULATION = {
+    "Super ECSBC": [
+        # Heating System
+        ("Heating >94°C and ≤121°C", lambda t: t == "heating_high",     1.5, 1.5),
+        ("Heating >60°C and ≤94°C",  lambda t: t == "heating_med",      1.0, 1.3),
+        ("Heating >40°C and ≤60°C",  lambda t: t == "heating_low",      0.7, 1.1),
+        # Cooling System
+        ("Cooling >4.5°C and ≤15°C", lambda t: t == "cooling_high",     1.0, 1.2),
+        ("Cooling <4.5°C",           lambda t: t == "cooling_low",      1.5, 1.5),
+        # Refrigerant Piping
+        ("Refrigerant >4.5°C and ≤15°C", lambda t: t == "ref_high",    0.7, 0.9),
+        ("Refrigerant <4.5°C",           lambda t: t == "ref_low",      1.5, 1.5),
+    ],
+    "ECSBC+": [
+        ("Heating >94°C and ≤121°C", lambda t: t == "heating_high",     1.1, 1.3),
+        ("Heating >60°C and ≤94°C",  lambda t: t == "heating_med",      0.8, 0.8),
+        ("Heating >40°C and ≤60°C",  lambda t: t == "heating_low",      0.5, 0.9),
+        ("Cooling >4.5°C and ≤15°C", lambda t: t == "cooling_high",     0.9, 1.0),
+        ("Cooling <4.5°C",           lambda t: t == "cooling_low",      1.1, 1.3),
+        ("Refrigerant >4.5°C and ≤15°C", lambda t: t == "ref_high",    0.5, 0.9),
+        ("Refrigerant <4.5°C",           lambda t: t == "ref_low",      1.1, 1.3),
+    ],
+    "ECSBC": [
+        ("Heating >94°C and ≤121°C", lambda t: t == "heating_high",     0.9, 1.2),
+        ("Heating >60°C and ≤94°C",  lambda t: t == "heating_med",      0.7, 0.7),
+        ("Heating >40°C and ≤60°C",  lambda t: t == "heating_low",      0.4, 0.7),
+        ("Cooling >4.5°C and ≤15°C", lambda t: t == "cooling_high",     0.7, 0.9),
+        ("Cooling <4.5°C",           lambda t: t == "cooling_low",      0.9, 1.2),
+        ("Refrigerant >4.5°C and ≤15°C", lambda t: t == "ref_high",    0.4, 0.7),
+        ("Refrigerant <4.5°C",           lambda t: t == "ref_low",      0.9, 1.2),
+    ],
+}
+
+PIPE_INSULATION_ROWS = {
+    "Super ECSBC": [
+        ("Heating >94°C and ≤121°C",      "heating_high", 1.5, 1.5),
+        ("Heating >60°C and ≤94°C",       "heating_med",  1.0, 1.3),
+        ("Heating >40°C and ≤60°C",       "heating_low",  0.7, 1.1),
+        ("Cooling >4.5°C and ≤15°C",      "cooling_high", 1.0, 1.2),
+        ("Cooling <4.5°C",                "cooling_low",  1.5, 1.5),
+        ("Refrigerant >4.5°C and ≤15°C",  "ref_high",     0.7, 0.9),
+        ("Refrigerant <4.5°C",            "ref_low",      1.5, 1.5),
+    ],
+    "ECSBC+": [
+        ("Heating >94°C and ≤121°C",      "heating_high", 1.1, 1.3),
+        ("Heating >60°C and ≤94°C",       "heating_med",  0.8, 0.8),
+        ("Heating >40°C and ≤60°C",       "heating_low",  0.5, 0.9),
+        ("Cooling >4.5°C and ≤15°C",      "cooling_high", 0.9, 1.0),
+        ("Cooling <4.5°C",                "cooling_low",  1.1, 1.3),
+        ("Refrigerant >4.5°C and ≤15°C",  "ref_high",     0.5, 0.9),
+        ("Refrigerant <4.5°C",            "ref_low",      1.1, 1.3),
+    ],
+    "ECSBC": [
+        ("Heating >94°C and ≤121°C",      "heating_high", 0.9, 1.2),
+        ("Heating >60°C and ≤94°C",       "heating_med",  0.7, 0.7),
+        ("Heating >40°C and ≤60°C",       "heating_low",  0.4, 0.7),
+        ("Cooling >4.5°C and ≤15°C",      "cooling_high", 0.7, 0.9),
+        ("Cooling <4.5°C",                "cooling_low",  0.9, 1.2),
+        ("Refrigerant >4.5°C and ≤15°C",  "ref_high",     0.4, 0.7),
+        ("Refrigerant <4.5°C",            "ref_low",      0.9, 1.2),
+    ],
+}
+
+# Table 6.7 – Ductwork Insulation (R value m²·K/W)
+DUCT_INSULATION = {
+    "Exterior":             {"Supply": 1.4, "Return": 0.6},
+    "Unconditioned Space":  {"Supply": 0.6, "Return": None},
+    "Buried":               {"Supply": 0.6, "Return": None},
+}
+
+PIPE_TEMP_OPTIONS = {
+    "Heating >94°C and ≤121°C":      "heating_high",
+    "Heating >60°C and ≤94°C":       "heating_med",
+    "Heating >40°C and ≤60°C":       "heating_low",
+    "Cooling >4.5°C and ≤15°C":      "cooling_high",
+    "Cooling <4.5°C":                "cooling_low",
+    "Refrigerant >4.5°C and ≤15°C":  "ref_high",
+    "Refrigerant <4.5°C":            "ref_low",
+}
+
 CLIMATE_ZONES     = ["Composite","Hot and Dry","Warm and Humid","Temperate","Cold"]
 BUILDING_TYPES    = ["Hospitality","Business","Health Care","Educational","Assembly","Shopping Complex"]
 BUILDING_SUBTYPES = {
@@ -934,86 +1020,6 @@ with tabs[1]:
         if use_epf:
             st.markdown('<div class="exc-box">🔶 <b>Under Development</b>: If WWR ≤ 40%, the Envelope Performance Factor (EPF) method may be used as an alternate compliance path instead of component-by-component prescriptive compliance.</div>', unsafe_allow_html=True)
 
-            # st.markdown('<div class="info-box">Enter proposed building envelope areas and U/SHGC values per façade orientation for EPF calculation. Trade-off is NOT permitted for skylights.</div>', unsafe_allow_html=True)
-
-            # sched_map = {
-            #     "Business":        "24-hour" if "24-hour" in building_subtype else "Daytime",
-            #     "Educational":     "Daytime",
-            #     "Shopping Complex":"Daytime",
-            #     "Hospitality":     "24-hour",
-            #     "Health Care":     "24-hour",
-            #     "Assembly":        "24-hour",
-            # }
-            # bld_sched = sched_map.get(building_type, "Daytime")
-            # st.caption(f"Using EPF coefficients for **{climate_zone}** / **{bld_sched}** schedule")
-
-            # coefs = EPF_COEF[climate_zone][bld_sched]
-
-            # st.markdown("**Baseline Building EPF (using code-required U/SHGC values)**")
-            # bl_wall_u  = req_wall_u
-            # bl_roof_u  = req_roof_u
-            # bl_fene_u  = req_fene_u
-            # bl_shgc_nn = req_shgc_nn
-            # bl_shgc_n  = req_shgc_n
-
-            # c1, c2, c3, c4 = st.columns(4)
-            # wall_area = c1.number_input("Gross Wall Area (m²)",   min_value=1.0, value=gross_ext_wall, key="epf_wa")
-            # roof_area = c2.number_input("Gross Roof Area (m²)",   min_value=1.0, value=gross_roof,     key="epf_ra")
-            # n_area    = c3.number_input("North Window Area (m²)", min_value=0.0, value=total_vert_fene*0.25, key="epf_na")
-            # s_area    = c4.number_input("South Window Area (m²)", min_value=0.0, value=total_vert_fene*0.25, key="epf_sa")
-            # c1b, c2b  = st.columns(2)
-            # e_area    = c1b.number_input("East Window Area (m²)", min_value=0.0, value=total_vert_fene*0.25, key="epf_ea")
-            # w_area    = c2b.number_input("West Window Area (m²)", min_value=0.0, value=total_vert_fene*0.25, key="epf_wa2")
-
-            # def calc_epf(w_u, w_a, r_u, r_a, n_u, n_shgc, n_a, s_u, s_shgc, s_a, e_u, e_shgc, e_a, ww_u, ww_shgc, ww_a, c):
-            #     epf  = c["Wall"]["U"]          * w_u  * w_a
-            #     epf += c["Roof"]["U"]          * r_u  * r_a
-            #     epf += c["North Windows"]["U"] * n_u  * n_a  + c["North Windows"]["SHGC"] * (n_shgc * n_a)
-            #     epf += c["South Windows"]["U"] * s_u  * s_a  + c["South Windows"]["SHGC"] * (s_shgc * s_a)
-            #     epf += c["East Windows"]["U"]  * e_u  * e_a  + c["East Windows"]["SHGC"]  * (e_shgc * e_a)
-            #     epf += c["West Windows"]["U"]  * ww_u * ww_a + c["West Windows"]["SHGC"]  * (ww_shgc* ww_a)
-            #     return round(epf, 1)
-
-            # epf_baseline = calc_epf(
-            #     bl_wall_u, wall_area, bl_roof_u, roof_area,
-            #     bl_fene_u, bl_shgc_n, n_area,
-            #     bl_fene_u, bl_shgc_nn, s_area,
-            #     bl_fene_u, bl_shgc_nn, e_area,
-            #     bl_fene_u, bl_shgc_nn, w_area,
-            #     coefs
-            # )
-
-            # st.markdown("**Proposed Building EPF**")
-            # c1, c2, c3, c4 = st.columns(4)
-            # p_wall_u  = c1.number_input("Prop. Wall U (W/m²·K)", min_value=0.01, value=wall_u_prop, key="epf_pwu")
-            # p_roof_u  = c2.number_input("Prop. Roof U (W/m²·K)", min_value=0.01, value=roof_u_prop, key="epf_pru")
-            # p_fene_u  = c3.number_input("Prop. Fene U (W/m²·K)", min_value=0.5,  value=fene_u_prop, key="epf_pfu")
-            # p_shgc_n  = c4.number_input("Prop. SHGC North",       min_value=0.05, max_value=1.0, value=shgc_n_prop, key="epf_psn")
-            # c1b, c2b  = st.columns(2)
-            # p_shgc_nn = c1b.number_input("Prop. SHGC Non-North",  min_value=0.05, max_value=1.0, value=shgc_nn_prop, key="epf_psnn")
-
-            # epf_proposed = calc_epf(
-            #     p_wall_u, wall_area, p_roof_u, roof_area,
-            #     p_fene_u, p_shgc_n,  n_area,
-            #     p_fene_u, p_shgc_nn, s_area,
-            #     p_fene_u, p_shgc_nn, e_area,
-            #     p_fene_u, p_shgc_nn, w_area,
-            #     coefs
-            # )
-
-            # epf_pass = epf_proposed <= epf_baseline
-            # st.markdown(f'<div class="{"exc-box" if epf_pass else "warn-box"}">📉 <b>EPF Result</b>: Proposed EPF = <b>{epf_proposed:,.0f}</b> vs Baseline EPF = <b>{epf_baseline:,.0f}</b>  →  {check_icon(epf_pass)} {"<b>PASS</b>" if epf_pass else "<b>FAIL</b>"}</div>', unsafe_allow_html=True)
-            # env_results["Envelope Trade-off EPF"] = epf_pass
-            # st.caption("Note: Skylights excluded from trade-off; they must individually meet Table 5.15.")
-
-            # # 12.5 modeling exceptions in info panel when EPF path is used
-            # with st.expander("📋 12.5 Simulation Modeling Exceptions (for WBP path)"):
-            #     st.markdown('<div class="exc-box">🔶 <b>(a)</b> Envelope assemblies &lt;5% of total area need not be separately described — add area to adjacent assembly.<br>'
-            #                 '<b>(b)</b> Surfaces within ±45° orientation/tilt may be combined.<br>'
-            #                 '<b>(c)</b> Schedules may differ Baseline vs Proposed only for non-standard efficiency measures; manual controls never eligible; AHJ approval required.<br>'
-            #                 '<b>(d)</b> Identical HVAC zones (same occupancy, loads, setpoints, HVAC type, glazing within ±45°) may be combined.</div>', unsafe_allow_html=True)
-
-
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 3: COMFORT SYSTEMS
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1567,74 +1573,299 @@ with st.expander("**6.2.3 – Controls**"):
             st.markdown('<div class="exc-box">🔶 Exception 6.2.3(a): Healthcare facility → timeclock NOT required.</div>', unsafe_allow_html=True)
             tc1 = "N/A"
         else:
-            tc1 = st.selectbox("6.2.3(a) Timeclock with night setback, 3 day-types, 2-hr override?", ["Yes","No","N/A"], key="tc1")
+            st.write("6.2.3(a) Timeclock ")
+            tc1 = st.selectbox("Timeclock with night setback, 3 day-types, 2-hr override?", ["Yes","No","N/A"], key="tc1")
 
-        tc2 = st.selectbox("6.2.3(b) Temperature control with 3°C dead-band?", ["Yes","No","N/A"], key="tc2")
-        tc3 = st.selectbox("6.2.3(c) Occupancy controls per space type?",       ["Yes","No","N/A"], key="tc3")
+        st.write("**6.2.3(b) Temperature control**")
+        tc2 = st.selectbox("Mechanical cooling and heating equipment in all buildings shall be installed with automatic controls to manage the temperature inside the conditioned zones.", ["Yes","No","N/A"], key="tc2")
+        st.write("Temperature control shall comply with the following requirements:")
+        tc2_1 = st.selectbox("Temperature control with 3°C dead-band?", ["Yes","No","N/A"], key="tc2_1")
+        tc2_2 = st.selectbox("Separate heating and cooling equipment serve the same temperature zone?", ["Yes","No","N/A"], key="tc2_2")
+        
+        if building_type == "Health Care":
+            tc2_3 = st.selectbox("Separate temperature control shall be installed in each In-patient rooms and wards.?", ["Yes","No","N/A"], key="tc2_3")
+        elif building_type == "Educational":
+            tc2_3 = st.selectbox("Separate temperature control shall be installed in each classroom, lecture room and computer lab?", ["Yes","No","N/A"], key="tc2_3")
+        elif building_type == "Office":
+            tc2_3 = st.selectbox("Separate temperature control shall be installed in each room less than 30 m²?", ["Yes","No","N/A"], key="tc2_3")
+        elif building_type == "Hospitality":
+            tc2_3 = st.selectbox("Separate temperature control shall be installed in each guest room?", ["Yes","No","N/A"], key="tc2_3")
+        else:
+            tc2_3 = "N/A"
 
+        st.write("**6.2.3(c) Occupancy controls**")
+        tc3 = st.selectbox("Occupancy controls per space type?",       ["Yes","No","N/A"], key="tc3")
+
+        st.write("**6.2.3(d) Cooling Tower Fan Control** ")
         ct_applicable = gross_area > 20000
         if not ct_applicable:
             st.markdown(f'<div class="exc-box">🔶 Cooling tower wet-bulb fan control (6.2.3-d) NOT required: BUA {gross_area:,.0f} m² ≤ 20,000 m²</div>', unsafe_allow_html=True)
             tc4 = "N/A"
         else:
             wb_drops = st.checkbox("Wet-bulb temperature drops below 17°C at project location?", key="wbd")
-            tc4 = st.selectbox("6.2.3(d) Cooling tower fan speed reduction to 50%?", ["Yes","No","N/A"], key="tc4") if wb_drops else "N/A"
+            tc4 = st.selectbox("Cooling tower fan speed reduction to 50%?", ["Yes","No","N/A"], key="tc4") if wb_drops else "N/A"
 
+
+        st.write("**6.2.3(e) AHU Fan** ")
         ahu_cap = st.number_input("AHU airflow capacity (m³/hr)", min_value=0.0, value=8000.0, step=500.0)
         ahu_exempt = ahu_cap < 5000
         if ahu_exempt:
             st.markdown('<div class="exc-box">🔶 Exception 6.2.3(e): AHU &lt;5000 m³/hr → variable speed fan NOT required.</div>', unsafe_allow_html=True)
             tc5 = "N/A"
         else:
-            tc5 = st.selectbox("6.2.3(e) AHU fan capable of 2/3 speed reduction?", ["Yes","No","N/A"], key="tc5")
+            tc5 = st.selectbox("AHU serving different zones of a building shall deploy fan speed modulation control to save energy, using duct static pressure signal?", ["Yes","No","N/A"], key="tc5")
 
+        st.write("**6.2.3(f) Damper Controls** ")
+        tc6 = st.selectbox("Automatic dampers for exhaust systems?", ["Yes","No","N/A"], key="tc6")
         has_kitchen_exhaust = st.checkbox("Kitchen exhaust hood(s) present?", key="kex")
         if has_kitchen_exhaust:
             st.markdown('<div class="exc-box">🔶 Exception 6.2.3(f): Auto dampers NOT required for kitchen exhaust hood systems.</div>', unsafe_allow_html=True)
-        tc6 = st.selectbox("6.2.3(f) Automatic dampers for remaining exhaust systems?", ["Yes","No","N/A"], key="tc6")
+        tc7 = st.selectbox("Automatic dampers for remaining exhaust systems?", ["Yes","No","N/A"], key="tc7")
 
     with c2:
-        ctrl_items = [tc1,tc2,tc3,tc4,tc5,tc6]
+        ctrl_items = [tc1,tc2,tc2_1,tc2_2,tc2_3,tc3,tc4,tc5,tc6,tc7]
         p = all(x in ["Yes","N/A"] for x in ctrl_items) and any(x=="Yes" for x in ctrl_items)
         hvac_results["6.2.3 Controls"] = p
         st.markdown(f"**Status:** {check_icon(p)}")
 
 with st.expander("**6.2.4 – Piping & Ductwork Insulation**"):
+    c1, c2 = st.columns([2, 1])
+    with c1:
+        st.markdown(
+            f'<div class="info-box">Pipe insulation R-values '
+            f'({compliance_level}). Location adjustments: −0.2 if in conditioned space/buried '
+            f'(min R-0.4); +0.2 if exposed to weather outside.</div>',
+            unsafe_allow_html=True
+        )
+
+        # ── Pipe Insulation ──────────────────────────────────────────────
+        st.markdown("##### a) Piping Insulation")
+
+        pipe_location_624 = st.selectbox(
+            "Pipe Location",
+            [
+                "Standard (Table R-values apply as-is)",
+                "In conditioned space or buried in ground (R may be reduced by 0.2, min R-0.4)",
+                "Outside building, direct weather exposure (R must be increased by 0.2)",
+            ],
+            key="pipe_loc_624"
+        )
+
+        pipe_temp_label = st.selectbox(
+            "Operating Temperature Range / System Type",
+            list(PIPE_TEMP_OPTIONS.keys()),
+            key="pipe_temp_624"
+        )
+        pipe_temp_key = PIPE_TEMP_OPTIONS[pipe_temp_label]
+
+        pipe_size_ge40 = st.checkbox(
+            "Pipe nominal diameter ≥ 40 mm?",
+            key="pipe_size_624"
+        )
+
+        # Look up base R from table
+        rows = PIPE_INSULATION_ROWS[compliance_level]
+        base_r_small = base_r_large = None
+        for (label, key, r_s, r_l) in rows:
+            if key == pipe_temp_key:
+                base_r_small, base_r_large = r_s, r_l
+                break
+
+        base_r = base_r_large if pipe_size_ge40 else base_r_small
+
+        # Apply location adjustment
+        if "conditioned space" in pipe_location_624 or "buried" in pipe_location_624:
+            adj_r = max(0.4, base_r - 0.2)
+            st.markdown(
+                f'<div class="exc-box">🔶 <b>Location Adjustment</b>: Base R = {base_r} − 0.2 = '
+                f'<b>{adj_r:.1f} m²·K/W</b> (min R-0.4 applied)</div>',
+                unsafe_allow_html=True
+            )
+        elif "weather exposure" in pipe_location_624:
+            adj_r = base_r + 0.2
+            st.markdown(
+                f'<div class="exc-box">🔶 <b>Location Adjustment</b>: Base R = {base_r} + 0.2 = '
+                f'<b>{adj_r:.1f} m²·K/W</b> (weather-exposed)</div>',
+                unsafe_allow_html=True
+            )
+        else:
+            adj_r = base_r
+            st.markdown(
+                f'Required R-value ({compliance_level}): **{adj_r:.1f} m²·K/W**'
+            )
+
+        proposed_pipe_r = st.number_input(
+            f"Proposed Pipe Insulation R-value (m²·K/W) — required ≥ {adj_r:.1f}",
+            min_value=0.0, value=float(adj_r), step=0.05,
+            key="prop_pipe_r_624"
+        )
+        pipe_r_pass = proposed_pipe_r >= adj_r
+        st.markdown(f"{check_icon(pipe_r_pass)} Proposed R: {proposed_pipe_r:.2f} vs required ≥ {adj_r:.2f}")
+
+        # Show full table for reference
+        with st.expander("📋 View full pipe insulation table for all temperature ranges"):
+            rows_display = []
+            for (lbl, key, r_s, r_l) in PIPE_INSULATION_ROWS[compliance_level]:
+                rows_display.append({
+                    "Operating Temperature / System": lbl,
+                    "R-value (<40 mm) m²·K/W": r_s,
+                    "R-value (≥40 mm) m²·K/W": r_l,
+                })
+            st.dataframe(pd.DataFrame(rows_display), hide_index=True, use_container_width=True)
+
+        st.markdown("---")
+
+        # ── Ductwork Insulation ───────────────────────────────────────────
+        st.markdown("##### b) Ductwork & Plenum Insulation (Table 6.7)")
+
+        duct_location = st.selectbox(
+            "Duct Location",
+            list(DUCT_INSULATION.keys()),
+            key="duct_loc_624"
+        )
+        duct_type = st.selectbox(
+            "Duct Type",
+            ["Supply", "Return"],
+            key="duct_type_624"
+        )
+
+        req_duct_r = DUCT_INSULATION[duct_location][duct_type]
+
+        if req_duct_r is None:
+            st.markdown(
+                f'<div class="exc-box">🔶 Return ducts in <b>{duct_location}</b> location: '
+                f'<b>No insulation required</b>.</div>',
+                unsafe_allow_html=True
+            )
+            duct_r_pass = True
+            hvac_results["6.2.4b Duct Insulation (no insulation reqd)"] = True
+        else:
+            st.markdown(
+                f'Required duct R-value ({duct_type}, {duct_location}): **R-{req_duct_r} m²·K/W**'
+            )
+            proposed_duct_r = st.number_input(
+                f"Proposed Duct Insulation R-value (m²·K/W) — required ≥ {req_duct_r}",
+                min_value=0.0, value=float(req_duct_r), step=0.05,
+                key="prop_duct_r_624"
+            )
+            duct_r_pass = proposed_duct_r >= req_duct_r
+            st.markdown(
+                f"{check_icon(duct_r_pass)} Proposed R: {proposed_duct_r:.2f} vs required ≥ {req_duct_r}"
+            )
+
+        with st.expander("📋 View full ductwork insulation table"):
+            duct_display = []
+            for loc, vals in DUCT_INSULATION.items():
+                duct_display.append({
+                    "Duct Location": loc,
+                    "Supply R-value (m²·K/W)": vals["Supply"],
+                    "Return R-value (m²·K/W)": vals["Return"] if vals["Return"] is not None else "Not required",
+                })
+            st.dataframe(pd.DataFrame(duct_display), hide_index=True, use_container_width=True)
+
+    with c2:
+        insulation_pass = pipe_r_pass and duct_r_pass
+        hvac_results["6.2.4a Pipe Insulation"] = pipe_r_pass
+        if req_duct_r is not None:
+            hvac_results["6.2.4b Duct Insulation"] = duct_r_pass
+        st.markdown(f"**Pipe Insulation:** {check_icon(pipe_r_pass)}")
+        st.markdown(f"**Duct Insulation:** {check_icon(duct_r_pass)}")
+        st.markdown(f"**Overall 6.2.4:** {check_icon(insulation_pass)}")
+
+with st.expander("**6.2.5 – Condenser Location**"):
     c1, c2 = st.columns([2,1])
     with c1:
-        pi1 = st.selectbox("Piping insulation R-value indicated?",   ["Yes","No","N/A"], key="pi1")
-        pi2 = st.selectbox("Ductwork insulation R-value indicated?", ["Yes","No","N/A"], key="pi2")
+        conden_loc = st.selectbox("Air cooled condensers shall be located such that the heat sink is free from of interference of heat discharnge by devices located in adjoining spaces, and do not interfere with other such systems installed nearby?", ["Yes","No","N/A"], key="conden_loc")
     with c2:
-        p = all(x=="Yes" for x in [pi1,pi2])
-        hvac_results["6.2.4 Insulation"] = p
-        st.markdown(f"**Status:** {check_icon(p)}")
+        hvac_results["6.2.5 Condenser Location"] = conden_loc == "Yes"
+        st.markdown(f"**Status:** {check_icon(conden_loc == 'Yes')}")
 
 st.markdown("#### Standardized Requirements (6.3)")
 
 with st.expander("**6.3.1 – Fans**"):
     c1, c2 = st.columns([2,1])
     with c1:
+        motor_power = st.checkbox("Supply, exhaust and return or relief fans with motor power exceeding 0.37 kW?", key="fan_power")
+        power = True
+
+        if compliance_level == "ECSBC":
+            if motor_power:
+                st.selectbox("Mechanical Efficiency is greater than 65%?", ["Yes","No","N/A"], key="fan_mech_eff")
+                power = hvac_results["6.3.1 Fan Mechanical Efficiency > 65%"] = st.session_state["fan_mech_eff"] == "Yes"
+            
+        if compliance_level == "ECSBC+":
+            if motor_power:
+                st.selectbox("Mechanical Efficiency is greater than 70%?", ["Yes","No","N/A"], key="fan_mech_eff_plus")
+                power = hvac_results["6.3.1 Fan Mechanical Efficiency > 70%"] = st.session_state["fan_mech_eff_plus"] == "Yes"
+            
+        if compliance_level == "Super ECSBC":
+            if motor_power:
+                st.selectbox("Mechanical Efficiency is greater than 75%?", ["Yes","No","N/A"], key="fan_mech_eff_super")
+                power = hvac_results["6.3.1 Fan Mechanical Efficiency > 75%"] = st.session_state["fan_mech_eff_super"] == "Yes"
+
         fan_ducted = st.selectbox("Fan type", ["Ducted (fan efficiency checked separately)","Un-ducted AC unit (efficiency in total unit rating)"], key="fandt")
         if "Un-ducted" in fan_ducted:
             st.markdown('<div class="exc-box">🔶 Exception 6.3.1: Un-ducted AC unit – fan efficiency captured in total unit ISEER/COP. Separate fan FEI check NOT required.</div>', unsafe_allow_html=True)
             hvac_results["6.3.1 Fan (un-ducted exception)"] = True
         else:
+            fan_type = st.selectbox("Fan type", ["Centrifugal fans","Axial flow flans"], key="fan_type")
             fan_fei = st.number_input("Fan Energy Index (FEI) for fans ≥2.5 kW shaft power", min_value=0.0, value=1.05, step=0.01)
-            fei_pass = fan_fei >= 1.00
-            hvac_results["6.3.1 Fan FEI ≥ 1.0"] = fei_pass
-            st.markdown(f"{check_icon(fei_pass)} FEI: {fan_fei}")
+
+            if fan_type == "Axial flow flans":
+                fei_pass = fan_fei >= 1.00
+                hvac_results["6.3.1 Fan FEI ≥ 1.0"] = fei_pass
+                st.markdown(f"{check_icon(fei_pass)} FEI: {fan_fei}")
+
+            if fan_type == "Centrifugal fans":
+                fei_pass = fan_fei >= 1.1
+                hvac_results["6.3.1 Fan FEI ≥ 1.1"] = fei_pass
+                st.markdown(f"{check_icon(fei_pass)} FEI: {fan_fei}, **Required {'≥ 1.1' if fan_type == 'Centrifugal fans' else '≥ 1.0'}**")
     with c2:
         st.markdown("")
+        st.markdown(f"**Status:** {check_icon(power)}")
+        st.markdown(f"**Status FEI: {check_icon(fei_pass)}**")
 
 with st.expander("**6.3.2 – Chillers**"):
-    req_cop  = CHILLER_COP[compliance_level]
-    req_iplv = CHILLER_IPLV[compliance_level]
-    st.markdown(f"**Code Min COP:** {req_cop} | **Code Min IPLV:** {req_iplv}")
+    # req_cop  = CHILLER_COP[compliance_level]
+    # req_iplv = CHILLER_IPLV[compliance_level]
     c1, c2 = st.columns([2,1])
     with c1:
-        chiller_cap  = st.number_input("Chiller Capacity (kW)", min_value=0.0, value=500.0)
-        chiller_cop  = st.number_input("Proposed COP",  min_value=1.0, value=5.5, step=0.1)
-        chiller_iplv = st.number_input("Proposed IPLV", min_value=1.0, value=6.5, step=0.1)
+        chiller_cop = True
+        chiller_iplv = True
+        chiller_type = st.selectbox("Chiller Type", ["Air Cooled", "Water Cooled"], key="chiller_type")
+        if chiller_type == "Water Cooled":
+            chiller_cap  = st.number_input("Chiller Capacity (kW)", min_value=0.0, value=500.0)
+            chiller_cop  = st.number_input("Proposed COP",  min_value=1.0, value=5.5, step=0.1)
+            chiller_iplv = st.number_input("Proposed IPLV", min_value=1.0, value=6.5, step=0.1)
+            if chiller_cap < 260:
+                req_cop = 4.7
+                req_iplv = 5.8
+            elif chiller_cap >=260 and chiller_cap < 530:
+                req_cop = 4.9
+                req_iplv = 5.9
+            elif chiller_cap >= 530 and chiller_cap < 1050:
+                req_cop = 5.4
+                req_iplv = 6.5
+            elif chiller_cap >= 1050 and chiller_cap < 1580:
+                req_cop = 5.8
+                req_iplv = 6.8
+            elif chiller_cap >= 1580:
+                req_cop = 6.3
+                req_iplv = 7
+                
+        if chiller_type == "Air Cooled":
+            chiller_cap  = st.number_input("Chiller Capacity (kW)", min_value=0.0, value=600.0)
+            chiller_cop  = st.number_input("Proposed COP",  min_value=1.0, value=6.5, step=0.1)
+            chiller_iplv = st.number_input("Proposed IPLV", min_value=1.0, value=7.5, step=0.1)
+            if chiller_cap < 260:
+                req_cop = 2.8
+                req_iplv = 6.5
+            elif chiller_cap >=260:
+                req_cop = 3.0
+                req_iplv = 3.7
+
+    st.markdown(f"**Code Min COP:** {req_cop} | **Code Min IPLV:** {req_iplv}")
+        
     with c2:
         cop_pass  = chiller_cop  >= req_cop
         iplv_pass = chiller_iplv >= req_iplv
@@ -2247,7 +2478,7 @@ with tabs[8]:
             height=360, margin=dict(t=40,b=40,l=20,r=20),
             plot_bgcolor="white", paper_bgcolor="white",
             legend=dict(orientation="h",yanchor="bottom",y=1.07,x=0.8))
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
 
     st.markdown("#### Section-wise Status")
     cols = st.columns(3)
@@ -2269,7 +2500,7 @@ with tabs[8]:
                   for s, checks in results.items() for item, val in checks.items() if val is False]
     if all_failed:
         st.markdown("#### ⚠️ Items Requiring Attention")
-        st.dataframe(pd.DataFrame(all_failed), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(all_failed), width='stretch', hide_index=True)
     else:
         st.success("✅ All checked items pass!")
 
@@ -2288,7 +2519,7 @@ with tabs[8]:
             f"≤ {MAX_SRR}%",
         ],
     })
-    st.dataframe(env_summary, use_container_width=True, hide_index=True)
+    st.dataframe(env_summary, width='stretch', hide_index=True)
 
     st.markdown("#### LPD Limits – Building Area Method")
     lpd_rows = []
@@ -2298,7 +2529,7 @@ with tabs[8]:
                 "ECSBC (W/m²)": LPD_TABLE[key]["ECSBC"],
                 "ECSBC+ (W/m²)": LPD_TABLE[key]["ECSBC+"],
                 "Super ECSBC (W/m²)": LPD_TABLE[key]["Super ECSBC"]})
-    st.dataframe(pd.DataFrame(lpd_rows), use_container_width=True, hide_index=True)
+    st.dataframe(pd.DataFrame(lpd_rows), width='stretch', hide_index=True)
 
     st.markdown("---")
     st.markdown("#### Compliance Radar")
@@ -2313,7 +2544,7 @@ with tabs[8]:
 
     c1, c2 = st.columns([3,2])
     with c1:
-        st.plotly_chart(fig_r, use_container_width=True)
+        st.plotly_chart(fig_r, width='stretch')
     with c2:
         st.markdown("**v3.0 — All 5 bugs fixed + 38 exceptions:**")
         st.markdown("""
