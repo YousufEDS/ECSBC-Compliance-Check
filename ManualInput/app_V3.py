@@ -148,9 +148,30 @@ LPD_TABLE = {
     "Museum":                     {"ECSBC":10.2,"ECSBC+":8.2,"Super ECSBC":5.1},
 }
 
-CHILLER_COP   = {"ECSBC":5.20,"ECSBC+":5.80,"Super ECSBC":6.10}
-CHILLER_IPLV  = {"ECSBC":6.10,"ECSBC+":7.00,"Super ECSBC":8.00}
-PUMP_IE_CLASS = {"ECSBC":"IE2","ECSBC+":"IE3","Super ECSBC":"IE4"}
+# CHILLER_COP   = {"ECSBC":5.20,"ECSBC+":5.80,"Super ECSBC":6.10}
+# CHILLER_IPLV  = {"ECSBC":6.10,"ECSBC+":7.00,"Super ECSBC":8.00}
+PUMP_IE_CLASS = {"ECSBC":"IE3","ECSBC+":"IE4","Super ECSBC":"IE5"}
+# ── Pump power limits (W/kW of cooling) — Table 6.12/6.13/6.14 ECSBC 2024 ──
+PUMP_POWER_LIMITS = {
+    "ECSBC": {
+        "chw_no_vfd": 18.2,   # Chilled water pump max W/kW WITHOUT VFD
+        "chw_vfd":    None,   # With VFD: no separate limit — VFD itself satisfies requirement
+        "cw_eff_threshold": 70.0,  # % pump efficiency threshold for condenser water
+        "cw_no_vfd": 17.7,    # Condenser water pump max W/kW (if pump eff ≥ 70%)
+    },
+    "ECSBC+": {
+        "chw_no_vfd": 16.9,
+        "chw_vfd":    None,
+        "cw_eff_threshold": 75.0,
+        "cw_no_vfd": 16.5,
+    },
+    "Super ECSBC": {
+        "chw_no_vfd": 14.9,
+        "chw_vfd":    None,
+        "cw_eff_threshold": 80.0,
+        "cw_no_vfd": 14.6,
+    },
+}
 DG_STAR_REQUIRED = {"ECSBC":3,"ECSBC+":4,"Super ECSBC":5}
 DG_BUA_THRESHOLD = 20000.0
 
@@ -1873,16 +1894,116 @@ with st.expander("**6.3.2 – Chillers**"):
         hvac_results[f"Chiller IPLV ≥ {req_iplv}"] = iplv_pass
         st.markdown(f"**COP:** {check_icon(cop_pass)} {chiller_cop}\n\n**IPLV:** {check_icon(iplv_pass)} {chiller_iplv}")
 
-with st.expander("**6.3.3 – Pumps**"):
-    req_ie = PUMP_IE_CLASS[compliance_level]
-    c1, c2 = st.columns([2,1])
-    with c1:
-        pump_ie = st.selectbox("Pump Motor Efficiency Class", IE_ORDER[1:])
-    with c2:
-        ie_pass = ie_gte(pump_ie, req_ie)
-        hvac_results[f"Pump Motor ≥ {req_ie}"] = ie_pass
-        st.markdown(f"{check_icon(ie_pass)} {pump_ie} (req: {req_ie}+)")
 
+with st.expander("**6.3.3 – Pumps**"):
+    req_ie  = PUMP_IE_CLASS[compliance_level]
+    limits  = PUMP_POWER_LIMITS[compliance_level]
+    c1, c2  = st.columns([2, 1])
+
+    with c1:
+        st.markdown(
+            f'<div class="info-box">Pump power expressed as <b>W/kW of cooling capacity</b>. ',
+            unsafe_allow_html=True
+        )
+
+        # ── Chilled Water Pumps ──────────────────────────────────────────
+        st.markdown("**Chilled Water Pumps (Primary & Secondary)**")
+        chw_power = st.number_input(
+            "Chilled water pump power (W/kW of cooling)",
+            min_value=0.0, value=15.0, step=0.1, key="chwp"
+        )
+        vfd_present = st.checkbox(
+            "Variable Frequency Drive (VFD) present on secondary chilled water pumps?",
+            value=False, key="vfd_chwp",
+            help="VFD on secondary pumps satisfies the chilled water pump power requirement."
+        )
+
+        # ── Condenser Water Pumps ────────────────────────────────────────
+        st.markdown("**Condenser Water Pumps**")
+        cw_power = st.number_input(
+            "Condenser water pump power (W/kW of cooling)",
+            min_value=0.0, value=14.0, step=0.1, key="cwp"
+        )
+        pump_eff = st.number_input(
+            "Pump hydraulic efficiency (%)",
+            min_value=0.0, max_value=100.0, value=75.0, step=0.5, key="pump_eff"
+        )
+
+        # ── Motor IE Class ───────────────────────────────────────────────
+        st.markdown("**Pump Motor Efficiency (IS 12615)**")
+        pump_ie = st.selectbox(
+            "Pump Motor IE Class",
+            IE_ORDER[:],   # IE2 … IE5
+            key="pump_ie_633"
+        )
+
+    with c2:
+        # ── Chilled Water Pass Logic ─────────────────────────────────────
+        # PASS if VFD present OR pump power ≤ limit
+        chw_limit = limits["chw_no_vfd"]
+        if vfd_present:
+            chw_pass = True
+            chw_note = "VFD present → requirement satisfied"
+        elif chw_power >= chw_limit:
+            chw_pass = True
+            chw_note = f"{chw_power} ≥ {chw_limit} W/kW"
+        else:
+            chw_pass = False
+            chw_note = f"{chw_power} < {chw_limit} W/kW (no VFD)"
+
+        # ── Condenser Water Pass Logic ───────────────────────────────────
+        # PASS if pump power ≤ limit OR pump efficiency ≥ threshold
+        cw_limit     = limits["cw_no_vfd"]
+        eff_threshold = limits["cw_eff_threshold"]
+        if cw_power >= cw_limit:
+            cw_pass = True
+            cw_note = f"{cw_power} ≥ {cw_limit} W/kW"
+        elif pump_eff >= eff_threshold:
+            cw_pass = True
+            cw_note = f"Power {cw_power} < {cw_limit} but pump eff {pump_eff}% ≥ {eff_threshold}%"
+        else:
+            cw_pass = False
+            cw_note = f"{cw_power} > {cw_limit} W/kW and pump eff {pump_eff}% < {eff_threshold}%"
+
+        # ── Motor IE Pass Logic ──────────────────────────────────────────
+        ie_pass = ie_gte(pump_ie, req_ie)
+
+        # ── Overall Pass ─────────────────────────────────────────────────
+        pump_633_pass = chw_pass and cw_pass and ie_pass
+
+        # ── Write to hvac_results (single clean set of keys) ─────────────
+        hvac_results["6.3.3 CHW Pump Power"]         = chw_pass
+        hvac_results["6.3.3 CW Pump Power/Eff"]      = cw_pass
+        hvac_results[f"6.3.3 Pump Motor ≥ {req_ie}"] = ie_pass
+        hvac_results["6.3.3 Pumps (overall)"]         = pump_633_pass
+
+        # ── Display ──────────────────────────────────────────────────────
+        st.markdown(f"**CHW Pump:** {check_icon(chw_pass)}")
+        st.caption(chw_note)
+
+        st.markdown(f"**CW Pump:** {check_icon(cw_pass)}")
+        st.caption(cw_note)
+
+        st.markdown(f"**Motor IE:** {check_icon(ie_pass)} {pump_ie} (req: {req_ie}+)")
+
+        if vfd_present:
+            st.markdown(
+                '<span class="exc-badge">🔶 VFD EXCEPTION — CHW power limit waived</span>',
+                unsafe_allow_html=True
+            )
+
+        st.markdown("---")
+        st.markdown(f"**Overall 6.3.3:** {check_icon(pump_633_pass)}")
+
+        # Reference limits box
+        st.markdown(
+            f'<div class="info-box" style="font-size:0.8rem">'
+            f'<b>Limits ({compliance_level}):</b><br>'
+            f'CHW ≤ {chw_limit} W/kW (or VFD)<br>'
+            f'CW ≤ {cw_limit} W/kW (or pump eff ≥ {eff_threshold}%)<br>'
+            f'Motor: {req_ie}+</div>',
+            unsafe_allow_html=True
+        )
 # ── NEW EXCEPTION 7 & 8: Cooling Tower Table 6.16 + Economizer commissioning ──
 with st.expander(f"**6.3.5 – Economizers & Cooling Tower Fan Efficiency** {new_badge()}"):
     st.markdown("##### 6.3.5(a) – Cooling Tower Fan Efficiency")
