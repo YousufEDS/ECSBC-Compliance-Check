@@ -1960,13 +1960,22 @@ with st.expander("**6.3.3 – Pumps**"):
             cw_note = f"{cw_power} ≥ {cw_limit} W/kW"
         elif pump_eff >= eff_threshold:
             cw_pass = True
-            cw_note = f"Power {cw_power} < {cw_limit} but pump eff {pump_eff}% ≥ {eff_threshold}%"
+            cw_note = f"Power {cw_power} < {cw_limit}"
         else:
             cw_pass = False
             cw_note = f"{cw_power} > {cw_limit} W/kW and pump eff {pump_eff}% < {eff_threshold}%"
 
         # ── Motor IE Pass Logic ──────────────────────────────────────────
         ie_pass = ie_gte(pump_ie, req_ie)
+
+        # ---- VFD present pass ----------------------------------------
+        if vfd_present:
+            vfd_pass = True
+            vfd_note = "VFD present → VFD on secondary pumps"
+        else:
+            vfd_pass = False
+            vfd_note = "No VFD → pump power must meet W/kW requirement"
+
 
         # ── Overall Pass ─────────────────────────────────────────────────
         pump_633_pass = chw_pass and cw_pass and ie_pass
@@ -1976,6 +1985,7 @@ with st.expander("**6.3.3 – Pumps**"):
         hvac_results["6.3.3 CW Pump Power/Eff"]      = cw_pass
         hvac_results[f"6.3.3 Pump Motor ≥ {req_ie}"] = ie_pass
         hvac_results["6.3.3 Pumps (overall)"]         = pump_633_pass
+        hvac_results["6.3.3 VFD Exception"]          = vfd_pass
 
         # ── Display ──────────────────────────────────────────────────────
         st.markdown(f"**CHW Pump:** {check_icon(chw_pass)}")
@@ -1986,11 +1996,9 @@ with st.expander("**6.3.3 – Pumps**"):
 
         st.markdown(f"**Motor IE:** {check_icon(ie_pass)} {pump_ie} (req: {req_ie}+)")
 
-        if vfd_present:
-            st.markdown(
-                '<span class="exc-badge">🔶 VFD EXCEPTION — CHW power limit waived</span>',
-                unsafe_allow_html=True
-            )
+        st.markdown(f"**VFD Status:** {check_icon(vfd_pass)}")
+        st.caption(vfd_note)
+
 
         st.markdown("---")
         st.markdown(f"**Overall 6.3.3:** {check_icon(pump_633_pass)}")
@@ -2005,6 +2013,12 @@ with st.expander("**6.3.3 – Pumps**"):
             unsafe_allow_html=True
         )
 # ── NEW EXCEPTION 7 & 8: Cooling Tower Table 6.16 + Economizer commissioning ──
+with st.expander("**6.3.4 – cooling Tower**"):
+    c1,c2 = st.columns([2,1])
+
+    with c1:
+        st.write("**Under development**")
+
 with st.expander(f"**6.3.5 – Economizers & Cooling Tower Fan Efficiency** {new_badge()}"):
     st.markdown("##### 6.3.5(a) – Cooling Tower Fan Efficiency")
     ct_type = st.selectbox("Cooling Tower Type", ["Open Circuit","Closed Circuit","None / Not Applicable"], key="ct_type")
