@@ -2558,7 +2558,7 @@ if compliance_level == 'ECSBC+':
 # 6.3.10  CONTROLS FOR SUPER ECSBC BUILDINGS
 # ─────────────────────────────────────────────────────────────────────────────
 if compliance_level == "Super ECSBC":
-    with st.expander(f"**6.3.10 – Controls for Super ECSBC Buildings** {new_badge()}"):
+    with st.expander(f"**6.3.10 – Controls for Super ECSBC Buildings**"):
         c1, c2 = st.columns([2, 1])
 
         with c1:
@@ -2753,10 +2753,9 @@ with st.expander("**6.3.12 – Total System Efficiency (Alternate Compliance App
 
         if use_tse:
             st.markdown(
-                f'<div class="info-box"><b>Table 6.25 Maximum System Efficiency Threshold '
+                f'<div class="info-box"><b>Maximum System Efficiency Threshold '
                 f'({compliance_level})</b>: ≤ <b>{req_tse} kW/kWr</b><br>'
-                f'Scope: Chillers + chilled water pumps + condenser water pumps + cooling tower fans.<br>'
-                f'Method: Annual hourly simulation per Table 12.1.</div>',
+                f'Scope: Chillers + chilled water pumps + condenser water pumps + cooling tower fans.<br>',
                 unsafe_allow_html=True,
             )
 
@@ -2820,7 +2819,7 @@ with st.expander("**6.3.12 – Total System Efficiency (Alternate Compliance App
 # ─────────────────────────────────────────────────────────────────────────────
 # 6.3.13  LOW-ENERGY COMFORT SYSTEMS
 # ─────────────────────────────────────────────────────────────────────────────
-with st.expander(f"**6.3.13 – Low-Energy Comfort Systems** {new_badge()}"):
+with st.expander(f"**6.3.13 – Low-Energy Comfort Systems**"):
     c1, c2 = st.columns([2, 1])
 
     with c1:
