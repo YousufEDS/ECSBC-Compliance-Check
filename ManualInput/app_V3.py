@@ -2900,7 +2900,6 @@ with st.expander(f"**6.3.13 – Low-Energy Comfort Systems**"):
         st.markdown(f"**Status:** {check_icon(lecs_6313_pass)}")
         if lecs_6313_pass is None:
             st.markdown('<span class="na-badge">Not selected</span>', unsafe_allow_html=True)
-
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 4: LIGHTING
 # ══════════════════════════════════════════════════════════════════════════════
@@ -2923,94 +2922,504 @@ with tabs[3]:
     if project_type == "Addition or Alteration to Existing Building":
         st.markdown('<div class="exc-box">🔶 <b>§3.3.2 Active</b>: Existing lighting systems need not comply. Only newly installed luminaires must meet LPD and control requirements.</div>', unsafe_allow_html=True)
 
-    compliance_method = st.radio("Lighting Compliance Method",
-        ["Building Area Method (§7.3.2)","Space Function Method (§7.3.3)"], horizontal=True)
+    # ── §7.3.1 Compliance Method ──────────────────────────────────────────────
+    compliance_method = st.radio(
+        "§7.3.1 – Interior Lighting Compliance Method",
+        ["Building Area Method (§7.3.2)", "Space Function Method (§7.3.3)"],
+        horizontal=True,
+    )
+    light_results["7.3.1 Compliance Method Selected"] = True  # always declared
 
+    # ══════════════════════════════════════════════════════════════════════════
     st.markdown("#### Mandatory Requirements (§7.2)")
     c1, c2 = st.columns(2)
+
+    # ── LEFT COLUMN ───────────────────────────────────────────────────────────
     with c1:
+
+        # 7.2.1 Lighting Quality & Quantity
         with st.expander("**7.2.1 – Lighting Quality & Quantity**"):
-            lq1 = st.selectbox("Lighting per IS 3646 Part 1?", ["Yes","No","N/A"], key="lq1")
-            light_results["7.2.1 Lighting Quality"] = lq1=="Yes"
+            lq1 = st.selectbox(
+                "Lighting per IS 3646 Part 1?", ["Yes", "No", "N/A"], key="lq1"
+            )
+            light_results["7.2.1 Lighting Quality"] = lq1 == "Yes"
 
+        # 7.2.2(a) Automatic Lighting Shutoff
         with st.expander("**7.2.2(a) – Automatic Lighting Shutoff**"):
-            has_247 = st.checkbox("Building includes 24/7 operation spaces?",  key="247")
-            has_pt  = st.checkbox("Building includes patient care spaces?",     key="ptc")
-            has_sec = st.checkbox("Building includes safety/security spaces?",  key="sec")
+            has_247 = st.checkbox("Building includes 24/7 operation spaces?", key="247")
+            has_pt  = st.checkbox("Building includes patient care spaces?",    key="ptc")
+            has_sec = st.checkbox("Building includes safety/security spaces?", key="sec")
             if has_247 or has_pt or has_sec:
-                st.markdown('<div class="exc-box">🔶 Exception §7.2.2(a): 24/7, patient-care, and safety/security spaces are EXEMPT from auto shutoff requirement.</div>', unsafe_allow_html=True)
-            als1 = st.selectbox("Auto shutoff / occupancy sensors for all other spaces?", ["Yes","No","N/A"], key="als1")
-            light_results["7.2.2(a) Auto Shutoff"] = als1=="Yes"
+                st.markdown(
+                    '<div class="exc-box">🔶 Exception §7.2.2(a): 24/7, patient-care, '
+                    "and safety/security spaces are EXEMPT from auto shutoff requirement.</div>",
+                    unsafe_allow_html=True,
+                )
+            st.write("At least 90% of all interior lighting fixtures by wattage in building shall be equipped with automatic control device that shall function on either:")
+            als1 = st.selectbox(
+                "A scheduled basis at specific programmed times. An independent program schedule shall be provided for areas of up to and including 2500 m2 and not more than one floor, or",
+                ["Yes", "No", "N/A"],
+                key="als1",
+            )
+            als2 = st.selectbox(
+                "Occupancy sensors that shall turn off/dim (by at least 80% of full light output) the lighting fixtures within 15 minutes of a space becoming un-occupied. Light fixtures controlled by occupancy sensors shall have a wall-mounted manual switch capable of turning on/off lights when the space is occupied.",
+                ["Yes", "No", "N/A"],
+                key="als2",
+            )
+            # any of the two options is acceptable, but at least one must be implemented
+            als_pass = "Yes" in [als1, als2]
+            if has_247 or has_pt or has_sec:
+                als_pass = True
+            st.markdown(f"**Status:** {check_icon(als_pass)}")
 
-        with st.expander(f"**7.2.2(b) – Space Control** {new_badge()}"):
-            sc1 = st.selectbox("At least one control per ceiling-height-partitioned space?", ["Yes","No","N/A"], key="sc1")
+            light_results["7.2.2(a) Auto Shutoff"] = als_pass
+
+
+
+        # 7.2.2(b) Space Control
+        with st.expander(f"**7.2.2(b) – Space Control**"):
+            sc1 = st.selectbox(
+                "At least one control per ceiling-height-partitioned space?",
+                ["Yes", "No", "N/A"],
+                key="sc1",
+            )
+
+            st.write("Each control device shall:")
+            sc2 = st.selectbox(
+                "Control a maximum of 250 m2 for a space <= 1000 m2, and a maximum of 1000 m2 for a space greateer than 1000 m2?",
+                ["Yes", "No", "N/A"],
+                key="sc2",
+            )
+
+            sc3 = st.selectbox(
+                "Control zones for general lighting shall be limited to 60 m2.",
+                ["Yes", "No", "N/A"],
+                key="sc3",
+            )
+
+            sc4 = st.selectbox(
+                "Control zones for general lighting shall be permitted to automalically turn on, up to the full power upon occupany and general lighting in other unoccupied control zones shall be permitted to automatically turn on to no more than 20% of full power.",
+                ["Yes", "No", "N/A"],
+                key = "sc4",
+            )
+
+            sc5 = st.selectbox(
+                "No more than 50$ of the lighting power for the general lighting shall be allowed to be automatically turned-on and none of remaining lighting turned on beyond 20% of full power if unoccupied.",
+                ["Yes", "No", "N/A"],
+                key = "sc5",
+            )
+
+            sc6 = st.selectbox(
+                "Have the capability to override the shutoff control specific in 7.2.2 (a) for a maximum of 2 hours, and be readily accessible and located so the occupant can see the control.",
+                ["Yes", "No", "N/A"],
+                key = "sc6",
+            )
+
             remote_ctrl_needed = st.checkbox(
-                "Remote installation of control device required for safety/security? (§7.2.2(b)-V)",
-                help="Control device may be remotely installed if required for safety/security, with pilot light indicator and clear labelling."
+                "Remote installation of control device required for safety/security?",
+                help=(
+                    "Control device may be remotely installed if required for safety/security, "
+                    "with pilot light indicator and clear labelling."
+                ),
             )
             if remote_ctrl_needed:
                 pilot_light_ok = st.checkbox("Remote device has pilot light indicator?")
-                labelled_ok    = st.checkbox("Remote device is clearly labelled to identify controlled lighting?")
+                labelled_ok    = st.checkbox(
+                    "Remote device is clearly labelled to identify controlled lighting?"
+                )
                 if pilot_light_ok and labelled_ok:
-                    st.markdown('<div class="exc-box">🔶 <b>Exception §7.2.2(b)-V</b>: Remote control device permitted — pilot light + labelling confirmed. Location constraint is WAIVED.</div>', unsafe_allow_html=True)
+                    st.markdown(
+                        '<div class="exc-box">🔶 <b>Exception '
+                        "device permitted — pilot light + labelling confirmed. Location constraint "
+                        "is WAIVED.</div>",
+                        unsafe_allow_html=True,
+                    )
                 else:
                     missing = []
-                    if not pilot_light_ok: missing.append("pilot light indicator")
-                    if not labelled_ok:    missing.append("clear labelling")
-                    st.warning(f"Remote device exception §7.2.2(b)-V not met: missing {', '.join(missing)}")
-            light_results["7.2.2(b) Space Control"] = sc1=="Yes"
+                    if not pilot_light_ok:
+                        missing.append("pilot light indicator")
+                    if not labelled_ok:
+                        missing.append("clear labelling")
+                    st.warning(
+                        f"Remote device exception §7.2.2(b)-V not met: missing {', '.join(missing)}"
+                    )
 
+
+            # ── §7.2.2(b)-2: Mandatory occupancy sensor locations ──────────
+            st.markdown("##### Occupancy Sensor")
+            st.markdown(
+                '<div class="info-box">Occupancy sensors are <b>mandatory</b> in the following '
+                "space types. Indicate N/A where space type does not exist in the building.</div>",
+                unsafe_allow_html=True,
+            )
+            occ_spaces_lt30  = st.selectbox(
+                "All habitable spaces < 30 m² (enclosed by walls/ceiling-height partitions)?",
+                ["Yes", "No", "N/A"],
+                key="occ_lt30",
+            )
+            occ_storage_gt15 = st.selectbox(
+                "All storage/utility spaces > 15 m²?",
+                ["Yes", "No", "N/A"],
+                key="occ_stor",
+            )
+            occ_toilet_gt25  = st.selectbox(
+                "Public toilets > 25 m² (controlling ≥ 80% of fixture wattage)?",
+                ["Yes", "No", "N/A"],
+                key="occ_toilet",
+            )
+            if building_type == "Hospitality":
+                occ_corridor = st.selectbox(
+                    "Hospitality public corridors (controlling 70–80% of fixture wattage)?",
+                    ["Yes", "No", "N/A"],
+                    key="occ_corr",
+                )
+                light_results["7.2.2(b)-2 Occ Sensor – Hospitality Corridor"] = (
+                    occ_corridor in ("Yes", "N/A")
+                )
+            occ_conf = st.selectbox(
+                "All conference/meeting rooms?", ["Yes", "No", "N/A"], key="occ_conf"
+            )
+
+            
+            exception_ok = remote_ctrl_needed and pilot_light_ok and labelled_ok
+
+            p1 = (
+                all(x in ("Yes", "N/A") for x in [
+                    occ_conf, occ_spaces_lt30, occ_storage_gt15,
+                    occ_toilet_gt25, sc1, sc2, sc3, sc4, sc5, sc6
+                ])
+                or exception_ok
+            )
+
+            st.markdown(f"**Status:** {check_icon(p1)}")
+            light_results["7.2.2(b)-2 Occ Sensor – Spaces <30m²"]    = occ_spaces_lt30  in ("Yes", "N/A")
+            light_results["7.2.2(b)-2 Occ Sensor – Storage >15m²"]   = occ_storage_gt15 in ("Yes", "N/A")
+            light_results["7.2.2(b)-2 Occ Sensor – Toilets >25m²"]   = occ_toilet_gt25  in ("Yes", "N/A")
+            light_results["7.2.2(b)-2 Occ Sensor – Conference Rooms"] = occ_conf         in ("Yes", "N/A")
+
+
+    # ── RIGHT COLUMN ──────────────────────────────────────────────────────────
     with c2:
-        with st.expander("**7.2.2(c) – Daylight Area Control**"):
-            dc1 = st.selectbox("Manual/automatic controls in daylight areas?", ["Yes","No","N/A"], key="dc1")
-            light_results["7.2.2(c) Daylight Control"] = dc1=="Yes"
 
+        # 7.2.2(c) Daylight Area Control
+        with st.expander("**7.2.2(c) – Control in Daylight Areas**"):
+            dc1 = st.selectbox(
+                "Manual/automatic controls in daylight areas which has a delay of minimum 5 minutes, and, Can switch off the lights fixtures or dim/step down up to 10% of full power?",
+                ["Yes", "No", "N/A"],
+                key="dc1",
+            )
+            dc_auto = st.checkbox(
+                "Automatic control device provided in daylight area?",
+                key="dc_auto",
+                help="If automatic, manual overrides shall NOT be allowed (§7.2.2(c)).",
+            )
+            if dc_auto:
+                st.markdown(
+                    '<div class="exc-box">⚠️ §7.2.2(c): Automatic daylight control is '
+                    "provided — manual overrides must be disabled.</div>",
+                    unsafe_allow_html=True,
+                )
+            dc_pass = dc1 == "Yes"
+            if dc_auto:
+                dc_pass = True
+            light_results["7.2.2(c) Daylight Control"] = dc_pass
+            st.markdown(f"**Status:** {check_icon(dc_pass)}")
+
+        # 7.2.3 Exterior Lighting Control
         with st.expander("**7.2.3 – Exterior Lighting Control**"):
-            ext_emergency = st.checkbox("Exterior lighting is for emergency/firefighting purposes only?", key="extemer")
+            ext_emergency = st.checkbox(
+                "Exterior lighting is for emergency/firefighting purposes only?", key="extemer"
+            )
             if ext_emergency:
-                st.markdown('<div class="exc-box">🔶 Exemption §7.2.3: Emergency/firefighting exterior lighting is EXEMPT from photosensor requirement.</div>', unsafe_allow_html=True)
-                light_results["7.2.3 Exterior Control"] = True
-            else:
-                ec1 = st.selectbox("Photosensor or astronomical time switch for exterior?", ["Yes","No","N/A"], key="ecl1")
-                light_results["7.2.3 Exterior Control"] = ec1=="Yes"
+                st.markdown(
+                    '<div class="exc-box">🔶 Exemption §7.2.3: Emergency/firefighting exterior '
+                    "lighting is EXEMPT from photosensor requirement.</div>",
+                    unsafe_allow_html=True,
+                )
+                light_results["7.2.3 Exterior Control – Photosensor"] = True
+            ec1 = st.selectbox(
+                "Photosensor or astronomical time switch for exterior?",
+                ["Yes", "No", "N/A"],
+                key="ecl1",
+            )
+            light_results["7.2.3 Exterior Control – Photosensor"] = ec1 == "Yes"
 
+            # §7.2.3(b) Facade lighting separate time control
+            has_facade = st.checkbox(
+                "Building has façade lighting or façade non-emergency signage?",
+                key="facade_exists",
+            )
+            if has_facade:
+                facade_ctrl = st.selectbox(
+                    "§7.2.3(b) – Separate time control for façade lighting / signage?",
+                    ["Yes", "No", "N/A"],
+                    key="facade_ctrl",
+                    help="Façade lighting and non-emergency façade signage must have separate time control.",
+                )
+                light_results["7.2.3(b) Facade Separate Time Control"] = facade_ctrl == "Yes"
+            else:
+                light_results["7.2.3(b) Facade Separate Time Control"] = True  # N/A — no façade
+            ec_pass = (ec1 == "Yes")
+            if ext_emergency:
+                ec_pass = True
+            if has_facade and facade_ctrl == "Yes":
+                ec_pass = True
+            else:
+                ec_pass = False
+            st.markdown(f"**Status:** {check_icon(ec_pass)}")
+
+
+        # 7.2.4 Centralized Controls (ECSBC+ and Super ECSBC only)
+        if compliance_level in ["ECSBC+", "Super ECSBC"]:
+            with st.expander(f"**7.2.4 – Centralized Controls ({compliance_level})**"):
+                st.write("Building shall have centralized lighting control system with at least following features:")
+                cc1 = st.selectbox(
+                    "Complete control of internal and external luminaired-switching on/off or dimming and scheduling of individual or group of luminaires?",
+                    ["Yes", "No", "N/A"],
+                    key="cc1",
+                )
+
+                cc2 = st.selectbox(
+                    "Space occupancy feedback from occupancy sensors?",
+                    ["Yes", "No", "N/A"],
+                    key = "cc2"
+                )
+
+                cc3 = st.selectbox(
+                    "Luminaire failure feedback for maintenance?",
+                    ["Yes", "No", "N/A"],
+                    key="cc3",
+                )
+
+                cc4 = st.selectbox(
+                    "Energy monitoring (Separately for internal and external lighting?",
+                    ["Yes", "No", "N/A"],
+                    key="cc4",
+                )
+
+                cc_pass = (
+                all(x in ("Yes", "N/A") for x in [
+                    cc1, cc2, cc3, cc4
+                ])
+                )
+                light_results["7.2.4 Centralized Controls"] = cc_pass
+                st.markdown(f"**Status:** {check_icon(cc_pass)}")
+
+        # 7.2.6 Exit Signs
         with st.expander("**7.2.6 – Exit Signs**"):
-            exit_sign = st.number_input("Exit sign wattage per face (W)", min_value=0.0, value=5.0, step=0.5)
+            exit_sign = st.number_input(
+                "Exit sign wattage per face (W)", min_value=0.0, value=5.0, step=0.5
+            )
             exit_pass = exit_sign <= 5.0
             light_results["7.2.6 Exit Signs ≤ 5W"] = exit_pass
-            st.markdown(f"{check_icon(exit_pass)} {exit_sign}W per face")
+            st.markdown(f"{check_icon(exit_pass)} {exit_sign}W per face — limit 5 W/face")
 
-    if compliance_level in ["ECSBC+","Super ECSBC"]:
-        with st.expander(f"**7.2.4 – Centralized Controls ({compliance_level})**"):
-            cc1 = st.selectbox("Centralized control with schedule & zones?", ["Yes","No","N/A"], key="cc1")
-            light_results["7.2.4 Centralized Controls"] = cc1=="Yes"
+    # ── §7.2.5 Additional Controls ────────────────────────────────────────────
+    st.markdown("#### Additional Controls")
+    with st.expander("**7.2.5 – Additional Controls for Specific Lighting Applications**"):
+        st.markdown(
+            '<div class="info-box">The following lighting types must be controlled '
+            "<b>independently</b> of general lighting.</div>",
+            unsafe_allow_html=True,
+        )
 
-    # ─ LPD ────────────────────────────────────────────────────────────────────
+        # Display / Accent Lighting
+        has_display = st.checkbox(
+            "Building has display/accent lighting in areas ≥ 300 m²?", key="disp_exists"
+        )
+        if has_display:
+            disp_ctrl = st.selectbox(
+                " Separate controls for display/accent lighting?",
+                ["Yes", "No", "N/A"],
+                key="disp_ctrl",
+            )
+            light_results["Display/Accent Lighting Control"] = disp_ctrl == "Yes"
+        else:
+            light_results["Display/Accent Lighting Control"] = True
+
+        # Hotel Guest Room Lighting (Hospitality only)
+        if building_type == "Hospitality":
+            hotel_master = st.selectbox(
+                "Master control at main room entry for all hotel guest room luminaires?",
+                ["Yes", "No", "N/A"],
+                key="hotel_master",
+            )
+            light_results["Hotel Guest Room Master Control"] = hotel_master == "Yes"
+
+        # Task Lighting
+        has_task = st.checkbox(
+            "Building has supplemental task lighting (under-shelf / under-cabinet)?",
+            key="task_exists",
+        )
+        if has_task:
+            task_ctrl = st.selectbox(
+                "Task lighting controlled independently (integral or compliant wall device)?",
+                ["Yes", "No", "N/A"],
+                key="task_ctrl",
+            )
+            light_results["Task Lighting Control"] = task_ctrl == "Yes"
+        else:
+            light_results["Task Lighting Control"] = True
+
+        # Non-Visual Lighting
+        has_nonvis = st.checkbox(
+            "Building has non-visual lighting (plant growth, food-warming)?", key="nonvis_exists"
+        )
+        if has_nonvis:
+            nonvis_ctrl = st.selectbox(
+                "Separate control device for non-visual lighting?",
+                ["Yes", "No", "N/A"],
+                key="nonvis_ctrl",
+            )
+            light_results["Non-Visual Lighting Control"] = nonvis_ctrl == "Yes"
+        else:
+            light_results["Non-Visual Lighting Control"] = True
+
+        # Demonstration Lighting
+        has_demo = st.checkbox(
+            "Building has demonstration/education lighting equipment?", key="demo_exists"
+        )
+        if has_demo:
+            demo_ctrl = st.selectbox(
+                "Separate control (authorized personnel only) for demonstration lighting?",
+                ["Yes", "No", "N/A"],
+                key="demo_ctrl",
+            )
+            light_results[" Demonstration Lighting Control"] = demo_ctrl == "Yes"
+        else:
+            light_results[" Demonstration Lighting Control"] = True
+
+    # ── §7.2.7 Lighting Power / Efficacy ─────────────────────────────────────
+    st.markdown("#### Exterior Luminaire Efficacy (§7.2.7)")
+    with st.expander("**7.2.7 – Exterior Luminaire Efficacy**"):
+        st.markdown(
+            '<div class="info-box">External luminaires emitting white light (CCT 2700K–6500K) '
+            "for exterior applications (excluding decorative/architectural) must meet minimum "
+            "efficacy: <b>ECSBC ≥ 100 lm/W</b>, <b>ECSBC+ ≥ 110 lm/W</b>, "
+            "<b>Super ECSBC ≥ 120 lm/W</b>.</div>",
+            unsafe_allow_html=True,
+        )
+        efficacy_limits = {"ECSBC": 100, "ECSBC+": 110, "Super ECSBC": 120}
+        req_efficacy = efficacy_limits.get(compliance_level, 100)
+
+        has_ext_luminaires = st.checkbox(
+            "Building has exterior luminaires (white light, non-decorative)?",
+            key="ext_lum_exists",
+        )
+        if has_ext_luminaires:
+            proposed_efficacy = st.number_input(
+                "Proposed exterior luminaire efficacy (lm/W)",
+                min_value=0.0,
+                value=float(req_efficacy),
+                step=1.0,
+                key="ext_efficacy",
+            )
+            eff_pass = proposed_efficacy >= req_efficacy
+            light_results["7.2.7 Exterior Luminaire Efficacy"] = eff_pass
+            st.markdown(
+                f"{check_icon(eff_pass)} {proposed_efficacy:.0f} lm/W — "
+                f"minimum required {req_efficacy} lm/W for {compliance_level}"
+            )
+        else:
+            light_results["7.2.7 Exterior Luminaire Efficacy"] = True  # not applicable
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # §7.3 Interior Lighting Power
+    # ══════════════════════════════════════════════════════════════════════════
     st.markdown("#### Interior Lighting Power (§7.3)")
-    st.markdown('<div class="info-box">Exempt lighting (§7.3) — excluded from LPD if additive to general lighting and on independent controls: display/accent in galleries/museums, equipment-integral, medical/dental, food-warming, plant-growth lighting.</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="info-box">Exempt lighting (§7.3) — excluded from LPD if additive to general '
+        "lighting and on independent controls: display/accent in galleries/museums, "
+        "equipment-integral, medical/dental, food-warming, plant-growth lighting.</div>",
+        unsafe_allow_html=True,
+    )
 
-    exempt_wattage = st.number_input("Exempt lighting wattage to be excluded (W) — §7.3 categories",
-        min_value=0.0, value=0.0, step=50.0)
-    emerg_wattage  = st.number_input("Emergency / life-safety lighting wattage (W) — §7.1 excluded from LPD",
-        min_value=0.0, value=0.0, step=50.0)
+    exempt_wattage = st.number_input(
+        "Exempt lighting wattage to be excluded (W) — §7.3 categories",
+        min_value=0.0,
+        value=0.0,
+        step=50.0,
+    )
+    emerg_wattage = st.number_input(
+        "Emergency / life-safety lighting wattage (W) — §7.1 excluded from LPD",
+        min_value=0.0,
+        value=0.0,
+        step=50.0,
+    )
 
-    st.markdown(f'##### Multiple Independent Lighting Systems <span class="new-badge">§7.3.3</span>', unsafe_allow_html=True)
+    st.markdown(
+        f'##### Multiple Independent Lighting Systems <span class="new-badge">§7.3.3 / §7.3.4</span>',
+        unsafe_allow_html=True,
+    )
     multi_lighting_systems = st.checkbox(
         "Are there multiple independent non-simultaneous lighting systems in any space?",
-        help="§7.3.3: LPD is based only on the highest-wattage system if simultaneous operation is prevented."
+        help=(
+            "§7.3.4 Exception: LPD is based only on the highest-wattage system "
+            "if simultaneous operation is prevented."
+        ),
     )
     highest_system_watts = 0.0
     if multi_lighting_systems:
         highest_system_watts = st.number_input(
             "Wattage of the highest-power independent lighting system (W)",
-            min_value=0.0, value=0.0, step=100.0)
-        st.markdown('<div class="exc-box">🔶 <b>Exception §7.3.3</b>: Multiple independent non-simultaneous systems — LPD calculated using only the highest-wattage system. Lighting quality must not be compromised.</div>', unsafe_allow_html=True)
+            min_value=0.0,
+            value=0.0,
+            step=100.0,
+        )
+        st.markdown(
+            '<div class="exc-box">🔶 <b>Exception §7.3.4</b>: Multiple independent non-simultaneous '
+            "systems — LPD calculated using only the highest-wattage system. Lighting quality "
+            "must not be compromised.</div>",
+            unsafe_allow_html=True,
+        )
+
+    # §7.3.4 Luminaire Wattage Documentation
+    with st.expander("**7.3.4 – Luminaire Wattage Documentation**"):
+        st.markdown(
+            '<div class="info-box">For compliance, wattage shall be: (1) manufacturer\'s labelled '
+            "rated wattage for mains-connected luminaires; (2) total input wattage including "
+            "remote ballasts/drivers; (3) for track/plug-in/flexible systems — highest specified "
+            "luminaire wattage OR 135 W/m, whichever is greater (systems with overload protection "
+            "rated at 100% of limiting device).</div>",
+            unsafe_allow_html=True,
+        )
+        lum_doc = st.selectbox(
+            "Luminaire wattage documented per §7.3.4 (manufacturer labels / test reports)?",
+            ["Yes", "No", "N/A"],
+            key="lum_doc",
+        )
+        has_ballast = st.checkbox(
+            "Any luminaires with permanently installed ballasts/drivers (remote or integral)?",
+            key="has_ballast",
+        )
+        if has_ballast:
+            ballast_doc = st.selectbox(
+                "Operating input wattage from manufacturer catalogue or independent test report?",
+                ["Yes", "No", "N/A"],
+                key="ballast_doc",
+            )
+            light_results["7.3.4 Ballast/Driver Wattage Documented"] = ballast_doc == "Yes"
+        has_track = st.checkbox(
+            "Any track / plug-in busway / flexible lighting systems?", key="has_track"
+        )
+        if has_track:
+            track_doc = st.selectbox(
+                "Track wattage based on max luminaire wattage or 135 W/m (whichever higher)?",
+                ["Yes", "No", "N/A"],
+                key="track_doc",
+            )
+            light_results["7.3.4 Track Lighting Wattage Basis"] = track_doc == "Yes"
+        light_results["7.3.4 Luminaire Wattage Documented"] = lum_doc == "Yes"
 
     c1, c2 = st.columns(2)
     with c1:
         lighted_area    = st.number_input("Lighted Floor Area (m²)", min_value=0.0, value=conditioned_area)
-        installed_total = st.number_input("Total Installed Interior Lighting Wattage (W) [before exclusions]",
-            min_value=0.0, value=req_lpd*conditioned_area*0.9, step=100.0)
+        installed_total = st.number_input(
+            "Total Installed Interior Lighting Wattage (W) [before exclusions]",
+            min_value=0.0,
+            value=req_lpd * conditioned_area * 0.9,
+            step=100.0,
+        )
         if multi_lighting_systems and highest_system_watts > 0:
             effective_watts = max(0, highest_system_watts - exempt_wattage - emerg_wattage)
         else:
@@ -3022,22 +3431,45 @@ with tabs[3]:
         st.metric("Total installed (gross)", f"{installed_total:,.0f} W")
         st.metric("Exempt watts excluded",   f"{exempt_wattage + emerg_wattage:,.0f} W")
         if multi_lighting_systems and highest_system_watts > 0:
-            st.metric("Highest system wattage (§7.3.3)", f"{highest_system_watts:,.0f} W")
-        st.metric("Effective LPD for compliance", f"{effective_lpd:.2f} W/m²", delta=f"Limit {req_lpd} W/m²")
+            st.metric(
+                "Highest system wattage (§7.3.4 exception)", f"{highest_system_watts:,.0f} W"
+            )
+        st.metric(
+            "Effective LPD for compliance",
+            f"{effective_lpd:.2f} W/m²",
+            delta=f"Limit {req_lpd} W/m²",
+        )
         st.markdown(f"**LPD Check:** {check_icon(lpd_pass)}")
 
-    st.markdown("#### Exterior Lighting Power")
+    # ══════════════════════════════════════════════════════════════════════════
+    # §7.3.5 Exterior Lighting Power
+    # ══════════════════════════════════════════════════════════════════════════
+    st.markdown("#### Exterior Lighting Power (§7.3.5)")
+    st.markdown(
+        '<div class="info-box">Trade-offs between exterior lighting applications are <b>not '
+        "permitted</b>. Each application must individually comply with its power limit from "
+        "Table 7.7 / 7.8 / 7.9.</div>",
+        unsafe_allow_html=True,
+    )
     c1, c2 = st.columns(2)
     with c1:
-        ext_lpd_allowed = st.number_input("Allowed Exterior LPD (W/m²) per Table 7.3.5", min_value=0.0, value=5.0, step=0.5)
-        ext_lpd_prop    = st.number_input("Proposed Exterior LPD (W/m²)",                 min_value=0.0, value=4.5, step=0.5)
+        ext_lpd_allowed = st.number_input(
+            "Allowed Exterior LPD (W/m²) per Table 7.7/7.8/7.9",
+            min_value=0.0,
+            value=5.0,
+            step=0.5,
+        )
+        ext_lpd_prop = st.number_input(
+            "Proposed Exterior LPD (W/m²)", min_value=0.0, value=4.5, step=0.5
+        )
     with c2:
         ext_pass = ext_lpd_prop <= ext_lpd_allowed
-        light_results["Exterior LPD"] = ext_pass
-        st.markdown(f"**Exterior LPD:** {check_icon(ext_pass)} {ext_lpd_prop} vs max {ext_lpd_allowed} W/m²")
+        light_results["7.3.5 Exterior LPD"] = ext_pass
+        st.markdown(
+            f"**Exterior LPD:** {check_icon(ext_pass)} {ext_lpd_prop} vs max {ext_lpd_allowed} W/m²"
+        )
 
     results["Lighting"] = light_results
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 5: ELECTRICAL & RE
