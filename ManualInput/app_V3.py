@@ -1058,1848 +1058,1848 @@ with tabs[2]:
 
     st.markdown("#### Mandatory Requirements")
 
-# ── NEW EXCEPTION 5: Ventilation 6.2.1(c) with two sub-exceptions ────────
-with st.expander("**6.2.1 – Ventilation**", expanded=True):
+    # ── NEW EXCEPTION 5: Ventilation 6.2.1(c) with two sub-exceptions ────────
+    with st.expander("**6.2.1 – Ventilation**", expanded=True):
 
-    st.markdown(
-        '<div class="info-box">6.2.1(c): Outdoor air requirement applies to all '
-        'habitable spaces unless a specific exception applies.</div>',
-        unsafe_allow_html=True
-    )
-
-    c1, c2 = st.columns([2, 1])
-
-    with c1:
-
-        # ---------------- MAIN INPUTS ----------------
-        v1 = st.selectbox(
-            "Habitable spaces ventilated per NBC-2016?",
-            ["Yes", "No", "N/A"],
-            key="v1"
+        st.markdown(
+            '<div class="info-box">6.2.1(c): Outdoor air requirement applies to all '
+            'habitable spaces unless a specific exception applies.</div>',
+            unsafe_allow_html=True
         )
 
-        v2 = st.selectbox(
-            "Ventilation system type:",
-            ["Natural Ventilation", "Mechanical Ventilation", "Mixed Model Ventilation"],
-            key="v2",placeholder=None,
-        )
+        c1, c2 = st.columns([2, 1])
 
-        # ---------------- NATURAL VENTILATION ----------------
-        nv1 = nv2 = nv3 = nv4 = None
+        with c1:
 
-        if v2 == "Natural Ventilation":
-
-            st.markdown("**Natural Ventilation Requirements:**")
-
-            nv1 = st.selectbox("NBC-2016 compliance?", ["Yes", "No", "N/A"], key="nv1")
-            nv2 = st.selectbox("Ceiling fans ≥ BEE 4-star?", ["Yes", "No", "N/A"], key="nv2")
-            nv3 = st.selectbox("Air circulators comply with IS 2997?", ["Yes", "No", "N/A"], key="nv3")
-            nv4 = st.selectbox("Exhaust fans comply with IS 2312 + ECSBC 6.3.1?", ["Yes", "No", "N/A"], key="nv4")
-
-        # ---------------- MECHANICAL / MIXED MODE ----------------
-        mv1 = mv2 = mv3 = mv4 = None
-        vent_exempt = False
-
-        if v2 in ["Mechanical Ventilation", "Mixed Model Ventilation"]:
-
-            st.markdown("**Mechanical Ventilation Requirements:**")
-
-            mv1 = st.selectbox(
-                "Basement car park ≥600 m² has CO sensors?",
+            # ---------------- MAIN INPUTS ----------------
+            v1 = st.selectbox(
+                "Habitable spaces ventilated per NBC-2016?",
                 ["Yes", "No", "N/A"],
-                key="mv1"
+                key="v1"
             )
 
-            mv2 = st.selectbox(
-                "Outdoor air > 5400 m³/hr in AC spaces (DCV applicable)?",
-                ["Yes", "No", "N/A"],
-                key="mv2"
+            v2 = st.selectbox(
+                "Ventilation system type:",
+                ["Natural Ventilation", "Mechanical Ventilation", "Mixed Model Ventilation"],
+                key="v2",placeholder=None,
             )
 
-            mv3 = st.selectbox(
-                "DCV system installed (economizer or CO₂ control)?",
-                ["Yes", "No", "N/A"],
-                key="mv3"
-            )
+            # ---------------- NATURAL VENTILATION ----------------
+            nv1 = nv2 = nv3 = nv4 = None
 
-            mv4 = st.selectbox(
-                "CO₂ sensors installed in spaces > 50 m² (if DCV used)?",
-                ["Yes", "No", "N/A"],
-                key="mv4"
-            )
+            if v2 == "Natural Ventilation":
 
-            # ---------------- EXCEPTIONS (ONLY DCV) ----------------
-            st.markdown("**6.2.1(c) Sub-Exceptions — DCV Only:**")
+                st.markdown("**Natural Ventilation Requirements:**")
 
-            has_process_exhaust = st.checkbox(
-                "Spaces with dust/fumes/mists/vapours/gases + mechanical exhaust?",
-                help="Exempt from DCV requirement"
-            )
+                nv1 = st.selectbox("NBC-2016 compliance?", ["Yes", "No", "N/A"], key="nv1")
+                nv2 = st.selectbox("Ceiling fans ≥ BEE 4-star?", ["Yes", "No", "N/A"], key="nv2")
+                nv3 = st.selectbox("Air circulators comply with IS 2997?", ["Yes", "No", "N/A"], key="nv3")
+                nv4 = st.selectbox("Exhaust fans comply with IS 2312 + ECSBC 6.3.1?", ["Yes", "No", "N/A"], key="nv4")
 
-            has_exhaust_recovery = st.checkbox(
-                "Systems have exhaust air energy recovery?",
-                help="Exempt from DCV requirement"
-            )
+            # ---------------- MECHANICAL / MIXED MODE ----------------
+            mv1 = mv2 = mv3 = mv4 = None
+            vent_exempt = False
 
-            if has_process_exhaust:
-                st.markdown(
-                    '<div class="exc-box">🔶 Exception 1: Process exhaust spaces EXEMPT from DCV.</div>',
-                    unsafe_allow_html=True
+            if v2 in ["Mechanical Ventilation", "Mixed Model Ventilation"]:
+
+                st.markdown("**Mechanical Ventilation Requirements:**")
+
+                mv1 = st.selectbox(
+                    "Basement car park ≥600 m² has CO sensors?",
+                    ["Yes", "No", "N/A"],
+                    key="mv1"
                 )
 
-            if has_exhaust_recovery:
-                st.markdown(
-                    '<div class="exc-box">🔶 Exception 2: Energy recovery systems EXEMPT from DCV.</div>',
-                    unsafe_allow_html=True
+                mv2 = st.selectbox(
+                    "Outdoor air > 5400 m³/hr in AC spaces (DCV applicable)?",
+                    ["Yes", "No", "N/A"],
+                    key="mv2"
                 )
 
-            vent_exempt = has_process_exhaust or has_exhaust_recovery
-
-        # ---------------- COMPLIANCE LOGIC ----------------
-
-        # BASE COMPLIANCE
-        base_ok = (v1 == "Yes")
-
-        # NATURAL COMPLIANCE
-        if v2 == "Natural Ventilation":
-            nv_ok = all([
-                nv1 == "Yes",
-                nv2 == "Yes",
-                nv3 == "Yes",
-                nv4 == "Yes"
-            ])
-        else:
-            nv_ok = True
-
-        # ---------------- MECHANICAL / DCV LOGIC ----------------
-        mech_ok = True
-        dcv_ok = True
-
-        if v2 in ["Mechanical Ventilation", "Mixed Model Ventilation"]:
-
-            # CO sensor baseline requirement always applies
-            co_ok = (mv1 in ["Yes", "N/A"])
-
-            # DCV rule trigger
-            dcv_required = (mv2 == "Yes")
-
-            if dcv_required:
-
-                if vent_exempt:
-                    dcv_ok = True
-
-                else:
-                    # must have DCV system AND CO2 compliance
-                    dcv_ok = (mv3 == "Yes" and mv4 == "Yes")
-
-            mech_ok = co_ok
-
-        # ---------------- FINAL COMPLIANCE ----------------
-        p = (base_ok and nv_ok and mech_ok and dcv_ok)
-
-    with c2:
-
-        hvac_results["6.2.1 Ventilation"] = p
-
-        st.markdown(f"**Status:** {check_icon(p)}")
-
-        if v2 in ["Mechanical Ventilation", "Mixed Model Ventilation"] and vent_exempt:
-            st.markdown(
-                '<span class="exc-badge">🔶 DCV EXEMPTION APPLIED</span>',
-                unsafe_allow_html=True
-            )
-# ── SECTION 6.2.2 – Space Conditioning Equipment Efficiencies ─────────────
-st.markdown("#### 6.2.2 – Space Conditioning Equipment Efficiencies")
-
-# ── 6.2.2(a) Chillers ─────────────────────────────────────────────────────
-with st.expander("**6.2.2(a) – Chillers**", expanded=True):
-    c1, c2 = st.columns([2, 1])
-    with c1:
-        has_chiller = st.checkbox("Project has chiller-based HVAC?", key="has_chiller_622")
-        if has_chiller:
-            chiller_bee_star = st.selectbox(
-                "Chiller BEE Star Rating (minimum BEE 2-Star required for ECSBC)",
-                [1, 2, 3, 4, 5], index=1, key="ch_bee"
-            )
-            chiller_bee_pass = chiller_bee_star >= 2
-            st.markdown(f"{check_icon(chiller_bee_pass)} BEE {chiller_bee_star}★ (min: 2★ for ECSBC)")
-
-            cooling_load_kwr = st.number_input(
-                "Total installed cooling load (kWr)",
-                min_value=0.0, value=600.0, step=10.0, key="cool_load_622"
-            )
-
-            water_availability = st.selectbox(
-                "Is cooling water / recycled water available at site?",
-                ["Yes", "No"], key="water_avail"
-            )
-
-            if water_availability == "Yes":
-                st.markdown(
-                    '<div class="info-box">ℹ️ Water-cooled chillers <b>should</b> be installed where cooling/recycled water is available.</div>',
-                    unsafe_allow_html=True
+                mv3 = st.selectbox(
+                    "DCV system installed (economizer or CO₂ control)?",
+                    ["Yes", "No", "N/A"],
+                    key="mv3"
                 )
 
-            chiller_config = st.selectbox(
-                "Chiller configuration",
-                [
-                    "Water-cooled only",
-                    "Air-cooled only (cooling load < 530 kWr)",
-                    "Hybrid (mix of water-cooled and air-cooled)",
-                ],
-                key="ch_config"
-            )
+                mv4 = st.selectbox(
+                    "CO₂ sensors installed in spaces > 50 m² (if DCV used)?",
+                    ["Yes", "No", "N/A"],
+                    key="mv4"
+                )
 
-            aircooled_pct = 0.0
-            hybrid_ok = True
+                # ---------------- EXCEPTIONS (ONLY DCV) ----------------
+                st.markdown("**6.2.1(c) Sub-Exceptions — DCV Only:**")
 
-            if chiller_config == "Air-cooled only (cooling load < 530 kWr)":
-                if cooling_load_kwr >= 530:
-                    st.warning(
-                        f"⚠️ Air-cooled only is NOT permitted for cooling load ≥ 530 kWr "
-                        f"(your load = {cooling_load_kwr:.0f} kWr). Use water-cooled or hybrid."
-                    )
-                    hybrid_ok = False
-                else:
+                has_process_exhaust = st.checkbox(
+                    "Spaces with dust/fumes/mists/vapours/gases + mechanical exhaust?",
+                    help="Exempt from DCV requirement"
+                )
+
+                has_exhaust_recovery = st.checkbox(
+                    "Systems have exhaust air energy recovery?",
+                    help="Exempt from DCV requirement"
+                )
+
+                if has_process_exhaust:
                     st.markdown(
-                        f'<div class="exc-box">🔶 Air-cooled acceptable: cooling load {cooling_load_kwr:.0f} kWr &lt; 530 kWr.</div>',
+                        '<div class="exc-box">🔶 Exception 1: Process exhaust spaces EXEMPT from DCV.</div>',
                         unsafe_allow_html=True
                     )
 
-            elif chiller_config == "Hybrid (mix of water-cooled and air-cooled)":
-                if cooling_load_kwr >= 530:
-                    aircooled_pct = st.number_input(
-                        "Air-cooled chiller capacity as % of total installed chilled water plant (excl. standby)",
-                        min_value=0.0, max_value=100.0, value=25.0, step=1.0,
-                        key="ac_pct"
+                if has_exhaust_recovery:
+                    st.markdown(
+                        '<div class="exc-box">🔶 Exception 2: Energy recovery systems EXEMPT from DCV.</div>',
+                        unsafe_allow_html=True
                     )
-                    hybrid_ok = aircooled_pct <= 33.0
-                    if not hybrid_ok:
+
+                vent_exempt = has_process_exhaust or has_exhaust_recovery
+
+            # ---------------- COMPLIANCE LOGIC ----------------
+
+            # BASE COMPLIANCE
+            base_ok = (v1 == "Yes")
+
+            # NATURAL COMPLIANCE
+            if v2 == "Natural Ventilation":
+                nv_ok = all([
+                    nv1 == "Yes",
+                    nv2 == "Yes",
+                    nv3 == "Yes",
+                    nv4 == "Yes"
+                ])
+            else:
+                nv_ok = True
+
+            # ---------------- MECHANICAL / DCV LOGIC ----------------
+            mech_ok = True
+            dcv_ok = True
+
+            if v2 in ["Mechanical Ventilation", "Mixed Model Ventilation"]:
+
+                # CO sensor baseline requirement always applies
+                co_ok = (mv1 in ["Yes", "N/A"])
+
+                # DCV rule trigger
+                dcv_required = (mv2 == "Yes")
+
+                if dcv_required:
+
+                    if vent_exempt:
+                        dcv_ok = True
+
+                    else:
+                        # must have DCV system AND CO2 compliance
+                        dcv_ok = (mv3 == "Yes" and mv4 == "Yes")
+
+                mech_ok = co_ok
+
+            # ---------------- FINAL COMPLIANCE ----------------
+            p = (base_ok and nv_ok and mech_ok and dcv_ok)
+
+        with c2:
+
+            hvac_results["6.2.1 Ventilation"] = p
+
+            st.markdown(f"**Status:** {check_icon(p)}")
+
+            if v2 in ["Mechanical Ventilation", "Mixed Model Ventilation"] and vent_exempt:
+                st.markdown(
+                    '<span class="exc-badge">🔶 DCV EXEMPTION APPLIED</span>',
+                    unsafe_allow_html=True
+                )
+    # ── SECTION 6.2.2 – Space Conditioning Equipment Efficiencies ─────────────
+    st.markdown("#### 6.2.2 – Space Conditioning Equipment Efficiencies")
+
+    # ── 6.2.2(a) Chillers ─────────────────────────────────────────────────────
+    with st.expander("**6.2.2(a) – Chillers**", expanded=True):
+        c1, c2 = st.columns([2, 1])
+        with c1:
+            has_chiller = st.checkbox("Project has chiller-based HVAC?", key="has_chiller_622")
+            if has_chiller:
+                chiller_bee_star = st.selectbox(
+                    "Chiller BEE Star Rating (minimum BEE 2-Star required for ECSBC)",
+                    [1, 2, 3, 4, 5], index=1, key="ch_bee"
+                )
+                chiller_bee_pass = chiller_bee_star >= 2
+                st.markdown(f"{check_icon(chiller_bee_pass)} BEE {chiller_bee_star}★ (min: 2★ for ECSBC)")
+
+                cooling_load_kwr = st.number_input(
+                    "Total installed cooling load (kWr)",
+                    min_value=0.0, value=600.0, step=10.0, key="cool_load_622"
+                )
+
+                water_availability = st.selectbox(
+                    "Is cooling water / recycled water available at site?",
+                    ["Yes", "No"], key="water_avail"
+                )
+
+                if water_availability == "Yes":
+                    st.markdown(
+                        '<div class="info-box">ℹ️ Water-cooled chillers <b>should</b> be installed where cooling/recycled water is available.</div>',
+                        unsafe_allow_html=True
+                    )
+
+                chiller_config = st.selectbox(
+                    "Chiller configuration",
+                    [
+                        "Water-cooled only",
+                        "Air-cooled only (cooling load < 530 kWr)",
+                        "Hybrid (mix of water-cooled and air-cooled)",
+                    ],
+                    key="ch_config"
+                )
+
+                aircooled_pct = 0.0
+                hybrid_ok = True
+
+                if chiller_config == "Air-cooled only (cooling load < 530 kWr)":
+                    if cooling_load_kwr >= 530:
                         st.warning(
-                            f"⚠️ For cooling load ≥ 530 kWr, air-cooled capacity must be ≤ 33% of total "
-                            f"(current: {aircooled_pct:.1f}%). AHJ may permit higher in specific local conditions."
+                            f"⚠️ Air-cooled only is NOT permitted for cooling load ≥ 530 kWr "
+                            f"(your load = {cooling_load_kwr:.0f} kWr). Use water-cooled or hybrid."
                         )
+                        hybrid_ok = False
                     else:
                         st.markdown(
-                            f'<div class="exc-box">✅ Hybrid OK: air-cooled {aircooled_pct:.1f}% ≤ 33% of total capacity.</div>',
+                            f'<div class="exc-box">🔶 Air-cooled acceptable: cooling load {cooling_load_kwr:.0f} kWr &lt; 530 kWr.</div>',
                             unsafe_allow_html=True
                         )
-                else:
-                    st.markdown(
-                        f'<div class="info-box">Cooling load &lt; 530 kWr — no air-cooled % restriction for hybrid configuration.</div>',
-                        unsafe_allow_html=True
-                    )
 
-            chiller_doc = st.selectbox(
-                "Chiller schedule with type, capacity, COP/IPLV documented?",
-                ["Yes", "No", "N/A"], key="ch_doc"
-            )
-
-            chiller_622_pass = (
-                chiller_bee_pass and hybrid_ok and chiller_doc == "Yes"
-            )
-        else:
-            chiller_622_pass = True  # not applicable
-
-    with c2:
-        hvac_results["6.2.2(a) Chillers"] = chiller_622_pass if has_chiller else None
-        st.markdown(f"**Status:** {check_icon(chiller_622_pass if has_chiller else None)}")
-        if not has_chiller:
-            st.markdown('<span class="na-badge">N/A</span>', unsafe_allow_html=True)
-
-# ── 6.2.2(b) Unitary / Split / Packaged ACs ───────────────────────────────
-with st.expander("**6.2.2(b) – Unitary, Split & Packaged Air-Conditioners**"):
-    c1, c2 = st.columns([2, 1])
-    with c1:
-        has_unitary = st.checkbox("Project has unitary/split/packaged AC units?", key="has_unitary")
-        if has_unitary:
-            st.markdown(
-                '<div class="info-box">Per IS 1391 (Part 1 & 2): Window/Split AC which are non ducted and have a capacity up to 10499 Wr and light commercial AC from 10500 to 18,000 Wr (All Air cooled systems) must meet '
-                'minimum BEE 3-Star. Ducted/Packaged AC &gt;3,500 Wr must comply with IS 8148.</div>',
-                unsafe_allow_html=True
-            )
-
-            # Non-ducted (window/split) up to 18000 Wr
-            st.markdown("**Non-Ducted (Window / Split) AC — up to 18,000 Wr (IS 1391):**")
-            nonduc_bee = st.selectbox(
-                "Non-ducted AC BEE Star Rating (min BEE 3-Star)",
-                [1, 2, 3, 4, 5], index=2, key="nonduc_bee"
-            )
-            nonduc_pass = nonduc_bee >= 3
-            st.markdown(f"{check_icon(nonduc_pass)} BEE {nonduc_bee}★ (min: 3★)")
-
-            # Ducted/Packaged > 3500 Wr - Table 6.1
-            st.markdown("**Ducted/Packaged AC — above 3,500 Wr (IS 8148):**")
-            has_ducted = st.checkbox("Ducted/Packaged AC above 3,500 Wr present?", key="has_duc")
-            ducted_pass = True
-            if has_ducted:
-                duc_cap = st.number_input(
-                    "Ducted/Packaged AC cooling capacity (kWr)",
-                    min_value=3.5, value=20.0, step=0.5, key="duc_cap"
-                )
-                duc_cooling_type = st.selectbox(
-                    "Cooling type", ["Air Cooled", "Water Cooled"], key="duc_ct"
-                )
-
-                if duc_cap <= 10.5:
-                    if duc_cooling_type == "Air Cooled":
-                        req_label = "BEE 3-Star"
-                        duc_bee_rating = st.selectbox(
-                            "Ducted AC BEE Star Rating (≤10.5 kWr Air Cooled: min BEE 3★)",
-                            [1, 2, 3, 4, 5], index=2, key="duc_bee"
+                elif chiller_config == "Hybrid (mix of water-cooled and air-cooled)":
+                    if cooling_load_kwr >= 530:
+                        aircooled_pct = st.number_input(
+                            "Air-cooled chiller capacity as % of total installed chilled water plant (excl. standby)",
+                            min_value=0.0, max_value=100.0, value=25.0, step=1.0,
+                            key="ac_pct"
                         )
-                        ducted_pass = duc_bee_rating >= 3
-                        st.markdown(f"{check_icon(ducted_pass)} BEE {duc_bee_rating}★ (min: 3★)")
-                    else:
-                        st.markdown(
-                            '<div class="info-box">Water Cooled ≤10.5 kWr: N/A per Table 6.1.</div>',
-                            unsafe_allow_html=True
-                        )
-                else:
-                    # > 10.5 kWr
-                    req_eer = 3.3 if duc_cooling_type == "Water Cooled" else 2.8
-                    duc_eer = st.number_input(
-                        f"EER of ducted/packaged AC (min {req_eer} for {duc_cooling_type}, capacity > 10.5 kWr)",
-                        min_value=0.5, value=req_eer, step=0.1, key="duc_eer"
-                    )
-                    ducted_pass = duc_eer >= req_eer
-                    st.markdown(f"{check_icon(ducted_pass)} EER: {duc_eer} vs min {req_eer} ({duc_cooling_type})")
-                    st.caption(
-                        "Note: EER will be replaced by IEER values when BEE Star Labelling Programme "
-                        "is made effective for capacities above 10,500 Wr."
-                    )
-
-            unitary_622_pass = nonduc_pass and ducted_pass
-        else:
-            unitary_622_pass = True
-
-    with c2:
-        hvac_results["6.2.2(b) Split/Packaged AC"] = unitary_622_pass if has_unitary else None
-        st.markdown(f"**Status:** {check_icon(unitary_622_pass if has_unitary else None)}")
-        if not has_unitary:
-            st.markdown('<span class="na-badge">N/A</span>', unsafe_allow_html=True)
-
-# ── 6.2.2(c) VRF Air-Conditioners ─────────────────────────────────────────
-with st.expander("**6.2.2(c) – Variable Refrigerant Flow (VRF) Air-Conditioners**"):
-    c1, c2 = st.columns([2, 1])
-    with c1:
-        has_vrf = st.checkbox("Project has VRF/VRV systems?", key="has_vrf")
-        if has_vrf:
-            st.markdown(
-                '<div class="info-box">VRF systems (Air Cooled) must meet minimum ISEER requirements. '
-                ' Rating per BIS standard (under development).</div>',
-                unsafe_allow_html=True
-            )
-
-            vrf_cap = st.number_input(
-                "VRF system cooling capacity (kWr)",
-                min_value=1.0, value=50.0, step=1.0, key="vrf_cap"
-            )
-
-            # Table 6.2 minimum ISEER by capacity range
-            if vrf_cap < 40:
-                req_vrf_iseer = 5.4
-                cap_range = "< 40 kWr"
-            elif vrf_cap < 70:
-                req_vrf_iseer = 5.5
-                cap_range = "≥ 40 and < 70 kWr"
-            else:
-                req_vrf_iseer = 5.6
-                cap_range = "≥ 70 kWr"
-
-            st.markdown(
-                f'<div class="info-box">Table 6.2 minimum ISEER for {cap_range}: <b>{req_vrf_iseer}</b></div>',
-                unsafe_allow_html=True
-            )
-
-            vrf_iseer = st.number_input(
-                f"Proposed VRF ISEER (min {req_vrf_iseer})",
-                min_value=1.0, value=req_vrf_iseer, step=0.1, key="vrf_iseer"
-            )
-            vrf_pass = vrf_iseer >= req_vrf_iseer
-            st.markdown(f"{check_icon(vrf_pass)} ISEER: {vrf_iseer} vs min {req_vrf_iseer} ({cap_range})")
-            st.caption(
-                "Note: ISEER and EER calculation shall be as per BIS standard as and when published. "
-            )
-        else:
-            vrf_pass = True
-
-    with c2:
-        hvac_results["6.2.2(c) VRF Systems"] = vrf_pass if has_vrf else None
-        st.markdown(f"**Status:** {check_icon(vrf_pass if has_vrf else None)}")
-        if not has_vrf:
-            st.markdown('<span class="na-badge">N/A</span>', unsafe_allow_html=True)
-
-# ── 6.2.2(d) Computer Room / Special Application ACs ─────────────────────
-with st.expander("**6.2.2(d) – Computer Room & Special Application ACs**"):
-    c1, c2 = st.columns([2, 1])
-    with c1:
-        has_crac = st.checkbox(
-            "Project has Computer Room ACs, server rooms, or special application ACs?",
-            key="has_crac"
-        )
-        if has_crac:
-            st.markdown(
-                '<div class="info-box">Computer room ACs must meet minimum SCOP-127 = 2.5 (Downflow & Upflow). '
-                'Rated per ASHRAE Standard 127-2012.</div>',
-                unsafe_allow_html=True
-            )
-
-            crac_scop_downflow = st.number_input(
-                "CRAC unit SCOP-127 — Downflow (min 2.5 W/W)",
-                min_value=0.5, value=2.6, step=0.1, key="crac_df"
-            )
-            crac_scop_upflow = st.number_input(
-                "CRAC unit SCOP-127 — Upflow (min 2.5 W/W)",
-                min_value=0.5, value=2.6, step=0.1, key="crac_uf"
-            )
-            crac_df_pass = crac_scop_downflow >= 2.5
-            crac_uf_pass = crac_scop_upflow >= 2.5
-            st.markdown(
-                f"{check_icon(crac_df_pass)} Downflow SCOP-127: {crac_scop_downflow} vs min 2.5  |  "
-                f"{check_icon(crac_uf_pass)} Upflow SCOP-127: {crac_scop_upflow} vs min 2.5"
-            )
-            st.caption(
-                "SCOP-127 = Net Sensible Cooling Capacity (W) ÷ Total Power Input (W), "
-                "excluding reheater and dehumidifier, at ASHRAE 127-2012 conditions."
-            )
-
-            # Separate units for 24-hr operational areas
-            has_24hr_special = st.checkbox(
-                "Building has 24-hr operational areas within an 8- or 12-hour occupancy building? "
-                "(e.g., server rooms, battery rooms, OTs in hospitals)",
-                key="has_24hr_sp"
-            )
-            if has_24hr_special:
-                sep_units_ok = st.selectbox(
-                    "Separate AC units installed for 24-hr/special areas that can act as standby "
-                    "when central system operates and take over when it shuts down?",
-                    ["Yes", "No", "N/A"], key="sep_units"
-                )
-                sep_units_pass = sep_units_ok in ["Yes", "N/A"]
-                if sep_units_ok == "Yes":
-                    st.markdown(
-                        '<div class="exc-box">✅ Separate condensing units for special areas (OTs, server rooms) '
-                        'allow central system to operate at higher efficiency when running normally.</div>',
-                        unsafe_allow_html=True
-                    )
-                else:
-                    sep_units_pass = False
-            else:
-                sep_units_pass = True
-
-            crac_622_pass = crac_df_pass and crac_uf_pass and sep_units_pass
-        else:
-            crac_622_pass = True
-
-    with c2:
-        hvac_results["6.2.2(d) Computer Room AC"] = crac_622_pass if has_crac else None
-        st.markdown(f"**Status:** {check_icon(crac_622_pass if has_crac else None)}")
-        if not has_crac:
-            st.markdown('<span class="na-badge">N/A</span>', unsafe_allow_html=True)
-
-# ── 6.2.2(e) Hot Water for HVAC Heating / Reheat ──────────────────────────
-with st.expander("**6.2.2(e) – Hot Water Production for HVAC Heating / Reheat**"):
-    c1, c2 = st.columns([2, 1])
-    with c1:
-        has_hwp = st.checkbox(
-            "Project requires hot water production for HVAC heating or reheat purposes?",
-            key="has_hwp"
-        )
-        if has_hwp:
-            st.markdown(
-                '<div class="info-box">Hot water for HVAC heating/reheat must use one of the accepted methods. '
-                'Electric, gas, or oil-fired boilers are <b>discouraged</b> unless process requirements '
-                'exist or by-product steam/hot water is available.</div>',
-                unsafe_allow_html=True
-            )
-
-            hw_method = st.multiselect(
-                "Hot water production method(s) selected",
-                [
-                    "Solar water heating system (IS 12976, min BEE 3-Star)",
-                    "Heat recovery from air/water cooled condensers",
-                    "Air-to-water heat pump",
-                    "Water-to-water heat pump",
-                    # "Electric/Gas/Oil-fired boiler (discouraged — special justification required)",
-                ],
-                key="hw_method"
-            )
-
-            boiler_used = any("boiler" in m.lower() for m in hw_method)
-            accepted_methods = [m for m in hw_method if "boiler" not in m.lower()]
-            hw_method_ok = len(accepted_methods) > 0
-
-            if boiler_used:
-                boiler_justif = st.selectbox(
-                    "Boiler justification: by-product steam/hot water available OR process requirement exists?",
-                    ["Yes — process requirement", "Yes — by-product steam/hot water", "No justification"],
-                    key="boiler_j"
-                )
-                boiler_ok = boiler_justif != "No justification"
-                if not boiler_ok:
-                    st.warning(
-                        "⚠️ Electric/Gas/Oil-fired boilers are discouraged per 6.2.2(e). "
-                        "Provide justification or use an accepted alternate method."
-                    )
-            else:
-                boiler_ok = True
-
-            # Solar water heating specifics
-            if "Solar water heating system (IS 12976, min BEE 3-Star)" in hw_method:
-                swh_bee = st.selectbox(
-                    "Solar water heater BEE Star Rating (min BEE 3-Star per IS 12976)",
-                    [1, 2, 3, 4, 5], index=2, key="swh_bee_622"
-                )
-                swh_bee_pass = swh_bee >= 3
-                st.markdown(f"{check_icon(swh_bee_pass)} Solar WH BEE {swh_bee}★ (min: 3★, IS 12976)")
-            else:
-                swh_bee_pass = True
-
-            hw_doc = st.selectbox(
-                "Hot water system design/specifications documented?",
-                ["Yes", "No", "N/A"], key="hw_doc"
-            )
-
-            hwp_622_pass = hw_method_ok and boiler_ok and swh_bee_pass and hw_doc == "Yes"
-        else:
-            hwp_622_pass = True
-
-    with c2:
-        hvac_results["6.2.2(e) HVAC Hot Water"] = hwp_622_pass if has_hwp else None
-        st.markdown(f"**Status:** {check_icon(hwp_622_pass if has_hwp else None)}")
-        if not has_hwp:
-            st.markdown('<span class="na-badge">N/A</span>', unsafe_allow_html=True)
-
-with st.expander("**6.2.3 – Controls**"):
-    c1, c2 = st.columns([2,1])
-    with c1:
-        hvac_cap = st.number_input("Total HVAC cooling/heating capacity (kWr)", min_value=0.0, value=200.0, step=5.0, key="hvacc")
-        timeclock_exempt = hvac_cap < 17.5
-
-        # ── NEW EXCEPTION 6: Single-zone HVAC VAV exception 6.2.3(a) ────
-        is_single_zone = st.checkbox(
-            "Is this a single-zone HVAC system?",
-            help="6.2.3(a): Single-zone systems are exempt from VAV/demand control requirements."
-        )
-
-
-        if timeclock_exempt:
-            st.markdown('<div class="exc-box">🔶 Exception 6.2.3(a): System capacity &lt;17.5 kWr → timeclock NOT required.</div>', unsafe_allow_html=True)
-            tc1 = "N/A"
-        elif is_single_zone:
-            st.markdown('<div class="exc-box">🔶 <b>Exception 6.2.3(a) — Single Zone</b>: Single-zone system → VAV/demand control requirement is NOT applicable.</div>', unsafe_allow_html=True)
-            tc1 = "N/A"
-        elif building_type == "Health Care":
-            st.markdown('<div class="exc-box">🔶 Exception 6.2.3(a): Healthcare facility → timeclock NOT required.</div>', unsafe_allow_html=True)
-            tc1 = "N/A"
-        else:
-            st.write("6.2.3(a) Timeclock ")
-            tc1 = st.selectbox("Timeclock with night setback, 3 day-types, 2-hr override?", ["Yes","No","N/A"], key="tc1")
-
-        st.write("**6.2.3(b) Temperature control**")
-        tc2 = st.selectbox("Mechanical cooling and heating equipment in all buildings shall be installed with automatic controls to manage the temperature inside the conditioned zones.", ["Yes","No","N/A"], key="tc2")
-        st.write("Temperature control shall comply with the following requirements:")
-        tc2_1 = st.selectbox("Temperature control with 3°C dead-band?", ["Yes","No","N/A"], key="tc2_1")
-        tc2_2 = st.selectbox("Separate heating and cooling equipment serve the same temperature zone?", ["Yes","No","N/A"], key="tc2_2")
-        
-        if building_type == "Health Care":
-            tc2_3 = st.selectbox("Separate temperature control shall be installed in each In-patient rooms and wards.?", ["Yes","No","N/A"], key="tc2_3")
-        elif building_type == "Educational":
-            tc2_3 = st.selectbox("Separate temperature control shall be installed in each classroom, lecture room and computer lab?", ["Yes","No","N/A"], key="tc2_3")
-        elif building_type == "Office":
-            tc2_3 = st.selectbox("Separate temperature control shall be installed in each room less than 30 m²?", ["Yes","No","N/A"], key="tc2_3")
-        elif building_type == "Hospitality":
-            tc2_3 = st.selectbox("Separate temperature control shall be installed in each guest room?", ["Yes","No","N/A"], key="tc2_3")
-        else:
-            tc2_3 = "N/A"
-
-        st.write("**6.2.3(c) Occupancy controls**")
-        tc3 = st.selectbox("Occupancy controls per space type?",       ["Yes","No","N/A"], key="tc3")
-
-        st.write("**6.2.3(d) Cooling Tower Fan Control** ")
-        ct_applicable = gross_area > 20000
-        if not ct_applicable:
-            st.markdown(f'<div class="exc-box">🔶 Cooling tower wet-bulb fan control (6.2.3-d) NOT required: BUA {gross_area:,.0f} m² ≤ 20,000 m²</div>', unsafe_allow_html=True)
-            tc4 = "N/A"
-        else:
-            wb_drops = st.checkbox("Wet-bulb temperature drops below 17°C at project location?", key="wbd")
-            tc4 = st.selectbox("Cooling tower fan speed reduction to 50%?", ["Yes","No","N/A"], key="tc4") if wb_drops else "N/A"
-
-
-        st.write("**6.2.3(e) AHU Fan** ")
-        ahu_cap = st.number_input("AHU airflow capacity (m³/hr)", min_value=0.0, value=8000.0, step=500.0)
-        ahu_exempt = ahu_cap < 5000
-        if ahu_exempt:
-            st.markdown('<div class="exc-box">🔶 Exception 6.2.3(e): AHU &lt;5000 m³/hr → variable speed fan NOT required.</div>', unsafe_allow_html=True)
-            tc5 = "N/A"
-        else:
-            tc5 = st.selectbox("AHU serving different zones of a building shall deploy fan speed modulation control to save energy, using duct static pressure signal?", ["Yes","No","N/A"], key="tc5")
-
-        st.write("**6.2.3(f) Damper Controls** ")
-        tc6 = st.selectbox("Automatic dampers for exhaust systems?", ["Yes","No","N/A"], key="tc6")
-        has_kitchen_exhaust = st.checkbox("Kitchen exhaust hood(s) present?", key="kex")
-        if has_kitchen_exhaust:
-            st.markdown('<div class="exc-box">🔶 Exception 6.2.3(f): Auto dampers NOT required for kitchen exhaust hood systems.</div>', unsafe_allow_html=True)
-        tc7 = st.selectbox("Automatic dampers for remaining exhaust systems?", ["Yes","No","N/A"], key="tc7")
-
-    with c2:
-        ctrl_items = [tc1,tc2,tc2_1,tc2_2,tc2_3,tc3,tc4,tc5,tc6,tc7]
-        p = all(x in ["Yes","N/A"] for x in ctrl_items) and any(x=="Yes" for x in ctrl_items)
-        hvac_results["6.2.3 Controls"] = p
-        st.markdown(f"**Status:** {check_icon(p)}")
-
-with st.expander("**6.2.4 – Piping & Ductwork Insulation**"):
-    c1, c2 = st.columns([2, 1])
-    with c1:
-        st.markdown(
-            f'<div class="info-box">Pipe insulation R-values '
-            f'({compliance_level}). Location adjustments: −0.2 if in conditioned space/buried '
-            f'(min R-0.4); +0.2 if exposed to weather outside.</div>',
-            unsafe_allow_html=True
-        )
-
-        # ── Pipe Insulation ──────────────────────────────────────────────
-        st.markdown("##### a) Piping Insulation")
-
-        pipe_location_624 = st.selectbox(
-            "Pipe Location",
-            [
-                "Standard (Table R-values apply as-is)",
-                "In conditioned space or buried in ground (R may be reduced by 0.2, min R-0.4)",
-                "Outside building, direct weather exposure (R must be increased by 0.2)",
-            ],
-            key="pipe_loc_624"
-        )
-
-        pipe_temp_label = st.selectbox(
-            "Operating Temperature Range / System Type",
-            list(PIPE_TEMP_OPTIONS.keys()),
-            key="pipe_temp_624"
-        )
-        pipe_temp_key = PIPE_TEMP_OPTIONS[pipe_temp_label]
-
-        pipe_size_ge40 = st.checkbox(
-            "Pipe nominal diameter ≥ 40 mm?",
-            key="pipe_size_624"
-        )
-
-        # Look up base R from table
-        rows = PIPE_INSULATION_ROWS[compliance_level]
-        base_r_small = base_r_large = None
-        for (label, key, r_s, r_l) in rows:
-            if key == pipe_temp_key:
-                base_r_small, base_r_large = r_s, r_l
-                break
-
-        base_r = base_r_large if pipe_size_ge40 else base_r_small
-
-        # Apply location adjustment
-        if "conditioned space" in pipe_location_624 or "buried" in pipe_location_624:
-            adj_r = max(0.4, base_r - 0.2)
-            st.markdown(
-                f'<div class="exc-box">🔶 <b>Location Adjustment</b>: Base R = {base_r} − 0.2 = '
-                f'<b>{adj_r:.1f} m²·K/W</b> (min R-0.4 applied)</div>',
-                unsafe_allow_html=True
-            )
-        elif "weather exposure" in pipe_location_624:
-            adj_r = base_r + 0.2
-            st.markdown(
-                f'<div class="exc-box">🔶 <b>Location Adjustment</b>: Base R = {base_r} + 0.2 = '
-                f'<b>{adj_r:.1f} m²·K/W</b> (weather-exposed)</div>',
-                unsafe_allow_html=True
-            )
-        else:
-            adj_r = base_r
-            st.markdown(
-                f'Required R-value ({compliance_level}): **{adj_r:.1f} m²·K/W**'
-            )
-
-        proposed_pipe_r = st.number_input(
-            f"Proposed Pipe Insulation R-value (m²·K/W) — required ≥ {adj_r:.1f}",
-            min_value=0.0, value=float(adj_r), step=0.05,
-            key="prop_pipe_r_624"
-        )
-        pipe_r_pass = proposed_pipe_r >= adj_r
-        st.markdown(f"{check_icon(pipe_r_pass)} Proposed R: {proposed_pipe_r:.2f} vs required ≥ {adj_r:.2f}")
-
-        # Show full table for reference
-        with st.expander("📋 View full pipe insulation table for all temperature ranges"):
-            rows_display = []
-            for (lbl, key, r_s, r_l) in PIPE_INSULATION_ROWS[compliance_level]:
-                rows_display.append({
-                    "Operating Temperature / System": lbl,
-                    "R-value (<40 mm) m²·K/W": r_s,
-                    "R-value (≥40 mm) m²·K/W": r_l,
-                })
-            st.dataframe(pd.DataFrame(rows_display), hide_index=True, use_container_width=True)
-
-        st.markdown("---")
-
-        # ── Ductwork Insulation ───────────────────────────────────────────
-        st.markdown("##### b) Ductwork & Plenum Insulation (Table 6.7)")
-
-        duct_location = st.selectbox(
-            "Duct Location",
-            list(DUCT_INSULATION.keys()),
-            key="duct_loc_624"
-        )
-        duct_type = st.selectbox(
-            "Duct Type",
-            ["Supply", "Return"],
-            key="duct_type_624"
-        )
-
-        req_duct_r = DUCT_INSULATION[duct_location][duct_type]
-
-        if req_duct_r is None:
-            st.markdown(
-                f'<div class="exc-box">🔶 Return ducts in <b>{duct_location}</b> location: '
-                f'<b>No insulation required</b>.</div>',
-                unsafe_allow_html=True
-            )
-            duct_r_pass = True
-            hvac_results["6.2.4b Duct Insulation (no insulation reqd)"] = True
-        else:
-            st.markdown(
-                f'Required duct R-value ({duct_type}, {duct_location}): **R-{req_duct_r} m²·K/W**'
-            )
-            proposed_duct_r = st.number_input(
-                f"Proposed Duct Insulation R-value (m²·K/W) — required ≥ {req_duct_r}",
-                min_value=0.0, value=float(req_duct_r), step=0.05,
-                key="prop_duct_r_624"
-            )
-            duct_r_pass = proposed_duct_r >= req_duct_r
-            st.markdown(
-                f"{check_icon(duct_r_pass)} Proposed R: {proposed_duct_r:.2f} vs required ≥ {req_duct_r}"
-            )
-
-        with st.expander("📋 View full ductwork insulation table"):
-            duct_display = []
-            for loc, vals in DUCT_INSULATION.items():
-                duct_display.append({
-                    "Duct Location": loc,
-                    "Supply R-value (m²·K/W)": vals["Supply"],
-                    "Return R-value (m²·K/W)": vals["Return"] if vals["Return"] is not None else "Not required",
-                })
-            st.dataframe(pd.DataFrame(duct_display), hide_index=True, use_container_width=True)
-
-    with c2:
-        insulation_pass = pipe_r_pass and duct_r_pass
-        hvac_results["6.2.4a Pipe Insulation"] = pipe_r_pass
-        if req_duct_r is not None:
-            hvac_results["6.2.4b Duct Insulation"] = duct_r_pass
-        st.markdown(f"**Pipe Insulation:** {check_icon(pipe_r_pass)}")
-        st.markdown(f"**Duct Insulation:** {check_icon(duct_r_pass)}")
-        st.markdown(f"**Overall 6.2.4:** {check_icon(insulation_pass)}")
-
-with st.expander("**6.2.5 – Condenser Location**"):
-    c1, c2 = st.columns([2,1])
-    with c1:
-        conden_loc = st.selectbox("Air cooled condensers shall be located such that the heat sink is free from of interference of heat discharnge by devices located in adjoining spaces, and do not interfere with other such systems installed nearby?", ["Yes","No","N/A"], key="conden_loc")
-    with c2:
-        hvac_results["6.2.5 Condenser Location"] = conden_loc == "Yes"
-        st.markdown(f"**Status:** {check_icon(conden_loc == 'Yes')}")
-
-st.markdown("#### Standardized Requirements (6.3)")
-
-with st.expander("**6.3.1 – Fans**"):
-    c1, c2 = st.columns([2,1])
-    with c1:
-        motor_power = st.checkbox("Supply, exhaust and return or relief fans with motor power exceeding 0.37 kW?", key="fan_power")
-        power = True
-
-        if compliance_level == "ECSBC":
-            if motor_power:
-                st.selectbox("Mechanical Efficiency is greater than 65%?", ["Yes","No","N/A"], key="fan_mech_eff")
-                power = hvac_results["6.3.1 Fan Mechanical Efficiency > 65%"] = st.session_state["fan_mech_eff"] == "Yes"
-            
-        if compliance_level == "ECSBC+":
-            if motor_power:
-                st.selectbox("Mechanical Efficiency is greater than 70%?", ["Yes","No","N/A"], key="fan_mech_eff_plus")
-                power = hvac_results["6.3.1 Fan Mechanical Efficiency > 70%"] = st.session_state["fan_mech_eff_plus"] == "Yes"
-            
-        if compliance_level == "Super ECSBC":
-            if motor_power:
-                st.selectbox("Mechanical Efficiency is greater than 75%?", ["Yes","No","N/A"], key="fan_mech_eff_super")
-                power = hvac_results["6.3.1 Fan Mechanical Efficiency > 75%"] = st.session_state["fan_mech_eff_super"] == "Yes"
-
-        fan_ducted = st.selectbox("Fan type", ["Ducted (fan efficiency checked separately)","Un-ducted AC unit (efficiency in total unit rating)"], key="fandt")
-        if "Un-ducted" in fan_ducted:
-            st.markdown('<div class="exc-box">🔶 Exception 6.3.1: Un-ducted AC unit – fan efficiency captured in total unit ISEER/COP. Separate fan FEI check NOT required.</div>', unsafe_allow_html=True)
-            hvac_results["6.3.1 Fan (un-ducted exception)"] = True
-        else:
-            fan_type = st.selectbox("Fan type", ["Centrifugal fans","Axial flow flans"], key="fan_type")
-            fan_fei = st.number_input("Fan Energy Index (FEI) for fans ≥2.5 kW shaft power", min_value=0.0, value=1.05, step=0.01)
-
-            if fan_type == "Axial flow flans":
-                fei_pass = fan_fei >= 1.00
-                hvac_results["6.3.1 Fan FEI ≥ 1.0"] = fei_pass
-                st.markdown(f"{check_icon(fei_pass)} FEI: {fan_fei}")
-
-            if fan_type == "Centrifugal fans":
-                fei_pass = fan_fei >= 1.1
-                hvac_results["6.3.1 Fan FEI ≥ 1.1"] = fei_pass
-                st.markdown(f"{check_icon(fei_pass)} FEI: {fan_fei}, **Required {'≥ 1.1' if fan_type == 'Centrifugal fans' else '≥ 1.0'}**")
-    with c2:
-        st.markdown("")
-        st.markdown(f"**Status:** {check_icon(power)}")
-        st.markdown(f"**Status FEI: {check_icon(fei_pass)}**")
-
-with st.expander("**6.3.2 – Chillers**"):
-    # req_cop  = CHILLER_COP[compliance_level]
-    # req_iplv = CHILLER_IPLV[compliance_level]
-    c1, c2 = st.columns([2,1])
-    with c1:
-        chiller_cop = True
-        chiller_iplv = True
-        chiller_type = st.selectbox("Chiller Type", ["Air Cooled", "Water Cooled"], key="chiller_type")
-        if chiller_type == "Water Cooled":
-            chiller_cap  = st.number_input("Chiller Capacity (kW)", min_value=0.0, value=500.0)
-            chiller_cop  = st.number_input("Proposed COP",  min_value=1.0, value=5.5, step=0.1)
-            chiller_iplv = st.number_input("Proposed IPLV", min_value=1.0, value=6.5, step=0.1)
-            if chiller_cap < 260:
-                req_cop = 4.7
-                req_iplv = 5.8
-            elif chiller_cap >=260 and chiller_cap < 530:
-                req_cop = 4.9
-                req_iplv = 5.9
-            elif chiller_cap >= 530 and chiller_cap < 1050:
-                req_cop = 5.4
-                req_iplv = 6.5
-            elif chiller_cap >= 1050 and chiller_cap < 1580:
-                req_cop = 5.8
-                req_iplv = 6.8
-            elif chiller_cap >= 1580:
-                req_cop = 6.3
-                req_iplv = 7
-                
-        if chiller_type == "Air Cooled":
-            chiller_cap  = st.number_input("Chiller Capacity (kW)", min_value=0.0, value=600.0)
-            chiller_cop  = st.number_input("Proposed COP",  min_value=1.0, value=6.5, step=0.1)
-            chiller_iplv = st.number_input("Proposed IPLV", min_value=1.0, value=7.5, step=0.1)
-            if chiller_cap < 260:
-                req_cop = 2.8
-                req_iplv = 6.5
-            elif chiller_cap >=260:
-                req_cop = 3.0
-                req_iplv = 3.7
-
-    st.markdown(f"**Code Min COP:** {req_cop} | **Code Min IPLV:** {req_iplv}")
-        
-    with c2:
-        cop_pass  = chiller_cop  >= req_cop
-        iplv_pass = chiller_iplv >= req_iplv
-        hvac_results[f"Chiller COP ≥ {req_cop}"]   = cop_pass
-        hvac_results[f"Chiller IPLV ≥ {req_iplv}"] = iplv_pass
-        st.markdown(f"**COP:** {check_icon(cop_pass)} {chiller_cop}\n\n**IPLV:** {check_icon(iplv_pass)} {chiller_iplv}")
-
-
-with st.expander("**6.3.3 – Pumps**"):
-    req_ie  = PUMP_IE_CLASS[compliance_level]
-    limits  = PUMP_POWER_LIMITS[compliance_level]
-    c1, c2  = st.columns([2, 1])
-
-    with c1:
-        st.markdown(
-            f'<div class="info-box">Pump power expressed as <b>W/kW of cooling capacity</b>. ',
-            unsafe_allow_html=True
-        )
-
-        # ── Chilled Water Pumps ──────────────────────────────────────────
-        st.markdown("**Chilled Water Pumps (Primary & Secondary)**")
-        chw_power = st.number_input(
-            "Chilled water pump power (W/kW of cooling)",
-            min_value=0.0, value=15.0, step=0.1, key="chwp"
-        )
-        vfd_present = st.checkbox(
-            "Variable Frequency Drive (VFD) present on secondary chilled water pumps?",
-            value=False, key="vfd_chwp",
-            help="VFD on secondary pumps satisfies the chilled water pump power requirement."
-        )
-
-        # ── Condenser Water Pumps ────────────────────────────────────────
-        st.markdown("**Condenser Water Pumps**")
-        cw_power = st.number_input(
-            "Condenser water pump power (W/kW of cooling)",
-            min_value=0.0, value=14.0, step=0.1, key="cwp"
-        )
-        pump_eff = st.number_input(
-            "Pump hydraulic efficiency (%)",
-            min_value=0.0, max_value=100.0, value=75.0, step=0.5, key="pump_eff"
-        )
-
-        # ── Motor IE Class ───────────────────────────────────────────────
-        st.markdown("**Pump Motor Efficiency (IS 12615)**")
-        pump_ie = st.selectbox(
-            "Pump Motor IE Class",
-            IE_ORDER[:],   # IE2 … IE5
-            key="pump_ie_633"
-        )
-
-    with c2:
-        # ── Chilled Water Pass Logic ─────────────────────────────────────
-        # PASS if VFD present OR pump power ≤ limit
-        chw_limit = limits["chw_no_vfd"]
-        if vfd_present:
-            chw_pass = True
-            chw_note = "VFD present → requirement satisfied"
-        elif chw_power >= chw_limit:
-            chw_pass = True
-            chw_note = f"{chw_power} ≥ {chw_limit} W/kW"
-        else:
-            chw_pass = False
-            chw_note = f"{chw_power} < {chw_limit} W/kW (no VFD)"
-
-        # ── Condenser Water Pass Logic ───────────────────────────────────
-        # PASS if pump power ≤ limit OR pump efficiency ≥ threshold
-        cw_limit     = limits["cw_no_vfd"]
-        eff_threshold = limits["cw_eff_threshold"]
-        if cw_power >= cw_limit:
-            cw_pass = True
-            cw_note = f"{cw_power} ≥ {cw_limit} W/kW"
-        elif pump_eff >= eff_threshold:
-            cw_pass = True
-            cw_note = f"Power {cw_power} < {cw_limit}"
-        else:
-            cw_pass = False
-            cw_note = f"{cw_power} > {cw_limit} W/kW and pump eff {pump_eff}% < {eff_threshold}%"
-
-        # ── Motor IE Pass Logic ──────────────────────────────────────────
-        ie_pass = ie_gte(pump_ie, req_ie)
-
-        # ---- VFD present pass ----------------------------------------
-        if vfd_present:
-            vfd_pass = True
-            vfd_note = "VFD present → VFD on secondary pumps"
-        else:
-            vfd_pass = False
-            vfd_note = "No VFD → pump power must meet W/kW requirement"
-
-
-        # ── Overall Pass ─────────────────────────────────────────────────
-        pump_633_pass = chw_pass and cw_pass and ie_pass
-
-        # ── Write to hvac_results (single clean set of keys) ─────────────
-        hvac_results["6.3.3 CHW Pump Power"]         = chw_pass
-        hvac_results["6.3.3 CW Pump Power/Eff"]      = cw_pass
-        hvac_results[f"6.3.3 Pump Motor ≥ {req_ie}"] = ie_pass
-        hvac_results["6.3.3 Pumps (overall)"]         = pump_633_pass
-        hvac_results["6.3.3 VFD Exception"]          = vfd_pass
-
-        # ── Display ──────────────────────────────────────────────────────
-        st.markdown(f"**CHW Pump:** {check_icon(chw_pass)}")
-        st.caption(chw_note)
-
-        st.markdown(f"**CW Pump:** {check_icon(cw_pass)}")
-        st.caption(cw_note)
-
-        st.markdown(f"**Motor IE:** {check_icon(ie_pass)} {pump_ie} (req: {req_ie}+)")
-
-        st.markdown(f"**VFD Status:** {check_icon(vfd_pass)}")
-        st.caption(vfd_note)
-
-
-        st.markdown("---")
-        st.markdown(f"**Overall 6.3.3:** {check_icon(pump_633_pass)}")
-
-        # Reference limits box
-        st.markdown(
-            f'<div class="info-box" style="font-size:0.8rem">'
-            f'<b>Limits ({compliance_level}):</b><br>'
-            f'CHW ≤ {chw_limit} W/kW (or VFD)<br>'
-            f'CW ≤ {cw_limit} W/kW (or pump eff ≥ {eff_threshold}%)<br>'
-            f'Motor: {req_ie}+</div>',
-            unsafe_allow_html=True
-        )
-
-# ══════════════════════════════════════════════════════════════════════════════
-# SECTIONS 6.3.4 – 6.3.13  (drop-in block for the Comfort Systems tab)
-# Depends on: compliance_level, gross_area, hvac_results, check_icon, ie_gte,
-#             IE_ORDER, new_badge  — all defined in the main script.
-# ══════════════════════════════════════════════════════════════════════════════
-
-# ─────────────────────────────────────────────────────────────────────────────
-# LOOKUP DATA (local to this block)
-# ─────────────────────────────────────────────────────────────────────────────
-
-# Table 6.16 / 6.17 / 6.18 – Cooling Tower Fan Efficiency
-COOLING_TOWER_DATA = {
-    "ECSBC": {
-        "equipment_type": "Open circuit cooling tower Fans",
-        "rating_condition": "37.2°C entering / 31.6°C leaving / 28.3°C WB outdoor air",
-        "efficiency": "0.35 kW/(ltr·sec.)",
-        "approach_max_C": 3.9,
-        "table": "6.16",
-    },
-    "ECSBC+": {
-        "equipment_type": "Open circuit cooling tower Fans (Chillers ≤530 kWr)",
-        "rating_condition": "37.8°C entering / 32.2°C leaving / 28.3°C WB outdoor air",
-        "efficiency": "0.35 kW/(ltr·sec.)",
-        "approach_max_C": 2.8,
-        "table": "6.17",
-    },
-    "Super ECSBC": {
-        "equipment_type": "Open circuit cooling tower Fans (Chillers ≤530 kWr)",
-        "rating_condition": "35.6°C entering / 30.0°C leaving / 28.3°C WB outdoor air",
-        "efficiency": "0.35 kW/(ltr·sec.)",
-        "approach_max_C": 1.7,
-        "table": "6.18",
-    },
-}
-
-# Tables 6.19–6.21 – Unitary/Split/Packaged AC for ECSBC+ & Super ECSBC
-# (ECSBC uses BEE 3-Star as in 6.2.2(b) — covered in that section)
-UNITARY_AC_STAR = {
-    "ECSBC+":      {"non_ducted_star": 4, "label": "BEE 4-Star"},
-    "Super ECSBC": {"non_ducted_star": 5, "label": "BEE 5-Star"},
-}
-DUCTED_AC_637 = {
-    "ECSBC+": {
-        "water_cooled_le10_5": "BEE 4-Star (N/A)",
-        "air_cooled_le10_5":   "BEE 4-Star",
-        "water_cooled_gt10_5_eer": 3.7,
-        "air_cooled_gt10_5_eer":   3.2,
-    },
-    "Super ECSBC": {
-        "water_cooled_le10_5": "BEE 5-Star (N/A)",
-        "air_cooled_le10_5":   "BEE 5-Star",
-        "water_cooled_gt10_5_eer": 3.9,
-        "air_cooled_gt10_5_eer":   3.4,
-    },
-}
-
-# Tables 6.22–6.24 – VRF ISEER
-VRF_ISEER_638 = {
-    "ECSBC":       {"lt40": 5.4, "ge40_lt70": 5.5, "ge70": 5.6},
-    "ECSBC+":      {"lt40": 6.4, "ge40_lt70": 6.5, "ge70": 6.6},
-    "Super ECSBC": {"lt40": 7.4, "ge40_lt70": 7.5, "ge70": 7.6},
-}
-
-# Table 6.25 – Total System Efficiency
-TOTAL_SYS_EFF = {
-    "ECSBC":       0.24,
-    "ECSBC+":      0.21,
-    "Super ECSBC": 0.19,
-}
-
-LOW_ENERGY_SYSTEMS = [
-    "Evaporative cooling",
-    "Desiccant cooling system",
-    "Solar air conditioning",
-    "Tri-generation (waste-to-heat)",
-    "Radiant cooling system",
-    "Ground source heat pump",
-    "Adiabatic cooling system",
-    "Under-floor Air distribution (UFAD) system",
-]
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 6.3.4  COOLING TOWERS
-# ─────────────────────────────────────────────────────────────────────────────
-with st.expander("**6.3.4 – Cooling Towers**"):
-    c1, c2 = st.columns([2, 1])
-    ct_data = COOLING_TOWER_DATA[compliance_level]
-
-    with c1:
-        has_ct = st.checkbox("Project has cooling towers?", key="has_ct_634")
-
-        if has_ct:
-            st.markdown(
-                f'<div class="info-box">'
-                f'Equipment: {ct_data["equipment_type"]}<br>'
-                f'Rating Condition: {ct_data["rating_condition"]}<br>'
-                f'Efficiency: {ct_data["efficiency"]}<br>'
-                f'Max Approach Temperature: <b>{ct_data["approach_max_C"]} °C</b>'
-                f'</div>',
-                unsafe_allow_html=True,
-            )
-
-            ct_approach = st.number_input(
-                f"Cooling tower approach temperature (°C) - max {ct_data['approach_max_C']} °C",
-                min_value=0.0, value=float(ct_data["approach_max_C"]), step=0.1,
-                key="ct_approach_634",
-            )
-            ct_approach_pass = ct_approach <= ct_data["approach_max_C"]
-            st.markdown(
-                f"{check_icon(ct_approach_pass)} Approach: {ct_approach} °C vs max {ct_data['approach_max_C']} °C"
-            )
-
-            ct_eff_val = st.number_input(
-                "Cooling tower fan efficiency (kW/(ltr·sec.))",
-                min_value=0.0, value=0.35, step=0.01, key="ct_eff_634",
-            )
-            ct_eff_pass = ct_eff_val <= 0.35
-            st.markdown(f"{check_icon(ct_eff_pass)} Fan efficiency: {ct_eff_val} vs max 0.35 kW/(ltr·sec.)")
-
-            ct_634_pass = ct_approach_pass and ct_eff_pass
-        else:
-            ct_634_pass = True  
-
-    with c2:
-        hvac_results["6.3.4 Cooling Towers"] = ct_634_pass if has_ct else None
-        st.markdown(f"**Status:** {check_icon(ct_634_pass if has_ct else None)}")
-        if not has_ct:
-            st.markdown('<span class="na-badge">N/A</span>', unsafe_allow_html=True)
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 6.3.5  ECONOMIZER
-# ─────────────────────────────────────────────────────────────────────────────
-with st.expander("**6.3.5 – Economizer**"):
-    c1, c2 = st.columns([2, 1])
-
-    with c1:
-        eco_bua_required = gross_area > 20000
-
-        if not eco_bua_required:
-            st.markdown(
-                f'<div class="exc-box">🔶 Economizer (6.3.5-a) NOT required: '
-                f'BUA {gross_area:,.0f} m² ≤ 20,000 m².</div>',
-                unsafe_allow_html=True,
-            )
-            eco_635_pass = True
-        else:
-            st.markdown(
-                '<div class="info-box">6.3.5-(a): Each cooling fan system in buildings '
-                '&gt;20,000 m² BUA must include at least one economizer (air-side or water-side).</div>',
-                unsafe_allow_html=True,
-            )
-
-            # ── Exception to 6.3.5-(a) ──────────────────────────────────
-
-            is_warm_humid = st.checkbox(
-                "Building is in Warm-Humid climate zone? (Exception 6.3.5-a #1)",
-                key="eco_wh_635",
-            )
-            is_hotdry_daytime = st.checkbox(
-                "Building has only daytime occupancy in Hot-Dry climate zone? (Exception 6.3.5-a #2)",
-                key="eco_hd_635",
-            )
-            small_system = st.checkbox(
-                "Individual cooling/heating fan system < 11,520 m³/hr? (Exception 6.3.5-a #3)",
-                key="eco_sm_635",
-            )
-
-            if is_warm_humid:
-                st.markdown(
-                    '<div class="exc-box">🔶 <b>Exception 6.3.5-a #1</b>: Warm-Humid zone — '
-                    'economizer NOT required.</div>',
-                    unsafe_allow_html=True,
-                )
-            if is_hotdry_daytime:
-                st.markdown(
-                    '<div class="exc-box">🔶 <b>Exception 6.3.5-a #2</b>: Daytime-only Hot-Dry — '
-                    'economizer NOT required.</div>',
-                    unsafe_allow_html=True,
-                )
-            if small_system:
-                st.markdown(
-                    '<div class="exc-box">🔶 <b>Exception 6.3.5-a #3</b>: System &lt; 11,520 m³/hr — '
-                    'economizer NOT required.</div>',
-                    unsafe_allow_html=True,
-                )
-
-            any_exception = is_warm_humid or is_hotdry_daytime or small_system
-
-            if any_exception:
-                eco_635_pass = True
-            else:
-                eco_type_635 = st.selectbox(
-                    "Economizer type installed",
-                    ["Air-side", "Water-side", "Both", "Not installed"],
-                    key="eco_type_635",
-                )
-                eco_provided = eco_type_635 != "Not installed"
-
-                # ── 6.3.5-(b) Partial Cooling ────────────────────────────
-                partial_cooling_ok = st.selectbox(
-                    "**6.3.5-(b): Economizer can provide partial cooling alongside mechanical cooling?**",
-                    ["Yes", "No", "N/A"], key="partial_cool_635",
-                )
-
-                # ── 6.3.5-(c) Economizer Controls ────────────────────────
-                eco_ctrl1 = eco_ctrl2 = eco_ctrl3 = "N/A"  # default for water-side or no economizer
-                if eco_type_635 in ["Air-side", "Both"]:
-                    st.markdown("**6.3.5-(c) Economizer Controls:**")
-
-                    eco_ctrl1 = st.selectbox(
-                        "Dampers sequenced with mechanical cooling (not only mixed-air temp)?",
-                        ["Yes", "No", "N/A"], key="eco_c1_635",
-                    )
-                    eco_ctrl2 = st.selectbox(
-                        "Auto-reduces outdoor air to design minimum when no longer reduces cooling energy?",
-                        ["Yes", "No", "N/A"], key="eco_c2_635",
-                    )
-                    eco_ctrl3 = st.selectbox(
-                        "High-limit shutoff at 24°C dry-bulb temperature?",
-                        ["Yes", "No", "N/A"], key="eco_c3_635",
-                    )
-
-                # ── 6.3.5-(d) Testing / Commissioning ────────────────────
-                    st.markdown("**6.3.5-(d) Testing of Economizers:**")
-
-                if eco_type_635 in ["Air-side", "Both"]:
-                    factory_commissioned_635 = st.checkbox(
-                        "Air-side economizer factory tested & calibrated per Appendix 3 + AHJ certified?",
-                        key="eco_factory_635",
-                        help="Exception 6.3.5-(d): Factory tested + AHJ certified → field commissioning waived.",
-                    )
-                    if factory_commissioned_635:
-                        st.markdown(
-                            '<div class="exc-box">🔶 <b>Exception 6.3.5-(d)</b>: Factory tested + '
-                            'AHJ certified — field commissioning requirement is <b>WAIVED</b>.</div>',
-                            unsafe_allow_html=True,
-                        )
-                        eco_comm_pass = True
-                    else:
-                        eco_comm_val = st.selectbox(
-                            "Air-side economizer field commissioned per Appendix 3?",
-                            ["Yes", "No", "N/A"], key="eco_field_635",
-                        )
-                        eco_comm_pass = eco_comm_val in ["Yes", "N/A"]
-                else:
-                    eco_comm_pass = True  # water-side; no Appendix 3 field test required
-
-                ctrl_items_635 = [eco_ctrl1, eco_ctrl2, eco_ctrl3]
-                ctrl_pass_635 = all(x in ["Yes", "N/A"] for x in ctrl_items_635)
-
-                eco_635_pass = (
-                    eco_provided
-                    and partial_cooling_ok in ["Yes", "N/A"]
-                    and ctrl_pass_635
-                    and eco_comm_pass
-                )
-
-    with c2:
-        hvac_results["6.3.5 Economizer"] = eco_635_pass
-        st.markdown(f"**Status:** {check_icon(eco_635_pass)}")
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 6.3.6  VARIABLE FLOW HYDRONIC SYSTEM
-# ─────────────────────────────────────────────────────────────────────────────
-with st.expander("**6.3.6 – Variable Flow Hydronic System**"):
-    c1, c2 = st.columns([2, 1])
-
-    with c1:
-        has_hydronic = st.checkbox(
-            "Project has a hydronic pumping system (HVAC)?", key="has_hydro_636"
-        )
-
-        if has_hydronic:
-            pump_total_kw = st.number_input(
-                "Total pump system power (kW)",
-                min_value=0.0, value=10.0, step=0.5, key="pump_kw_636",
-            )
-
-            if pump_total_kw <= 7.5:
-                st.markdown(
-                    f'<div class="exc-box">🔶 Total pump power {pump_total_kw} kW ≤ 7.5 kW — '
-                    f'variable fluid flow NOT required (6.3.6-a).</div>',
-                    unsafe_allow_html=True,
-                )
-                vff_636_pass = True
-            else:
-                st.markdown(
-                    '<div class="info-box">6.3.6-(a): Pumping system &gt; 7.5 kW must be '
-                    'designed for variable fluid flow, capable of reducing to the greater of '
-                    '50% of design flow OR manufacturer minimum for chiller operation.</div>',
-                    unsafe_allow_html=True,
-                )
-
-                min_flow_pct = st.number_input(
-                    "Minimum achievable pump flow as % of design flow",
-                    min_value=0.0, max_value=100.0, value=50.0, step=1.0,
-                    key="min_flow_636",
-                )
-                chiller_min_flow = st.number_input(
-                    "Chiller manufacturer minimum flow as % of design flow",
-                    min_value=0.0, max_value=100.0, value=30.0, step=1.0,
-                    key="chiller_min_636",
-                )
-                vff_limit = max(50.0, chiller_min_flow)
-                vff_ok = min_flow_pct <= vff_limit
-                st.markdown(
-                    f"Required ≤ max(50%, chiller min {chiller_min_flow:.0f}%) = "
-                    f"**{vff_limit:.0f}%** | Proposed: {min_flow_pct:.0f}% "
-                    f"{check_icon(vff_ok)}"
-                )
-
-                # ── 6.3.6-(b) Auto shut-off condenser water flow ─────────
-                st.markdown("**6.3.6-(b) Automatic Shut-off of Condenser Water Flow:**")
-                cond_pump_kw = st.number_input(
-                    "Condenser water circulation pump motor power (kW)",
-                    min_value=0.0, value=8.0, step=0.5, key="cond_kw_636",
-                )
-                if cond_pump_kw < 7.5:
-                    st.markdown(
-                        f'<div class="exc-box">🔶 Pump motor {cond_pump_kw} kW &lt; 7.5 kW — '
-                        f'two-way isolation valve NOT required (6.3.6-b).</div>',
-                        unsafe_allow_html=True,
-                    )
-                    iso_valve_pass = True
-                else:
-                    iso_valve = st.selectbox(
-                        "Two-way automatic isolation valve (interlocked with compressor) installed?",
-                        ["Yes", "No", "N/A"], key="iso_valve_636",
-                    )
-                    iso_valve_pass = iso_valve in ["Yes", "N/A"]
-                    st.markdown(
-                        f"{check_icon(iso_valve_pass)} Isolation valve / control interlocked with compressor"
-                    )
-
-                vff_636_pass = vff_ok and iso_valve_pass
-        else:
-            vff_636_pass = True
-
-    with c2:
-        hvac_results["6.3.6 Variable Flow Hydronic"] = vff_636_pass if has_hydronic else None
-        st.markdown(f"**Status:** {check_icon(vff_636_pass if has_hydronic else None)}")
-        if not has_hydronic:
-            st.markdown('<span class="na-badge">N/A</span>', unsafe_allow_html=True)
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 6.3.7  UNITARY, SPLIT, PACKAGED ACs  (ECSBC+ / Super ECSBC enhanced limits)
-# ─────────────────────────────────────────────────────────────────────────────
-with st.expander("**6.3.7 – Unitary, Split & Packaged Air-Conditioners (ECSBC+/Super ECSBC)**"):
-    c1, c2 = st.columns([2, 1])
-
-    with c1:
-        if compliance_level == "ECSBC":
-            st.markdown(
-                '<div class="info-box">6.3.7 enhanced efficiency requirements apply to '
-                '<b>ECSBC+</b> and <b>Super ECSBC</b> only. '
-                'For ECSBC, refer to section 6.2.2(b).</div>',
-                unsafe_allow_html=True,
-            )
-            unitary_637_pass = True
-        else:
-            req_star = UNITARY_AC_STAR[compliance_level]
-            st.markdown(
-                f'<div class="info-box">Table 6.19 ({compliance_level}): '
-                f'Non-ducted (Window/Split) ACs up to 18,000 Wr must meet '
-                f'<b>{req_star["label"]}</b>.</div>',
-                unsafe_allow_html=True,
-            )
-
-            has_unitary_637 = st.checkbox(
-                "Project has unitary/split/packaged AC units?", key="has_unit_637"
-            )
-
-            if has_unitary_637:
-                # ── Non-ducted ───────────────────────────────────────────
-                nd_star = st.selectbox(
-                    f"Non-ducted AC BEE Star (min {req_star['label']})",
-                    [1, 2, 3, 4, 5],
-                    index=req_star["non_ducted_star"] - 1,
-                    key="nd_star_637",
-                )
-                nd_pass = nd_star >= req_star["non_ducted_star"]
-                st.markdown(f"{check_icon(nd_pass)} BEE {nd_star}★ (min: {req_star['non_ducted_star']}★)")
-
-                # ── Ducted/Packaged ──────────────────────────────────────
-                has_duc_637 = st.checkbox("Ducted/packaged AC above 3,500 Wr present?", key="has_duc_637")
-                duc_637_pass = True
-
-                if has_duc_637:
-                    duc_cap_637 = st.number_input(
-                        "Ducted/Packaged capacity (kWr)",
-                        min_value=3.5, value=20.0, step=0.5, key="duc_cap_637",
-                    )
-                    duc_ct_637 = st.selectbox(
-                        "Cooling type", ["Air Cooled", "Water Cooled"], key="duc_ct_637"
-                    )
-                    duc_reqs = DUCTED_AC_637[compliance_level]
-
-                    if duc_cap_637 <= 10.5:
-                        if duc_ct_637 == "Air Cooled":
-                            min_star = 4 if compliance_level == "ECSBC+" else 5
-                            duc_star_val = st.selectbox(
-                                f"Ducted AC BEE Star (≤10.5 kWr Air Cooled, min {min_star}★)",
-                                [1, 2, 3, 4, 5], index=min_star - 1, key="duc_star_637",
+                        hybrid_ok = aircooled_pct <= 33.0
+                        if not hybrid_ok:
+                            st.warning(
+                                f"⚠️ For cooling load ≥ 530 kWr, air-cooled capacity must be ≤ 33% of total "
+                                f"(current: {aircooled_pct:.1f}%). AHJ may permit higher in specific local conditions."
                             )
-                            duc_637_pass = duc_star_val >= min_star
-                            st.markdown(f"{check_icon(duc_637_pass)} BEE {duc_star_val}★ (min: {min_star}★)")
                         else:
                             st.markdown(
-                                f'<div class="info-box">Water Cooled ≤10.5 kWr: N/A per Tables 6.20/6.21.</div>',
-                                unsafe_allow_html=True,
+                                f'<div class="exc-box">✅ Hybrid OK: air-cooled {aircooled_pct:.1f}% ≤ 33% of total capacity.</div>',
+                                unsafe_allow_html=True
                             )
                     else:
-                        req_eer_637 = (
-                            duc_reqs["water_cooled_gt10_5_eer"]
-                            if duc_ct_637 == "Water Cooled"
-                            else duc_reqs["air_cooled_gt10_5_eer"]
-                        )
-                        duc_eer_637 = st.number_input(
-                            f"EER (min {req_eer_637} for {duc_ct_637}, &gt;10.5 kWr)",
-                            min_value=0.5, value=req_eer_637, step=0.1, key="duc_eer_637",
-                        )
-                        duc_637_pass = duc_eer_637 >= req_eer_637
                         st.markdown(
-                            f"{check_icon(duc_637_pass)} EER: {duc_eer_637} vs min {req_eer_637} ({duc_ct_637})"
+                            f'<div class="info-box">Cooling load &lt; 530 kWr — no air-cooled % restriction for hybrid configuration.</div>',
+                            unsafe_allow_html=True
                         )
+
+                chiller_doc = st.selectbox(
+                    "Chiller schedule with type, capacity, COP/IPLV documented?",
+                    ["Yes", "No", "N/A"], key="ch_doc"
+                )
+
+                chiller_622_pass = (
+                    chiller_bee_pass and hybrid_ok and chiller_doc == "Yes"
+                )
+            else:
+                chiller_622_pass = True  # not applicable
+
+        with c2:
+            hvac_results["6.2.2(a) Chillers"] = chiller_622_pass if has_chiller else None
+            st.markdown(f"**Status:** {check_icon(chiller_622_pass if has_chiller else None)}")
+            if not has_chiller:
+                st.markdown('<span class="na-badge">N/A</span>', unsafe_allow_html=True)
+
+    # ── 6.2.2(b) Unitary / Split / Packaged ACs ───────────────────────────────
+    with st.expander("**6.2.2(b) – Unitary, Split & Packaged Air-Conditioners**"):
+        c1, c2 = st.columns([2, 1])
+        with c1:
+            has_unitary = st.checkbox("Project has unitary/split/packaged AC units?", key="has_unitary")
+            if has_unitary:
+                st.markdown(
+                    '<div class="info-box">Per IS 1391 (Part 1 & 2): Window/Split AC which are non ducted and have a capacity up to 10499 Wr and light commercial AC from 10500 to 18,000 Wr (All Air cooled systems) must meet '
+                    'minimum BEE 3-Star. Ducted/Packaged AC &gt;3,500 Wr must comply with IS 8148.</div>',
+                    unsafe_allow_html=True
+                )
+
+                # Non-ducted (window/split) up to 18000 Wr
+                st.markdown("**Non-Ducted (Window / Split) AC — up to 18,000 Wr (IS 1391):**")
+                nonduc_bee = st.selectbox(
+                    "Non-ducted AC BEE Star Rating (min BEE 3-Star)",
+                    [1, 2, 3, 4, 5], index=2, key="nonduc_bee"
+                )
+                nonduc_pass = nonduc_bee >= 3
+                st.markdown(f"{check_icon(nonduc_pass)} BEE {nonduc_bee}★ (min: 3★)")
+
+                # Ducted/Packaged > 3500 Wr - Table 6.1
+                st.markdown("**Ducted/Packaged AC — above 3,500 Wr (IS 8148):**")
+                has_ducted = st.checkbox("Ducted/Packaged AC above 3,500 Wr present?", key="has_duc")
+                ducted_pass = True
+                if has_ducted:
+                    duc_cap = st.number_input(
+                        "Ducted/Packaged AC cooling capacity (kWr)",
+                        min_value=3.5, value=20.0, step=0.5, key="duc_cap"
+                    )
+                    duc_cooling_type = st.selectbox(
+                        "Cooling type", ["Air Cooled", "Water Cooled"], key="duc_ct"
+                    )
+
+                    if duc_cap <= 10.5:
+                        if duc_cooling_type == "Air Cooled":
+                            req_label = "BEE 3-Star"
+                            duc_bee_rating = st.selectbox(
+                                "Ducted AC BEE Star Rating (≤10.5 kWr Air Cooled: min BEE 3★)",
+                                [1, 2, 3, 4, 5], index=2, key="duc_bee"
+                            )
+                            ducted_pass = duc_bee_rating >= 3
+                            st.markdown(f"{check_icon(ducted_pass)} BEE {duc_bee_rating}★ (min: 3★)")
+                        else:
+                            st.markdown(
+                                '<div class="info-box">Water Cooled ≤10.5 kWr: N/A per Table 6.1.</div>',
+                                unsafe_allow_html=True
+                            )
+                    else:
+                        # > 10.5 kWr
+                        req_eer = 3.3 if duc_cooling_type == "Water Cooled" else 2.8
+                        duc_eer = st.number_input(
+                            f"EER of ducted/packaged AC (min {req_eer} for {duc_cooling_type}, capacity > 10.5 kWr)",
+                            min_value=0.5, value=req_eer, step=0.1, key="duc_eer"
+                        )
+                        ducted_pass = duc_eer >= req_eer
+                        st.markdown(f"{check_icon(ducted_pass)} EER: {duc_eer} vs min {req_eer} ({duc_cooling_type})")
                         st.caption(
-                            "EER will be replaced by IEER when BEE Star Labelling Programme is effective for >10,500 Wr."
+                            "Note: EER will be replaced by IEER values when BEE Star Labelling Programme "
+                            "is made effective for capacities above 10,500 Wr."
                         )
 
-                unitary_637_pass = nd_pass and duc_637_pass
+                unitary_622_pass = nonduc_pass and ducted_pass
             else:
-                unitary_637_pass = True
+                unitary_622_pass = True
 
-    with c2:
-        hvac_results["6.3.7 Unitary/Split/Pkg AC"] = (
-            unitary_637_pass if compliance_level != "ECSBC" else None
-        )
-        st.markdown(
-            f"**Status:** {check_icon(unitary_637_pass if compliance_level != 'ECSBC' else None)}"
-        )
-        if compliance_level == "ECSBC":
-            st.markdown('<span class="na-badge">N/A for ECSBC</span>', unsafe_allow_html=True)
+        with c2:
+            hvac_results["6.2.2(b) Split/Packaged AC"] = unitary_622_pass if has_unitary else None
+            st.markdown(f"**Status:** {check_icon(unitary_622_pass if has_unitary else None)}")
+            if not has_unitary:
+                st.markdown('<span class="na-badge">N/A</span>', unsafe_allow_html=True)
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 6.3.8  VARIABLE REFRIGERANT FLOW (VRF) ACs
-# ─────────────────────────────────────────────────────────────────────────────
-with st.expander("**6.3.8 – Variable Refrigerant Flow (VRF) Air-Conditioners**"):
-    c1, c2 = st.columns([2, 1])
-
-    with c1:
-        has_vrf_638 = st.checkbox("Project has VRF/VRV systems?", key="has_vrf_638")
-
-        if has_vrf_638:
-            iseer_reqs = VRF_ISEER_638[compliance_level]
-            st.markdown(
-                f'<div class="info-box"><b>Minimum ISEER ({compliance_level})</b><br>'
-                f'&lt;40 kWr → {iseer_reqs["lt40"]} | '
-                f'≥40 &amp; &lt;70 kWr → {iseer_reqs["ge40_lt70"]} | '
-                f'≥70 kWr → {iseer_reqs["ge70"]}'
-                f'</div>',
-                unsafe_allow_html=True,
-            )
-
-            vrf_cap_638 = st.number_input(
-                "VRF system cooling capacity (kWr)",
-                min_value=1.0, value=50.0, step=1.0, key="vrf_cap_638",
-            )
-
-            if vrf_cap_638 < 40:
-                req_iseer_638 = iseer_reqs["lt40"]
-                cap_range_638 = "< 40 kWr"
-            elif vrf_cap_638 < 70:
-                req_iseer_638 = iseer_reqs["ge40_lt70"]
-                cap_range_638 = "≥ 40 and < 70 kWr"
-            else:
-                req_iseer_638 = iseer_reqs["ge70"]
-                cap_range_638 = "≥ 70 kWr"
-
-            vrf_iseer_638 = st.number_input(
-                f"Proposed VRF ISEER (min {req_iseer_638} for {cap_range_638})",
-                min_value=1.0, value=req_iseer_638, step=0.1, key="vrf_iseer_638",
-            )
-            vrf_638_pass = vrf_iseer_638 >= req_iseer_638
-            st.markdown(
-                f"{check_icon(vrf_638_pass)} ISEER: {vrf_iseer_638} vs min {req_iseer_638} ({cap_range_638})"
-            )
-            st.caption(
-                "ISEER and EER calculation per BIS standard for VRF ACs (currently in draft form)."
-            )
-        else:
-            vrf_638_pass = True
-
-    with c2:
-        hvac_results["6.3.8 VRF Systems"] = vrf_638_pass if has_vrf_638 else None
-        st.markdown(f"**Status:** {check_icon(vrf_638_pass if has_vrf_638 else None)}")
-        if not has_vrf_638:
-            st.markdown('<span class="na-badge">N/A</span>', unsafe_allow_html=True)
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 6.3.9  CONTROLS FOR ECSBC+ BUILDINGS
-# ─────────────────────────────────────────────────────────────────────────────
-if compliance_level == 'ECSBC+':
-    with st.expander(f"**6.3.9 – Controls for ECSBC+ Buildings**"):
+    # ── 6.2.2(c) VRF Air-Conditioners ─────────────────────────────────────────
+    with st.expander("**6.2.2(c) – Variable Refrigerant Flow (VRF) Air-Conditioners**"):
         c1, c2 = st.columns([2, 1])
+        with c1:
+            has_vrf = st.checkbox("Project has VRF/VRV systems?", key="has_vrf")
+            if has_vrf:
+                st.markdown(
+                    '<div class="info-box">VRF systems (Air Cooled) must meet minimum ISEER requirements. '
+                    ' Rating per BIS standard (under development).</div>',
+                    unsafe_allow_html=True
+                )
+
+                vrf_cap = st.number_input(
+                    "VRF system cooling capacity (kWr)",
+                    min_value=1.0, value=50.0, step=1.0, key="vrf_cap"
+                )
+
+                # Table 6.2 minimum ISEER by capacity range
+                if vrf_cap < 40:
+                    req_vrf_iseer = 5.4
+                    cap_range = "< 40 kWr"
+                elif vrf_cap < 70:
+                    req_vrf_iseer = 5.5
+                    cap_range = "≥ 40 and < 70 kWr"
+                else:
+                    req_vrf_iseer = 5.6
+                    cap_range = "≥ 70 kWr"
+
+                st.markdown(
+                    f'<div class="info-box">Table 6.2 minimum ISEER for {cap_range}: <b>{req_vrf_iseer}</b></div>',
+                    unsafe_allow_html=True
+                )
+
+                vrf_iseer = st.number_input(
+                    f"Proposed VRF ISEER (min {req_vrf_iseer})",
+                    min_value=1.0, value=req_vrf_iseer, step=0.1, key="vrf_iseer"
+                )
+                vrf_pass = vrf_iseer >= req_vrf_iseer
+                st.markdown(f"{check_icon(vrf_pass)} ISEER: {vrf_iseer} vs min {req_vrf_iseer} ({cap_range})")
+                st.caption(
+                    "Note: ISEER and EER calculation shall be as per BIS standard as and when published. "
+                )
+            else:
+                vrf_pass = True
+
+        with c2:
+            hvac_results["6.2.2(c) VRF Systems"] = vrf_pass if has_vrf else None
+            st.markdown(f"**Status:** {check_icon(vrf_pass if has_vrf else None)}")
+            if not has_vrf:
+                st.markdown('<span class="na-badge">N/A</span>', unsafe_allow_html=True)
+
+    # ── 6.2.2(d) Computer Room / Special Application ACs ─────────────────────
+    with st.expander("**6.2.2(d) – Computer Room & Special Application ACs**"):
+        c1, c2 = st.columns([2, 1])
+        with c1:
+            has_crac = st.checkbox(
+                "Project has Computer Room ACs, server rooms, or special application ACs?",
+                key="has_crac"
+            )
+            if has_crac:
+                st.markdown(
+                    '<div class="info-box">Computer room ACs must meet minimum SCOP-127 = 2.5 (Downflow & Upflow). '
+                    'Rated per ASHRAE Standard 127-2012.</div>',
+                    unsafe_allow_html=True
+                )
+
+                crac_scop_downflow = st.number_input(
+                    "CRAC unit SCOP-127 — Downflow (min 2.5 W/W)",
+                    min_value=0.5, value=2.6, step=0.1, key="crac_df"
+                )
+                crac_scop_upflow = st.number_input(
+                    "CRAC unit SCOP-127 — Upflow (min 2.5 W/W)",
+                    min_value=0.5, value=2.6, step=0.1, key="crac_uf"
+                )
+                crac_df_pass = crac_scop_downflow >= 2.5
+                crac_uf_pass = crac_scop_upflow >= 2.5
+                st.markdown(
+                    f"{check_icon(crac_df_pass)} Downflow SCOP-127: {crac_scop_downflow} vs min 2.5  |  "
+                    f"{check_icon(crac_uf_pass)} Upflow SCOP-127: {crac_scop_upflow} vs min 2.5"
+                )
+                st.caption(
+                    "SCOP-127 = Net Sensible Cooling Capacity (W) ÷ Total Power Input (W), "
+                    "excluding reheater and dehumidifier, at ASHRAE 127-2012 conditions."
+                )
+
+                # Separate units for 24-hr operational areas
+                has_24hr_special = st.checkbox(
+                    "Building has 24-hr operational areas within an 8- or 12-hour occupancy building? "
+                    "(e.g., server rooms, battery rooms, OTs in hospitals)",
+                    key="has_24hr_sp"
+                )
+                if has_24hr_special:
+                    sep_units_ok = st.selectbox(
+                        "Separate AC units installed for 24-hr/special areas that can act as standby "
+                        "when central system operates and take over when it shuts down?",
+                        ["Yes", "No", "N/A"], key="sep_units"
+                    )
+                    sep_units_pass = sep_units_ok in ["Yes", "N/A"]
+                    if sep_units_ok == "Yes":
+                        st.markdown(
+                            '<div class="exc-box">✅ Separate condensing units for special areas (OTs, server rooms) '
+                            'allow central system to operate at higher efficiency when running normally.</div>',
+                            unsafe_allow_html=True
+                        )
+                    else:
+                        sep_units_pass = False
+                else:
+                    sep_units_pass = True
+
+                crac_622_pass = crac_df_pass and crac_uf_pass and sep_units_pass
+            else:
+                crac_622_pass = True
+
+        with c2:
+            hvac_results["6.2.2(d) Computer Room AC"] = crac_622_pass if has_crac else None
+            st.markdown(f"**Status:** {check_icon(crac_622_pass if has_crac else None)}")
+            if not has_crac:
+                st.markdown('<span class="na-badge">N/A</span>', unsafe_allow_html=True)
+
+    # ── 6.2.2(e) Hot Water for HVAC Heating / Reheat ──────────────────────────
+    with st.expander("**6.2.2(e) – Hot Water Production for HVAC Heating / Reheat**"):
+        c1, c2 = st.columns([2, 1])
+        with c1:
+            has_hwp = st.checkbox(
+                "Project requires hot water production for HVAC heating or reheat purposes?",
+                key="has_hwp"
+            )
+            if has_hwp:
+                st.markdown(
+                    '<div class="info-box">Hot water for HVAC heating/reheat must use one of the accepted methods. '
+                    'Electric, gas, or oil-fired boilers are <b>discouraged</b> unless process requirements '
+                    'exist or by-product steam/hot water is available.</div>',
+                    unsafe_allow_html=True
+                )
+
+                hw_method = st.multiselect(
+                    "Hot water production method(s) selected",
+                    [
+                        "Solar water heating system (IS 12976, min BEE 3-Star)",
+                        "Heat recovery from air/water cooled condensers",
+                        "Air-to-water heat pump",
+                        "Water-to-water heat pump",
+                        # "Electric/Gas/Oil-fired boiler (discouraged — special justification required)",
+                    ],
+                    key="hw_method"
+                )
+
+                boiler_used = any("boiler" in m.lower() for m in hw_method)
+                accepted_methods = [m for m in hw_method if "boiler" not in m.lower()]
+                hw_method_ok = len(accepted_methods) > 0
+
+                if boiler_used:
+                    boiler_justif = st.selectbox(
+                        "Boiler justification: by-product steam/hot water available OR process requirement exists?",
+                        ["Yes — process requirement", "Yes — by-product steam/hot water", "No justification"],
+                        key="boiler_j"
+                    )
+                    boiler_ok = boiler_justif != "No justification"
+                    if not boiler_ok:
+                        st.warning(
+                            "⚠️ Electric/Gas/Oil-fired boilers are discouraged per 6.2.2(e). "
+                            "Provide justification or use an accepted alternate method."
+                        )
+                else:
+                    boiler_ok = True
+
+                # Solar water heating specifics
+                if "Solar water heating system (IS 12976, min BEE 3-Star)" in hw_method:
+                    swh_bee = st.selectbox(
+                        "Solar water heater BEE Star Rating (min BEE 3-Star per IS 12976)",
+                        [1, 2, 3, 4, 5], index=2, key="swh_bee_622"
+                    )
+                    swh_bee_pass = swh_bee >= 3
+                    st.markdown(f"{check_icon(swh_bee_pass)} Solar WH BEE {swh_bee}★ (min: 3★, IS 12976)")
+                else:
+                    swh_bee_pass = True
+
+                hw_doc = st.selectbox(
+                    "Hot water system design/specifications documented?",
+                    ["Yes", "No", "N/A"], key="hw_doc"
+                )
+
+                hwp_622_pass = hw_method_ok and boiler_ok and swh_bee_pass and hw_doc == "Yes"
+            else:
+                hwp_622_pass = True
+
+        with c2:
+            hvac_results["6.2.2(e) HVAC Hot Water"] = hwp_622_pass if has_hwp else None
+            st.markdown(f"**Status:** {check_icon(hwp_622_pass if has_hwp else None)}")
+            if not has_hwp:
+                st.markdown('<span class="na-badge">N/A</span>', unsafe_allow_html=True)
+
+    with st.expander("**6.2.3 – Controls**"):
+        c1, c2 = st.columns([2,1])
+        with c1:
+            hvac_cap = st.number_input("Total HVAC cooling/heating capacity (kWr)", min_value=0.0, value=200.0, step=5.0, key="hvacc")
+            timeclock_exempt = hvac_cap < 17.5
+
+            # ── NEW EXCEPTION 6: Single-zone HVAC VAV exception 6.2.3(a) ────
+            is_single_zone = st.checkbox(
+                "Is this a single-zone HVAC system?",
+                help="6.2.3(a): Single-zone systems are exempt from VAV/demand control requirements."
+            )
+
+
+            if timeclock_exempt:
+                st.markdown('<div class="exc-box">🔶 Exception 6.2.3(a): System capacity &lt;17.5 kWr → timeclock NOT required.</div>', unsafe_allow_html=True)
+                tc1 = "N/A"
+            elif is_single_zone:
+                st.markdown('<div class="exc-box">🔶 <b>Exception 6.2.3(a) — Single Zone</b>: Single-zone system → VAV/demand control requirement is NOT applicable.</div>', unsafe_allow_html=True)
+                tc1 = "N/A"
+            elif building_type == "Health Care":
+                st.markdown('<div class="exc-box">🔶 Exception 6.2.3(a): Healthcare facility → timeclock NOT required.</div>', unsafe_allow_html=True)
+                tc1 = "N/A"
+            else:
+                st.write("6.2.3(a) Timeclock ")
+                tc1 = st.selectbox("Timeclock with night setback, 3 day-types, 2-hr override?", ["Yes","No","N/A"], key="tc1")
+
+            st.write("**6.2.3(b) Temperature control**")
+            tc2 = st.selectbox("Mechanical cooling and heating equipment in all buildings shall be installed with automatic controls to manage the temperature inside the conditioned zones.", ["Yes","No","N/A"], key="tc2")
+            st.write("Temperature control shall comply with the following requirements:")
+            tc2_1 = st.selectbox("Temperature control with 3°C dead-band?", ["Yes","No","N/A"], key="tc2_1")
+            tc2_2 = st.selectbox("Separate heating and cooling equipment serve the same temperature zone?", ["Yes","No","N/A"], key="tc2_2")
+            
+            if building_type == "Health Care":
+                tc2_3 = st.selectbox("Separate temperature control shall be installed in each In-patient rooms and wards.?", ["Yes","No","N/A"], key="tc2_3")
+            elif building_type == "Educational":
+                tc2_3 = st.selectbox("Separate temperature control shall be installed in each classroom, lecture room and computer lab?", ["Yes","No","N/A"], key="tc2_3")
+            elif building_type == "Office":
+                tc2_3 = st.selectbox("Separate temperature control shall be installed in each room less than 30 m²?", ["Yes","No","N/A"], key="tc2_3")
+            elif building_type == "Hospitality":
+                tc2_3 = st.selectbox("Separate temperature control shall be installed in each guest room?", ["Yes","No","N/A"], key="tc2_3")
+            else:
+                tc2_3 = "N/A"
+
+            st.write("**6.2.3(c) Occupancy controls**")
+            tc3 = st.selectbox("Occupancy controls per space type?",       ["Yes","No","N/A"], key="tc3")
+
+            st.write("**6.2.3(d) Cooling Tower Fan Control** ")
+            ct_applicable = gross_area > 20000
+            if not ct_applicable:
+                st.markdown(f'<div class="exc-box">🔶 Cooling tower wet-bulb fan control (6.2.3-d) NOT required: BUA {gross_area:,.0f} m² ≤ 20,000 m²</div>', unsafe_allow_html=True)
+                tc4 = "N/A"
+            else:
+                wb_drops = st.checkbox("Wet-bulb temperature drops below 17°C at project location?", key="wbd")
+                tc4 = st.selectbox("Cooling tower fan speed reduction to 50%?", ["Yes","No","N/A"], key="tc4") if wb_drops else "N/A"
+
+
+            st.write("**6.2.3(e) AHU Fan** ")
+            ahu_cap = st.number_input("AHU airflow capacity (m³/hr)", min_value=0.0, value=8000.0, step=500.0)
+            ahu_exempt = ahu_cap < 5000
+            if ahu_exempt:
+                st.markdown('<div class="exc-box">🔶 Exception 6.2.3(e): AHU &lt;5000 m³/hr → variable speed fan NOT required.</div>', unsafe_allow_html=True)
+                tc5 = "N/A"
+            else:
+                tc5 = st.selectbox("AHU serving different zones of a building shall deploy fan speed modulation control to save energy, using duct static pressure signal?", ["Yes","No","N/A"], key="tc5")
+
+            st.write("**6.2.3(f) Damper Controls** ")
+            tc6 = st.selectbox("Automatic dampers for exhaust systems?", ["Yes","No","N/A"], key="tc6")
+            has_kitchen_exhaust = st.checkbox("Kitchen exhaust hood(s) present?", key="kex")
+            if has_kitchen_exhaust:
+                st.markdown('<div class="exc-box">🔶 Exception 6.2.3(f): Auto dampers NOT required for kitchen exhaust hood systems.</div>', unsafe_allow_html=True)
+            tc7 = st.selectbox("Automatic dampers for remaining exhaust systems?", ["Yes","No","N/A"], key="tc7")
+
+        with c2:
+            ctrl_items = [tc1,tc2,tc2_1,tc2_2,tc2_3,tc3,tc4,tc5,tc6,tc7]
+            p = all(x in ["Yes","N/A"] for x in ctrl_items) and any(x=="Yes" for x in ctrl_items)
+            hvac_results["6.2.3 Controls"] = p
+            st.markdown(f"**Status:** {check_icon(p)}")
+
+    with st.expander("**6.2.4 – Piping & Ductwork Insulation**"):
+        c1, c2 = st.columns([2, 1])
+        with c1:
+            st.markdown(
+                f'<div class="info-box">Pipe insulation R-values '
+                f'({compliance_level}). Location adjustments: −0.2 if in conditioned space/buried '
+                f'(min R-0.4); +0.2 if exposed to weather outside.</div>',
+                unsafe_allow_html=True
+            )
+
+            # ── Pipe Insulation ──────────────────────────────────────────────
+            st.markdown("##### a) Piping Insulation")
+
+            pipe_location_624 = st.selectbox(
+                "Pipe Location",
+                [
+                    "Standard (Table R-values apply as-is)",
+                    "In conditioned space or buried in ground (R may be reduced by 0.2, min R-0.4)",
+                    "Outside building, direct weather exposure (R must be increased by 0.2)",
+                ],
+                key="pipe_loc_624"
+            )
+
+            pipe_temp_label = st.selectbox(
+                "Operating Temperature Range / System Type",
+                list(PIPE_TEMP_OPTIONS.keys()),
+                key="pipe_temp_624"
+            )
+            pipe_temp_key = PIPE_TEMP_OPTIONS[pipe_temp_label]
+
+            pipe_size_ge40 = st.checkbox(
+                "Pipe nominal diameter ≥ 40 mm?",
+                key="pipe_size_624"
+            )
+
+            # Look up base R from table
+            rows = PIPE_INSULATION_ROWS[compliance_level]
+            base_r_small = base_r_large = None
+            for (label, key, r_s, r_l) in rows:
+                if key == pipe_temp_key:
+                    base_r_small, base_r_large = r_s, r_l
+                    break
+
+            base_r = base_r_large if pipe_size_ge40 else base_r_small
+
+            # Apply location adjustment
+            if "conditioned space" in pipe_location_624 or "buried" in pipe_location_624:
+                adj_r = max(0.4, base_r - 0.2)
+                st.markdown(
+                    f'<div class="exc-box">🔶 <b>Location Adjustment</b>: Base R = {base_r} − 0.2 = '
+                    f'<b>{adj_r:.1f} m²·K/W</b> (min R-0.4 applied)</div>',
+                    unsafe_allow_html=True
+                )
+            elif "weather exposure" in pipe_location_624:
+                adj_r = base_r + 0.2
+                st.markdown(
+                    f'<div class="exc-box">🔶 <b>Location Adjustment</b>: Base R = {base_r} + 0.2 = '
+                    f'<b>{adj_r:.1f} m²·K/W</b> (weather-exposed)</div>',
+                    unsafe_allow_html=True
+                )
+            else:
+                adj_r = base_r
+                st.markdown(
+                    f'Required R-value ({compliance_level}): **{adj_r:.1f} m²·K/W**'
+                )
+
+            proposed_pipe_r = st.number_input(
+                f"Proposed Pipe Insulation R-value (m²·K/W) — required ≥ {adj_r:.1f}",
+                min_value=0.0, value=float(adj_r), step=0.05,
+                key="prop_pipe_r_624"
+            )
+            pipe_r_pass = proposed_pipe_r >= adj_r
+            st.markdown(f"{check_icon(pipe_r_pass)} Proposed R: {proposed_pipe_r:.2f} vs required ≥ {adj_r:.2f}")
+
+            # Show full table for reference
+            with st.expander("📋 View full pipe insulation table for all temperature ranges"):
+                rows_display = []
+                for (lbl, key, r_s, r_l) in PIPE_INSULATION_ROWS[compliance_level]:
+                    rows_display.append({
+                        "Operating Temperature / System": lbl,
+                        "R-value (<40 mm) m²·K/W": r_s,
+                        "R-value (≥40 mm) m²·K/W": r_l,
+                    })
+                st.dataframe(pd.DataFrame(rows_display), hide_index=True, use_container_width=True)
+
+            st.markdown("---")
+
+            # ── Ductwork Insulation ───────────────────────────────────────────
+            st.markdown("##### b) Ductwork & Plenum Insulation (Table 6.7)")
+
+            duct_location = st.selectbox(
+                "Duct Location",
+                list(DUCT_INSULATION.keys()),
+                key="duct_loc_624"
+            )
+            duct_type = st.selectbox(
+                "Duct Type",
+                ["Supply", "Return"],
+                key="duct_type_624"
+            )
+
+            req_duct_r = DUCT_INSULATION[duct_location][duct_type]
+
+            if req_duct_r is None:
+                st.markdown(
+                    f'<div class="exc-box">🔶 Return ducts in <b>{duct_location}</b> location: '
+                    f'<b>No insulation required</b>.</div>',
+                    unsafe_allow_html=True
+                )
+                duct_r_pass = True
+                hvac_results["6.2.4b Duct Insulation (no insulation reqd)"] = True
+            else:
+                st.markdown(
+                    f'Required duct R-value ({duct_type}, {duct_location}): **R-{req_duct_r} m²·K/W**'
+                )
+                proposed_duct_r = st.number_input(
+                    f"Proposed Duct Insulation R-value (m²·K/W) — required ≥ {req_duct_r}",
+                    min_value=0.0, value=float(req_duct_r), step=0.05,
+                    key="prop_duct_r_624"
+                )
+                duct_r_pass = proposed_duct_r >= req_duct_r
+                st.markdown(
+                    f"{check_icon(duct_r_pass)} Proposed R: {proposed_duct_r:.2f} vs required ≥ {req_duct_r}"
+                )
+
+            with st.expander("📋 View full ductwork insulation table"):
+                duct_display = []
+                for loc, vals in DUCT_INSULATION.items():
+                    duct_display.append({
+                        "Duct Location": loc,
+                        "Supply R-value (m²·K/W)": vals["Supply"],
+                        "Return R-value (m²·K/W)": vals["Return"] if vals["Return"] is not None else "Not required",
+                    })
+                st.dataframe(pd.DataFrame(duct_display), hide_index=True, use_container_width=True)
+
+        with c2:
+            insulation_pass = pipe_r_pass and duct_r_pass
+            hvac_results["6.2.4a Pipe Insulation"] = pipe_r_pass
+            if req_duct_r is not None:
+                hvac_results["6.2.4b Duct Insulation"] = duct_r_pass
+            st.markdown(f"**Pipe Insulation:** {check_icon(pipe_r_pass)}")
+            st.markdown(f"**Duct Insulation:** {check_icon(duct_r_pass)}")
+            st.markdown(f"**Overall 6.2.4:** {check_icon(insulation_pass)}")
+
+    with st.expander("**6.2.5 – Condenser Location**"):
+        c1, c2 = st.columns([2,1])
+        with c1:
+            conden_loc = st.selectbox("Air cooled condensers shall be located such that the heat sink is free from of interference of heat discharnge by devices located in adjoining spaces, and do not interfere with other such systems installed nearby?", ["Yes","No","N/A"], key="conden_loc")
+        with c2:
+            hvac_results["6.2.5 Condenser Location"] = conden_loc == "Yes"
+            st.markdown(f"**Status:** {check_icon(conden_loc == 'Yes')}")
+
+    st.markdown("#### Standardized Requirements (6.3)")
+
+    with st.expander("**6.3.1 – Fans**"):
+        c1, c2 = st.columns([2,1])
+        with c1:
+            motor_power = st.checkbox("Supply, exhaust and return or relief fans with motor power exceeding 0.37 kW?", key="fan_power")
+            power = True
+
+            if compliance_level == "ECSBC":
+                if motor_power:
+                    st.selectbox("Mechanical Efficiency is greater than 65%?", ["Yes","No","N/A"], key="fan_mech_eff")
+                    power = hvac_results["6.3.1 Fan Mechanical Efficiency > 65%"] = st.session_state["fan_mech_eff"] == "Yes"
+                
+            if compliance_level == "ECSBC+":
+                if motor_power:
+                    st.selectbox("Mechanical Efficiency is greater than 70%?", ["Yes","No","N/A"], key="fan_mech_eff_plus")
+                    power = hvac_results["6.3.1 Fan Mechanical Efficiency > 70%"] = st.session_state["fan_mech_eff_plus"] == "Yes"
+                
+            if compliance_level == "Super ECSBC":
+                if motor_power:
+                    st.selectbox("Mechanical Efficiency is greater than 75%?", ["Yes","No","N/A"], key="fan_mech_eff_super")
+                    power = hvac_results["6.3.1 Fan Mechanical Efficiency > 75%"] = st.session_state["fan_mech_eff_super"] == "Yes"
+
+            fan_ducted = st.selectbox("Fan type", ["Ducted (fan efficiency checked separately)","Un-ducted AC unit (efficiency in total unit rating)"], key="fandt")
+            if "Un-ducted" in fan_ducted:
+                st.markdown('<div class="exc-box">🔶 Exception 6.3.1: Un-ducted AC unit – fan efficiency captured in total unit ISEER/COP. Separate fan FEI check NOT required.</div>', unsafe_allow_html=True)
+                hvac_results["6.3.1 Fan (un-ducted exception)"] = True
+            else:
+                fan_type = st.selectbox("Fan type", ["Centrifugal fans","Axial flow flans"], key="fan_type")
+                fan_fei = st.number_input("Fan Energy Index (FEI) for fans ≥2.5 kW shaft power", min_value=0.0, value=1.05, step=0.01)
+
+                if fan_type == "Axial flow flans":
+                    fei_pass = fan_fei >= 1.00
+                    hvac_results["6.3.1 Fan FEI ≥ 1.0"] = fei_pass
+                    st.markdown(f"{check_icon(fei_pass)} FEI: {fan_fei}")
+
+                if fan_type == "Centrifugal fans":
+                    fei_pass = fan_fei >= 1.1
+                    hvac_results["6.3.1 Fan FEI ≥ 1.1"] = fei_pass
+                    st.markdown(f"{check_icon(fei_pass)} FEI: {fan_fei}, **Required {'≥ 1.1' if fan_type == 'Centrifugal fans' else '≥ 1.0'}**")
+        with c2:
+            st.markdown("")
+            st.markdown(f"**Status:** {check_icon(power)}")
+            st.markdown(f"**Status FEI: {check_icon(fei_pass)}**")
+
+    with st.expander("**6.3.2 – Chillers**"):
+        # req_cop  = CHILLER_COP[compliance_level]
+        # req_iplv = CHILLER_IPLV[compliance_level]
+        c1, c2 = st.columns([2,1])
+        with c1:
+            chiller_cop = True
+            chiller_iplv = True
+            chiller_type = st.selectbox("Chiller Type", ["Air Cooled", "Water Cooled"], key="chiller_type")
+            if chiller_type == "Water Cooled":
+                chiller_cap  = st.number_input("Chiller Capacity (kW)", min_value=0.0, value=500.0)
+                chiller_cop  = st.number_input("Proposed COP",  min_value=1.0, value=5.5, step=0.1)
+                chiller_iplv = st.number_input("Proposed IPLV", min_value=1.0, value=6.5, step=0.1)
+                if chiller_cap < 260:
+                    req_cop = 4.7
+                    req_iplv = 5.8
+                elif chiller_cap >=260 and chiller_cap < 530:
+                    req_cop = 4.9
+                    req_iplv = 5.9
+                elif chiller_cap >= 530 and chiller_cap < 1050:
+                    req_cop = 5.4
+                    req_iplv = 6.5
+                elif chiller_cap >= 1050 and chiller_cap < 1580:
+                    req_cop = 5.8
+                    req_iplv = 6.8
+                elif chiller_cap >= 1580:
+                    req_cop = 6.3
+                    req_iplv = 7
+                    
+            if chiller_type == "Air Cooled":
+                chiller_cap  = st.number_input("Chiller Capacity (kW)", min_value=0.0, value=600.0)
+                chiller_cop  = st.number_input("Proposed COP",  min_value=1.0, value=6.5, step=0.1)
+                chiller_iplv = st.number_input("Proposed IPLV", min_value=1.0, value=7.5, step=0.1)
+                if chiller_cap < 260:
+                    req_cop = 2.8
+                    req_iplv = 6.5
+                elif chiller_cap >=260:
+                    req_cop = 3.0
+                    req_iplv = 3.7
+
+        st.markdown(f"**Code Min COP:** {req_cop} | **Code Min IPLV:** {req_iplv}")
+            
+        with c2:
+            cop_pass  = chiller_cop  >= req_cop
+            iplv_pass = chiller_iplv >= req_iplv
+            hvac_results[f"Chiller COP ≥ {req_cop}"]   = cop_pass
+            hvac_results[f"Chiller IPLV ≥ {req_iplv}"] = iplv_pass
+            st.markdown(f"**COP:** {check_icon(cop_pass)} {chiller_cop}\n\n**IPLV:** {check_icon(iplv_pass)} {chiller_iplv}")
+
+
+    with st.expander("**6.3.3 – Pumps**"):
+        req_ie  = PUMP_IE_CLASS[compliance_level]
+        limits  = PUMP_POWER_LIMITS[compliance_level]
+        c1, c2  = st.columns([2, 1])
 
         with c1:
             st.markdown(
-                '<div class="info-box">6.3.9: Required in addition to 6.2.3 mandatory controls '
-                'for ECSBC+ and Super ECSBC buildings.</div>',
-                unsafe_allow_html=True,
+                f'<div class="info-box">Pump power expressed as <b>W/kW of cooling capacity</b>. ',
+                unsafe_allow_html=True
             )
 
-            # (a) Zone Temperature Control
-            st.markdown("**6.3.9-(a) Zone Temperature Control:**")
-            ztc_639 = st.selectbox(
-                "Common-area space temperature set-point varied automatically based on outside temperature?",
-                ["Yes", "No", "N/A"], key="ztc_639",
+            # ── Chilled Water Pumps ──────────────────────────────────────────
+            st.markdown("**Chilled Water Pumps (Primary & Secondary)**")
+            chw_power = st.number_input(
+                "Chilled water pump power (W/kW of cooling)",
+                min_value=0.0, value=15.0, step=0.1, key="chwp"
+            )
+            vfd_present = st.checkbox(
+                "Variable Frequency Drive (VFD) present on secondary chilled water pumps?",
+                value=False, key="vfd_chwp",
+                help="VFD on secondary pumps satisfies the chilled water pump power requirement."
             )
 
-            # (b) AHU Fan Energy Optimization
-            st.markdown("**6.3.9-(b) AHU Fan Energy Optimization:**")
-            ahu_opt_639 = st.selectbox(
-                "Control system optimizes AHU fan static pressure dynamically across VAV/auto-diffuser zones?",
-                ["Yes", "No", "N/A"], key="ahu_opt_639",
+            # ── Condenser Water Pumps ────────────────────────────────────────
+            st.markdown("**Condenser Water Pumps**")
+            cw_power = st.number_input(
+                "Condenser water pump power (W/kW of cooling)",
+                min_value=0.0, value=14.0, step=0.1, key="cwp"
+            )
+            pump_eff = st.number_input(
+                "Pump hydraulic efficiency (%)",
+                min_value=0.0, max_value=100.0, value=75.0, step=0.5, key="pump_eff"
             )
 
-            # (c) Secondary Pump Energy Optimization
-            st.markdown("**6.3.9-(c) Secondary Pump Energy Optimization:**")
-            pump_opt_639 = st.selectbox(
-                "Control system optimizes chilled water pump speed for loops and terminal units?",
-                ["Yes", "No", "N/A"], key="pump_opt_639",
+            # ── Motor IE Class ───────────────────────────────────────────────
+            st.markdown("**Pump Motor Efficiency (IS 12615)**")
+            pump_ie = st.selectbox(
+                "Pump Motor IE Class",
+                IE_ORDER[:],   # IE2 … IE5
+                key="pump_ie_633"
             )
-
-            ctrl_639_pass = all(
-                x in ["Yes", "N/A"] for x in [ztc_639, ahu_opt_639, pump_opt_639]
-            ) and any(x == "Yes" for x in [ztc_639, ahu_opt_639, pump_opt_639])
 
         with c2:
-            hvac_results["6.3.9 ECSBC+ Controls"] = ctrl_639_pass
-            st.markdown(f"**Status:** {check_icon(ctrl_639_pass)}")
+            # ── Chilled Water Pass Logic ─────────────────────────────────────
+            # PASS if VFD present OR pump power ≤ limit
+            chw_limit = limits["chw_no_vfd"]
+            if vfd_present:
+                chw_pass = True
+                chw_note = "VFD present → requirement satisfied"
+            elif chw_power >= chw_limit:
+                chw_pass = True
+                chw_note = f"{chw_power} ≥ {chw_limit} W/kW"
+            else:
+                chw_pass = False
+                chw_note = f"{chw_power} < {chw_limit} W/kW (no VFD)"
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 6.3.10  CONTROLS FOR SUPER ECSBC BUILDINGS
-# ─────────────────────────────────────────────────────────────────────────────
-if compliance_level == "Super ECSBC":
-    with st.expander(f"**6.3.10 – Controls for Super ECSBC Buildings**"):
+            # ── Condenser Water Pass Logic ───────────────────────────────────
+            # PASS if pump power ≤ limit OR pump efficiency ≥ threshold
+            cw_limit     = limits["cw_no_vfd"]
+            eff_threshold = limits["cw_eff_threshold"]
+            if cw_power >= cw_limit:
+                cw_pass = True
+                cw_note = f"{cw_power} ≥ {cw_limit} W/kW"
+            elif pump_eff >= eff_threshold:
+                cw_pass = True
+                cw_note = f"Power {cw_power} < {cw_limit}"
+            else:
+                cw_pass = False
+                cw_note = f"{cw_power} > {cw_limit} W/kW and pump eff {pump_eff}% < {eff_threshold}%"
+
+            # ── Motor IE Pass Logic ──────────────────────────────────────────
+            ie_pass = ie_gte(pump_ie, req_ie)
+
+            # ---- VFD present pass ----------------------------------------
+            if vfd_present:
+                vfd_pass = True
+                vfd_note = "VFD present → VFD on secondary pumps"
+            else:
+                vfd_pass = False
+                vfd_note = "No VFD → pump power must meet W/kW requirement"
+
+
+            # ── Overall Pass ─────────────────────────────────────────────────
+            pump_633_pass = chw_pass and cw_pass and ie_pass
+
+            # ── Write to hvac_results (single clean set of keys) ─────────────
+            hvac_results["6.3.3 CHW Pump Power"]         = chw_pass
+            hvac_results["6.3.3 CW Pump Power/Eff"]      = cw_pass
+            hvac_results[f"6.3.3 Pump Motor ≥ {req_ie}"] = ie_pass
+            hvac_results["6.3.3 Pumps (overall)"]         = pump_633_pass
+            hvac_results["6.3.3 VFD Exception"]          = vfd_pass
+
+            # ── Display ──────────────────────────────────────────────────────
+            st.markdown(f"**CHW Pump:** {check_icon(chw_pass)}")
+            st.caption(chw_note)
+
+            st.markdown(f"**CW Pump:** {check_icon(cw_pass)}")
+            st.caption(cw_note)
+
+            st.markdown(f"**Motor IE:** {check_icon(ie_pass)} {pump_ie} (req: {req_ie}+)")
+
+            st.markdown(f"**VFD Status:** {check_icon(vfd_pass)}")
+            st.caption(vfd_note)
+
+
+            st.markdown("---")
+            st.markdown(f"**Overall 6.3.3:** {check_icon(pump_633_pass)}")
+
+            # Reference limits box
+            st.markdown(
+                f'<div class="info-box" style="font-size:0.8rem">'
+                f'<b>Limits ({compliance_level}):</b><br>'
+                f'CHW ≤ {chw_limit} W/kW (or VFD)<br>'
+                f'CW ≤ {cw_limit} W/kW (or pump eff ≥ {eff_threshold}%)<br>'
+                f'Motor: {req_ie}+</div>',
+                unsafe_allow_html=True
+            )
+
+    # ══════════════════════════════════════════════════════════════════════════════
+    # SECTIONS 6.3.4 – 6.3.13  (drop-in block for the Comfort Systems tab)
+    # Depends on: compliance_level, gross_area, hvac_results, check_icon, ie_gte,
+    #             IE_ORDER, new_badge  — all defined in the main script.
+    # ══════════════════════════════════════════════════════════════════════════════
+
+    # ─────────────────────────────────────────────────────────────────────────────
+    # LOOKUP DATA (local to this block)
+    # ─────────────────────────────────────────────────────────────────────────────
+
+    # Table 6.16 / 6.17 / 6.18 – Cooling Tower Fan Efficiency
+    COOLING_TOWER_DATA = {
+        "ECSBC": {
+            "equipment_type": "Open circuit cooling tower Fans",
+            "rating_condition": "37.2°C entering / 31.6°C leaving / 28.3°C WB outdoor air",
+            "efficiency": "0.35 kW/(ltr·sec.)",
+            "approach_max_C": 3.9,
+            "table": "6.16",
+        },
+        "ECSBC+": {
+            "equipment_type": "Open circuit cooling tower Fans (Chillers ≤530 kWr)",
+            "rating_condition": "37.8°C entering / 32.2°C leaving / 28.3°C WB outdoor air",
+            "efficiency": "0.35 kW/(ltr·sec.)",
+            "approach_max_C": 2.8,
+            "table": "6.17",
+        },
+        "Super ECSBC": {
+            "equipment_type": "Open circuit cooling tower Fans (Chillers ≤530 kWr)",
+            "rating_condition": "35.6°C entering / 30.0°C leaving / 28.3°C WB outdoor air",
+            "efficiency": "0.35 kW/(ltr·sec.)",
+            "approach_max_C": 1.7,
+            "table": "6.18",
+        },
+    }
+
+    # Tables 6.19–6.21 – Unitary/Split/Packaged AC for ECSBC+ & Super ECSBC
+    # (ECSBC uses BEE 3-Star as in 6.2.2(b) — covered in that section)
+    UNITARY_AC_STAR = {
+        "ECSBC+":      {"non_ducted_star": 4, "label": "BEE 4-Star"},
+        "Super ECSBC": {"non_ducted_star": 5, "label": "BEE 5-Star"},
+    }
+    DUCTED_AC_637 = {
+        "ECSBC+": {
+            "water_cooled_le10_5": "BEE 4-Star (N/A)",
+            "air_cooled_le10_5":   "BEE 4-Star",
+            "water_cooled_gt10_5_eer": 3.7,
+            "air_cooled_gt10_5_eer":   3.2,
+        },
+        "Super ECSBC": {
+            "water_cooled_le10_5": "BEE 5-Star (N/A)",
+            "air_cooled_le10_5":   "BEE 5-Star",
+            "water_cooled_gt10_5_eer": 3.9,
+            "air_cooled_gt10_5_eer":   3.4,
+        },
+    }
+
+    # Tables 6.22–6.24 – VRF ISEER
+    VRF_ISEER_638 = {
+        "ECSBC":       {"lt40": 5.4, "ge40_lt70": 5.5, "ge70": 5.6},
+        "ECSBC+":      {"lt40": 6.4, "ge40_lt70": 6.5, "ge70": 6.6},
+        "Super ECSBC": {"lt40": 7.4, "ge40_lt70": 7.5, "ge70": 7.6},
+    }
+
+    # Table 6.25 – Total System Efficiency
+    TOTAL_SYS_EFF = {
+        "ECSBC":       0.24,
+        "ECSBC+":      0.21,
+        "Super ECSBC": 0.19,
+    }
+
+    LOW_ENERGY_SYSTEMS = [
+        "Evaporative cooling",
+        "Desiccant cooling system",
+        "Solar air conditioning",
+        "Tri-generation (waste-to-heat)",
+        "Radiant cooling system",
+        "Ground source heat pump",
+        "Adiabatic cooling system",
+        "Under-floor Air distribution (UFAD) system",
+    ]
+
+    # ─────────────────────────────────────────────────────────────────────────────
+    # 6.3.4  COOLING TOWERS
+    # ─────────────────────────────────────────────────────────────────────────────
+    with st.expander("**6.3.4 – Cooling Towers**"):
         c1, c2 = st.columns([2, 1])
+        ct_data = COOLING_TOWER_DATA[compliance_level]
 
         with c1:
-            st.markdown(
-                '<div class="info-box">6.3.10: Required in addition to 6.2.3 and 6.3.9 '
-                'for Super ECSBC buildings.</div>',
-                unsafe_allow_html=True,
-            )
+            has_ct = st.checkbox("Project has cooling towers?", key="has_ct_634")
 
-            # (a) Zone Temperature Control – centralised correction
-            st.markdown("**6.3.10-(a) Centralised Zone Temperature Correction:**")
-            cztc_6310 = st.selectbox(
-                "Centralised system auto-corrects heating/cooling set-points altered by occupants at regular intervals?",
-                ["Yes", "No", "N/A"], key="cztc_6310",
-            )
-
-            # (b) Control of Fenestration Louver or Blinds
-            st.markdown("**6.3.10-(b) Fenestration / Louver / Blind Control:**")
-            has_large_glazing = st.checkbox(
-                "Building has large glass façades (curtain walls, large glazed areas)?",
-                key="lg_glass_6310",
-            )
-            if has_large_glazing:
-                fene_ctrl_6310 = st.selectbox(
-                    "Automatic control of curtains, blinds or external louvers installed?",
-                    ["Yes", "No", "N/A"], key="fene_ctrl_6310",
-                )
-            else:
-                fene_ctrl_6310 = "N/A"
+            if has_ct:
                 st.markdown(
-                    '<div class="exc-box">🔶 No large glass façade — '
-                    'fenestration control not required.</div>',
-                    unsafe_allow_html=True,
-                )
-
-            # (c) Occupancy Control
-            st.markdown("**6.3.10-(c) Occupancy Control (real-time headcount):**")
-            has_large_zones = st.checkbox(
-                "Building has large zones (e.g. open-plan workstation areas)?",
-                key="lz_6310",
-            )
-            if has_large_zones:
-                occ_ctrl_6310 = st.selectbox(
-                    "Conditioning equipment for large zones has real-time headcount energy saving capability?",
-                    ["Yes", "No", "N/A"], key="occ_ctrl_6310",
-                )
-            else:
-                occ_ctrl_6310 = "N/A"
-                st.markdown(
-                    '<div class="exc-box">🔶 No large zones — occupancy control not required.</div>',
-                    unsafe_allow_html=True,
-                )
-
-            # (d) Chiller Plant Control
-            st.markdown("**6.3.10-(d) Chiller Plant Control:**")
-            total_chiller_kw_6310 = st.number_input(
-                "Total chilled water plant cooling capacity (kW)",
-                min_value=0.0, value=1000.0, step=50.0, key="chiller_tot_6310",
-            )
-            num_chillers_6310 = st.number_input(
-                "Number of chillers in one plant room",
-                min_value=0, value=2, step=1, key="num_ch_6310",
-            )
-
-            if total_chiller_kw_6310 > 1500 or num_chillers_6310 > 3:
-                cpc_6310 = st.selectbox(
-                    "Chiller plant control system optimises chillers, pumps and cooling tower fans on real-time basis?",
-                    ["Yes", "No", "N/A"], key="cpc_6310",
-                )
-                chiller_ctrl_pass = cpc_6310 in ["Yes", "N/A"]
-                if total_chiller_kw_6310 > 1500:
-                    st.markdown(
-                        f'<div class="info-box">Plant capacity {total_chiller_kw_6310:.0f} kW &gt; 1,500 kW — '
-                        f'chiller plant control required.</div>',
-                        unsafe_allow_html=True,
-                    )
-                if num_chillers_6310 > 3:
-                    st.markdown(
-                        f'<div class="info-box">{num_chillers_6310} chillers &gt; 3 in one plant room — '
-                        f'chiller plant control required.</div>',
-                        unsafe_allow_html=True,
-                    )
-            else:
-                st.markdown(
-                    f'<div class="exc-box">🔶 Chiller plant control NOT required: '
-                    f'capacity {total_chiller_kw_6310:.0f} kW ≤ 1,500 kW and '
-                    f'{num_chillers_6310} chillers ≤ 3.</div>',
-                    unsafe_allow_html=True,
-                )
-                chiller_ctrl_pass = True
-
-            ctrl_6310_items = [cztc_6310, fene_ctrl_6310, occ_ctrl_6310]
-            ctrl_6310_pass = (
-                all(x in ["Yes", "N/A"] for x in ctrl_6310_items)
-                and chiller_ctrl_pass
-                and any(x == "Yes" for x in ctrl_6310_items)
-            )
-
-        with c2:
-            hvac_results["6.3.10 Super ECSBC Controls"] = ctrl_6310_pass
-            st.markdown(f"**Status:** {check_icon(ctrl_6310_pass)}")
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 6.3.11  ENERGY RECOVERY
-# ─────────────────────────────────────────────────────────────────────────────
-with st.expander("**6.3.11 – Energy Recovery**"):
-    c1, c2 = st.columns([2, 1])
-    EXEMPT_ER = {"Kitchen", "Laundry", "Operation Theater / ICU", "Laboratory"}
-
-    with c1:
-        er_btype_applicable = building_type in ["Hospitality", "Health Care"]
-
-        if not er_btype_applicable:
-            st.markdown(
-                f'<div class="exc-box">🔶 6.3.11 applies to <b>Hospitality</b> and '
-                f'<b>Healthcare</b> occupancies only. This building type '
-                f'({building_type}) is <b>not subject</b> to 6.3.11.</div>',
-                unsafe_allow_html=True,
-            )
-            er_6311_pass = True
-        else:
-            er_cap_6311 = st.number_input(
-                "Energy recovery system capacity (m³/hr)",
-                min_value=0.0, value=8000.0, step=500.0, key="er_cap_6311",
-            )
-            min_oa_pct = st.number_input(
-                "Minimum outdoor air supply as % of total supply air",
-                min_value=0.0, max_value=100.0, value=70.0, step=1.0,
-                key="er_oa_6311",
-            )
-
-            if er_cap_6311 <= 7560 or min_oa_pct < 70:
-                st.markdown(
-                    f'<div class="exc-box">🔶 Energy recovery NOT mandatory: '
-                    f'capacity {er_cap_6311:,.0f} m³/hr '
-                    f'{"≤ 7,560 m³/hr" if er_cap_6311 <= 7560 else ""}'
-                    f'{"and OA% " + str(min_oa_pct) + "% < 70%" if min_oa_pct < 70 else ""}.'
+                    f'<div class="info-box">'
+                    f'Equipment: {ct_data["equipment_type"]}<br>'
+                    f'Rating Condition: {ct_data["rating_condition"]}<br>'
+                    f'Efficiency: {ct_data["efficiency"]}<br>'
+                    f'Max Approach Temperature: <b>{ct_data["approach_max_C"]} °C</b>'
                     f'</div>',
+                    unsafe_allow_html=True,
+                )
+
+                ct_approach = st.number_input(
+                    f"Cooling tower approach temperature (°C) - max {ct_data['approach_max_C']} °C",
+                    min_value=0.0, value=float(ct_data["approach_max_C"]), step=0.1,
+                    key="ct_approach_634",
+                )
+                ct_approach_pass = ct_approach <= ct_data["approach_max_C"]
+                st.markdown(
+                    f"{check_icon(ct_approach_pass)} Approach: {ct_approach} °C vs max {ct_data['approach_max_C']} °C"
+                )
+
+                ct_eff_val = st.number_input(
+                    "Cooling tower fan efficiency (kW/(ltr·sec.))",
+                    min_value=0.0, value=0.35, step=0.01, key="ct_eff_634",
+                )
+                ct_eff_pass = ct_eff_val <= 0.35
+                st.markdown(f"{check_icon(ct_eff_pass)} Fan efficiency: {ct_eff_val} vs max 0.35 kW/(ltr·sec.)")
+
+                ct_634_pass = ct_approach_pass and ct_eff_pass
+            else:
+                ct_634_pass = True  
+
+        with c2:
+            hvac_results["6.3.4 Cooling Towers"] = ct_634_pass if has_ct else None
+            st.markdown(f"**Status:** {check_icon(ct_634_pass if has_ct else None)}")
+            if not has_ct:
+                st.markdown('<span class="na-badge">N/A</span>', unsafe_allow_html=True)
+
+    # ─────────────────────────────────────────────────────────────────────────────
+    # 6.3.5  ECONOMIZER
+    # ─────────────────────────────────────────────────────────────────────────────
+    with st.expander("**6.3.5 – Economizer**"):
+        c1, c2 = st.columns([2, 1])
+
+        with c1:
+            eco_bua_required = gross_area > 20000
+
+            if not eco_bua_required:
+                st.markdown(
+                    f'<div class="exc-box">🔶 Economizer (6.3.5-a) NOT required: '
+                    f'BUA {gross_area:,.0f} m² ≤ 20,000 m².</div>',
+                    unsafe_allow_html=True,
+                )
+                eco_635_pass = True
+            else:
+                st.markdown(
+                    '<div class="info-box">6.3.5-(a): Each cooling fan system in buildings '
+                    '&gt;20,000 m² BUA must include at least one economizer (air-side or water-side).</div>',
+                    unsafe_allow_html=True,
+                )
+
+                # ── Exception to 6.3.5-(a) ──────────────────────────────────
+
+                is_warm_humid = st.checkbox(
+                    "Building is in Warm-Humid climate zone? (Exception 6.3.5-a #1)",
+                    key="eco_wh_635",
+                )
+                is_hotdry_daytime = st.checkbox(
+                    "Building has only daytime occupancy in Hot-Dry climate zone? (Exception 6.3.5-a #2)",
+                    key="eco_hd_635",
+                )
+                small_system = st.checkbox(
+                    "Individual cooling/heating fan system < 11,520 m³/hr? (Exception 6.3.5-a #3)",
+                    key="eco_sm_635",
+                )
+
+                if is_warm_humid:
+                    st.markdown(
+                        '<div class="exc-box">🔶 <b>Exception 6.3.5-a #1</b>: Warm-Humid zone — '
+                        'economizer NOT required.</div>',
+                        unsafe_allow_html=True,
+                    )
+                if is_hotdry_daytime:
+                    st.markdown(
+                        '<div class="exc-box">🔶 <b>Exception 6.3.5-a #2</b>: Daytime-only Hot-Dry — '
+                        'economizer NOT required.</div>',
+                        unsafe_allow_html=True,
+                    )
+                if small_system:
+                    st.markdown(
+                        '<div class="exc-box">🔶 <b>Exception 6.3.5-a #3</b>: System &lt; 11,520 m³/hr — '
+                        'economizer NOT required.</div>',
+                        unsafe_allow_html=True,
+                    )
+
+                any_exception = is_warm_humid or is_hotdry_daytime or small_system
+
+                if any_exception:
+                    eco_635_pass = True
+                else:
+                    eco_type_635 = st.selectbox(
+                        "Economizer type installed",
+                        ["Air-side", "Water-side", "Both", "Not installed"],
+                        key="eco_type_635",
+                    )
+                    eco_provided = eco_type_635 != "Not installed"
+
+                    # ── 6.3.5-(b) Partial Cooling ────────────────────────────
+                    partial_cooling_ok = st.selectbox(
+                        "**6.3.5-(b): Economizer can provide partial cooling alongside mechanical cooling?**",
+                        ["Yes", "No", "N/A"], key="partial_cool_635",
+                    )
+
+                    # ── 6.3.5-(c) Economizer Controls ────────────────────────
+                    eco_ctrl1 = eco_ctrl2 = eco_ctrl3 = "N/A"  # default for water-side or no economizer
+                    if eco_type_635 in ["Air-side", "Both"]:
+                        st.markdown("**6.3.5-(c) Economizer Controls:**")
+
+                        eco_ctrl1 = st.selectbox(
+                            "Dampers sequenced with mechanical cooling (not only mixed-air temp)?",
+                            ["Yes", "No", "N/A"], key="eco_c1_635",
+                        )
+                        eco_ctrl2 = st.selectbox(
+                            "Auto-reduces outdoor air to design minimum when no longer reduces cooling energy?",
+                            ["Yes", "No", "N/A"], key="eco_c2_635",
+                        )
+                        eco_ctrl3 = st.selectbox(
+                            "High-limit shutoff at 24°C dry-bulb temperature?",
+                            ["Yes", "No", "N/A"], key="eco_c3_635",
+                        )
+
+                    # ── 6.3.5-(d) Testing / Commissioning ────────────────────
+                        st.markdown("**6.3.5-(d) Testing of Economizers:**")
+
+                    if eco_type_635 in ["Air-side", "Both"]:
+                        factory_commissioned_635 = st.checkbox(
+                            "Air-side economizer factory tested & calibrated per Appendix 3 + AHJ certified?",
+                            key="eco_factory_635",
+                            help="Exception 6.3.5-(d): Factory tested + AHJ certified → field commissioning waived.",
+                        )
+                        if factory_commissioned_635:
+                            st.markdown(
+                                '<div class="exc-box">🔶 <b>Exception 6.3.5-(d)</b>: Factory tested + '
+                                'AHJ certified — field commissioning requirement is <b>WAIVED</b>.</div>',
+                                unsafe_allow_html=True,
+                            )
+                            eco_comm_pass = True
+                        else:
+                            eco_comm_val = st.selectbox(
+                                "Air-side economizer field commissioned per Appendix 3?",
+                                ["Yes", "No", "N/A"], key="eco_field_635",
+                            )
+                            eco_comm_pass = eco_comm_val in ["Yes", "N/A"]
+                    else:
+                        eco_comm_pass = True  # water-side; no Appendix 3 field test required
+
+                    ctrl_items_635 = [eco_ctrl1, eco_ctrl2, eco_ctrl3]
+                    ctrl_pass_635 = all(x in ["Yes", "N/A"] for x in ctrl_items_635)
+
+                    eco_635_pass = (
+                        eco_provided
+                        and partial_cooling_ok in ["Yes", "N/A"]
+                        and ctrl_pass_635
+                        and eco_comm_pass
+                    )
+
+        with c2:
+            hvac_results["6.3.5 Economizer"] = eco_635_pass
+            st.markdown(f"**Status:** {check_icon(eco_635_pass)}")
+
+    # ─────────────────────────────────────────────────────────────────────────────
+    # 6.3.6  VARIABLE FLOW HYDRONIC SYSTEM
+    # ─────────────────────────────────────────────────────────────────────────────
+    with st.expander("**6.3.6 – Variable Flow Hydronic System**"):
+        c1, c2 = st.columns([2, 1])
+
+        with c1:
+            has_hydronic = st.checkbox(
+                "Project has a hydronic pumping system (HVAC)?", key="has_hydro_636"
+            )
+
+            if has_hydronic:
+                pump_total_kw = st.number_input(
+                    "Total pump system power (kW)",
+                    min_value=0.0, value=10.0, step=0.5, key="pump_kw_636",
+                )
+
+                if pump_total_kw <= 7.5:
+                    st.markdown(
+                        f'<div class="exc-box">🔶 Total pump power {pump_total_kw} kW ≤ 7.5 kW — '
+                        f'variable fluid flow NOT required (6.3.6-a).</div>',
+                        unsafe_allow_html=True,
+                    )
+                    vff_636_pass = True
+                else:
+                    st.markdown(
+                        '<div class="info-box">6.3.6-(a): Pumping system &gt; 7.5 kW must be '
+                        'designed for variable fluid flow, capable of reducing to the greater of '
+                        '50% of design flow OR manufacturer minimum for chiller operation.</div>',
+                        unsafe_allow_html=True,
+                    )
+
+                    min_flow_pct = st.number_input(
+                        "Minimum achievable pump flow as % of design flow",
+                        min_value=0.0, max_value=100.0, value=50.0, step=1.0,
+                        key="min_flow_636",
+                    )
+                    chiller_min_flow = st.number_input(
+                        "Chiller manufacturer minimum flow as % of design flow",
+                        min_value=0.0, max_value=100.0, value=30.0, step=1.0,
+                        key="chiller_min_636",
+                    )
+                    vff_limit = max(50.0, chiller_min_flow)
+                    vff_ok = min_flow_pct <= vff_limit
+                    st.markdown(
+                        f"Required ≤ max(50%, chiller min {chiller_min_flow:.0f}%) = "
+                        f"**{vff_limit:.0f}%** | Proposed: {min_flow_pct:.0f}% "
+                        f"{check_icon(vff_ok)}"
+                    )
+
+                    # ── 6.3.6-(b) Auto shut-off condenser water flow ─────────
+                    st.markdown("**6.3.6-(b) Automatic Shut-off of Condenser Water Flow:**")
+                    cond_pump_kw = st.number_input(
+                        "Condenser water circulation pump motor power (kW)",
+                        min_value=0.0, value=8.0, step=0.5, key="cond_kw_636",
+                    )
+                    if cond_pump_kw < 7.5:
+                        st.markdown(
+                            f'<div class="exc-box">🔶 Pump motor {cond_pump_kw} kW &lt; 7.5 kW — '
+                            f'two-way isolation valve NOT required (6.3.6-b).</div>',
+                            unsafe_allow_html=True,
+                        )
+                        iso_valve_pass = True
+                    else:
+                        iso_valve = st.selectbox(
+                            "Two-way automatic isolation valve (interlocked with compressor) installed?",
+                            ["Yes", "No", "N/A"], key="iso_valve_636",
+                        )
+                        iso_valve_pass = iso_valve in ["Yes", "N/A"]
+                        st.markdown(
+                            f"{check_icon(iso_valve_pass)} Isolation valve / control interlocked with compressor"
+                        )
+
+                    vff_636_pass = vff_ok and iso_valve_pass
+            else:
+                vff_636_pass = True
+
+        with c2:
+            hvac_results["6.3.6 Variable Flow Hydronic"] = vff_636_pass if has_hydronic else None
+            st.markdown(f"**Status:** {check_icon(vff_636_pass if has_hydronic else None)}")
+            if not has_hydronic:
+                st.markdown('<span class="na-badge">N/A</span>', unsafe_allow_html=True)
+
+    # ─────────────────────────────────────────────────────────────────────────────
+    # 6.3.7  UNITARY, SPLIT, PACKAGED ACs  (ECSBC+ / Super ECSBC enhanced limits)
+    # ─────────────────────────────────────────────────────────────────────────────
+    with st.expander("**6.3.7 – Unitary, Split & Packaged Air-Conditioners (ECSBC+/Super ECSBC)**"):
+        c1, c2 = st.columns([2, 1])
+
+        with c1:
+            if compliance_level == "ECSBC":
+                st.markdown(
+                    '<div class="info-box">6.3.7 enhanced efficiency requirements apply to '
+                    '<b>ECSBC+</b> and <b>Super ECSBC</b> only. '
+                    'For ECSBC, refer to section 6.2.2(b).</div>',
+                    unsafe_allow_html=True,
+                )
+                unitary_637_pass = True
+            else:
+                req_star = UNITARY_AC_STAR[compliance_level]
+                st.markdown(
+                    f'<div class="info-box">Table 6.19 ({compliance_level}): '
+                    f'Non-ducted (Window/Split) ACs up to 18,000 Wr must meet '
+                    f'<b>{req_star["label"]}</b>.</div>',
+                    unsafe_allow_html=True,
+                )
+
+                has_unitary_637 = st.checkbox(
+                    "Project has unitary/split/packaged AC units?", key="has_unit_637"
+                )
+
+                if has_unitary_637:
+                    # ── Non-ducted ───────────────────────────────────────────
+                    nd_star = st.selectbox(
+                        f"Non-ducted AC BEE Star (min {req_star['label']})",
+                        [1, 2, 3, 4, 5],
+                        index=req_star["non_ducted_star"] - 1,
+                        key="nd_star_637",
+                    )
+                    nd_pass = nd_star >= req_star["non_ducted_star"]
+                    st.markdown(f"{check_icon(nd_pass)} BEE {nd_star}★ (min: {req_star['non_ducted_star']}★)")
+
+                    # ── Ducted/Packaged ──────────────────────────────────────
+                    has_duc_637 = st.checkbox("Ducted/packaged AC above 3,500 Wr present?", key="has_duc_637")
+                    duc_637_pass = True
+
+                    if has_duc_637:
+                        duc_cap_637 = st.number_input(
+                            "Ducted/Packaged capacity (kWr)",
+                            min_value=3.5, value=20.0, step=0.5, key="duc_cap_637",
+                        )
+                        duc_ct_637 = st.selectbox(
+                            "Cooling type", ["Air Cooled", "Water Cooled"], key="duc_ct_637"
+                        )
+                        duc_reqs = DUCTED_AC_637[compliance_level]
+
+                        if duc_cap_637 <= 10.5:
+                            if duc_ct_637 == "Air Cooled":
+                                min_star = 4 if compliance_level == "ECSBC+" else 5
+                                duc_star_val = st.selectbox(
+                                    f"Ducted AC BEE Star (≤10.5 kWr Air Cooled, min {min_star}★)",
+                                    [1, 2, 3, 4, 5], index=min_star - 1, key="duc_star_637",
+                                )
+                                duc_637_pass = duc_star_val >= min_star
+                                st.markdown(f"{check_icon(duc_637_pass)} BEE {duc_star_val}★ (min: {min_star}★)")
+                            else:
+                                st.markdown(
+                                    f'<div class="info-box">Water Cooled ≤10.5 kWr: N/A per Tables 6.20/6.21.</div>',
+                                    unsafe_allow_html=True,
+                                )
+                        else:
+                            req_eer_637 = (
+                                duc_reqs["water_cooled_gt10_5_eer"]
+                                if duc_ct_637 == "Water Cooled"
+                                else duc_reqs["air_cooled_gt10_5_eer"]
+                            )
+                            duc_eer_637 = st.number_input(
+                                f"EER (min {req_eer_637} for {duc_ct_637}, &gt;10.5 kWr)",
+                                min_value=0.5, value=req_eer_637, step=0.1, key="duc_eer_637",
+                            )
+                            duc_637_pass = duc_eer_637 >= req_eer_637
+                            st.markdown(
+                                f"{check_icon(duc_637_pass)} EER: {duc_eer_637} vs min {req_eer_637} ({duc_ct_637})"
+                            )
+                            st.caption(
+                                "EER will be replaced by IEER when BEE Star Labelling Programme is effective for >10,500 Wr."
+                            )
+
+                    unitary_637_pass = nd_pass and duc_637_pass
+                else:
+                    unitary_637_pass = True
+
+        with c2:
+            hvac_results["6.3.7 Unitary/Split/Pkg AC"] = (
+                unitary_637_pass if compliance_level != "ECSBC" else None
+            )
+            st.markdown(
+                f"**Status:** {check_icon(unitary_637_pass if compliance_level != 'ECSBC' else None)}"
+            )
+            if compliance_level == "ECSBC":
+                st.markdown('<span class="na-badge">N/A for ECSBC</span>', unsafe_allow_html=True)
+
+    # ─────────────────────────────────────────────────────────────────────────────
+    # 6.3.8  VARIABLE REFRIGERANT FLOW (VRF) ACs
+    # ─────────────────────────────────────────────────────────────────────────────
+    with st.expander("**6.3.8 – Variable Refrigerant Flow (VRF) Air-Conditioners**"):
+        c1, c2 = st.columns([2, 1])
+
+        with c1:
+            has_vrf_638 = st.checkbox("Project has VRF/VRV systems?", key="has_vrf_638")
+
+            if has_vrf_638:
+                iseer_reqs = VRF_ISEER_638[compliance_level]
+                st.markdown(
+                    f'<div class="info-box"><b>Minimum ISEER ({compliance_level})</b><br>'
+                    f'&lt;40 kWr → {iseer_reqs["lt40"]} | '
+                    f'≥40 &amp; &lt;70 kWr → {iseer_reqs["ge40_lt70"]} | '
+                    f'≥70 kWr → {iseer_reqs["ge70"]}'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+
+                vrf_cap_638 = st.number_input(
+                    "VRF system cooling capacity (kWr)",
+                    min_value=1.0, value=50.0, step=1.0, key="vrf_cap_638",
+                )
+
+                if vrf_cap_638 < 40:
+                    req_iseer_638 = iseer_reqs["lt40"]
+                    cap_range_638 = "< 40 kWr"
+                elif vrf_cap_638 < 70:
+                    req_iseer_638 = iseer_reqs["ge40_lt70"]
+                    cap_range_638 = "≥ 40 and < 70 kWr"
+                else:
+                    req_iseer_638 = iseer_reqs["ge70"]
+                    cap_range_638 = "≥ 70 kWr"
+
+                vrf_iseer_638 = st.number_input(
+                    f"Proposed VRF ISEER (min {req_iseer_638} for {cap_range_638})",
+                    min_value=1.0, value=req_iseer_638, step=0.1, key="vrf_iseer_638",
+                )
+                vrf_638_pass = vrf_iseer_638 >= req_iseer_638
+                st.markdown(
+                    f"{check_icon(vrf_638_pass)} ISEER: {vrf_iseer_638} vs min {req_iseer_638} ({cap_range_638})"
+                )
+                st.caption(
+                    "ISEER and EER calculation per BIS standard for VRF ACs (currently in draft form)."
+                )
+            else:
+                vrf_638_pass = True
+
+        with c2:
+            hvac_results["6.3.8 VRF Systems"] = vrf_638_pass if has_vrf_638 else None
+            st.markdown(f"**Status:** {check_icon(vrf_638_pass if has_vrf_638 else None)}")
+            if not has_vrf_638:
+                st.markdown('<span class="na-badge">N/A</span>', unsafe_allow_html=True)
+
+    # ─────────────────────────────────────────────────────────────────────────────
+    # 6.3.9  CONTROLS FOR ECSBC+ BUILDINGS
+    # ─────────────────────────────────────────────────────────────────────────────
+    if compliance_level == 'ECSBC+':
+        with st.expander(f"**6.3.9 – Controls for ECSBC+ Buildings**"):
+            c1, c2 = st.columns([2, 1])
+
+            with c1:
+                st.markdown(
+                    '<div class="info-box">6.3.9: Required in addition to 6.2.3 mandatory controls '
+                    'for ECSBC+ and Super ECSBC buildings.</div>',
+                    unsafe_allow_html=True,
+                )
+
+                # (a) Zone Temperature Control
+                st.markdown("**6.3.9-(a) Zone Temperature Control:**")
+                ztc_639 = st.selectbox(
+                    "Common-area space temperature set-point varied automatically based on outside temperature?",
+                    ["Yes", "No", "N/A"], key="ztc_639",
+                )
+
+                # (b) AHU Fan Energy Optimization
+                st.markdown("**6.3.9-(b) AHU Fan Energy Optimization:**")
+                ahu_opt_639 = st.selectbox(
+                    "Control system optimizes AHU fan static pressure dynamically across VAV/auto-diffuser zones?",
+                    ["Yes", "No", "N/A"], key="ahu_opt_639",
+                )
+
+                # (c) Secondary Pump Energy Optimization
+                st.markdown("**6.3.9-(c) Secondary Pump Energy Optimization:**")
+                pump_opt_639 = st.selectbox(
+                    "Control system optimizes chilled water pump speed for loops and terminal units?",
+                    ["Yes", "No", "N/A"], key="pump_opt_639",
+                )
+
+                ctrl_639_pass = all(
+                    x in ["Yes", "N/A"] for x in [ztc_639, ahu_opt_639, pump_opt_639]
+                ) and any(x == "Yes" for x in [ztc_639, ahu_opt_639, pump_opt_639])
+
+            with c2:
+                hvac_results["6.3.9 ECSBC+ Controls"] = ctrl_639_pass
+                st.markdown(f"**Status:** {check_icon(ctrl_639_pass)}")
+
+    # ─────────────────────────────────────────────────────────────────────────────
+    # 6.3.10  CONTROLS FOR SUPER ECSBC BUILDINGS
+    # ─────────────────────────────────────────────────────────────────────────────
+    if compliance_level == "Super ECSBC":
+        with st.expander(f"**6.3.10 – Controls for Super ECSBC Buildings**"):
+            c1, c2 = st.columns([2, 1])
+
+            with c1:
+                st.markdown(
+                    '<div class="info-box">6.3.10: Required in addition to 6.2.3 and 6.3.9 '
+                    'for Super ECSBC buildings.</div>',
+                    unsafe_allow_html=True,
+                )
+
+                # (a) Zone Temperature Control – centralised correction
+                st.markdown("**6.3.10-(a) Centralised Zone Temperature Correction:**")
+                cztc_6310 = st.selectbox(
+                    "Centralised system auto-corrects heating/cooling set-points altered by occupants at regular intervals?",
+                    ["Yes", "No", "N/A"], key="cztc_6310",
+                )
+
+                # (b) Control of Fenestration Louver or Blinds
+                st.markdown("**6.3.10-(b) Fenestration / Louver / Blind Control:**")
+                has_large_glazing = st.checkbox(
+                    "Building has large glass façades (curtain walls, large glazed areas)?",
+                    key="lg_glass_6310",
+                )
+                if has_large_glazing:
+                    fene_ctrl_6310 = st.selectbox(
+                        "Automatic control of curtains, blinds or external louvers installed?",
+                        ["Yes", "No", "N/A"], key="fene_ctrl_6310",
+                    )
+                else:
+                    fene_ctrl_6310 = "N/A"
+                    st.markdown(
+                        '<div class="exc-box">🔶 No large glass façade — '
+                        'fenestration control not required.</div>',
+                        unsafe_allow_html=True,
+                    )
+
+                # (c) Occupancy Control
+                st.markdown("**6.3.10-(c) Occupancy Control (real-time headcount):**")
+                has_large_zones = st.checkbox(
+                    "Building has large zones (e.g. open-plan workstation areas)?",
+                    key="lz_6310",
+                )
+                if has_large_zones:
+                    occ_ctrl_6310 = st.selectbox(
+                        "Conditioning equipment for large zones has real-time headcount energy saving capability?",
+                        ["Yes", "No", "N/A"], key="occ_ctrl_6310",
+                    )
+                else:
+                    occ_ctrl_6310 = "N/A"
+                    st.markdown(
+                        '<div class="exc-box">🔶 No large zones — occupancy control not required.</div>',
+                        unsafe_allow_html=True,
+                    )
+
+                # (d) Chiller Plant Control
+                st.markdown("**6.3.10-(d) Chiller Plant Control:**")
+                total_chiller_kw_6310 = st.number_input(
+                    "Total chilled water plant cooling capacity (kW)",
+                    min_value=0.0, value=1000.0, step=50.0, key="chiller_tot_6310",
+                )
+                num_chillers_6310 = st.number_input(
+                    "Number of chillers in one plant room",
+                    min_value=0, value=2, step=1, key="num_ch_6310",
+                )
+
+                if total_chiller_kw_6310 > 1500 or num_chillers_6310 > 3:
+                    cpc_6310 = st.selectbox(
+                        "Chiller plant control system optimises chillers, pumps and cooling tower fans on real-time basis?",
+                        ["Yes", "No", "N/A"], key="cpc_6310",
+                    )
+                    chiller_ctrl_pass = cpc_6310 in ["Yes", "N/A"]
+                    if total_chiller_kw_6310 > 1500:
+                        st.markdown(
+                            f'<div class="info-box">Plant capacity {total_chiller_kw_6310:.0f} kW &gt; 1,500 kW — '
+                            f'chiller plant control required.</div>',
+                            unsafe_allow_html=True,
+                        )
+                    if num_chillers_6310 > 3:
+                        st.markdown(
+                            f'<div class="info-box">{num_chillers_6310} chillers &gt; 3 in one plant room — '
+                            f'chiller plant control required.</div>',
+                            unsafe_allow_html=True,
+                        )
+                else:
+                    st.markdown(
+                        f'<div class="exc-box">🔶 Chiller plant control NOT required: '
+                        f'capacity {total_chiller_kw_6310:.0f} kW ≤ 1,500 kW and '
+                        f'{num_chillers_6310} chillers ≤ 3.</div>',
+                        unsafe_allow_html=True,
+                    )
+                    chiller_ctrl_pass = True
+
+                ctrl_6310_items = [cztc_6310, fene_ctrl_6310, occ_ctrl_6310]
+                ctrl_6310_pass = (
+                    all(x in ["Yes", "N/A"] for x in ctrl_6310_items)
+                    and chiller_ctrl_pass
+                    and any(x == "Yes" for x in ctrl_6310_items)
+                )
+
+            with c2:
+                hvac_results["6.3.10 Super ECSBC Controls"] = ctrl_6310_pass
+                st.markdown(f"**Status:** {check_icon(ctrl_6310_pass)}")
+
+    # ─────────────────────────────────────────────────────────────────────────────
+    # 6.3.11  ENERGY RECOVERY
+    # ─────────────────────────────────────────────────────────────────────────────
+    with st.expander("**6.3.11 – Energy Recovery**"):
+        c1, c2 = st.columns([2, 1])
+        EXEMPT_ER = {"Kitchen", "Laundry", "Operation Theater / ICU", "Laboratory"}
+
+        with c1:
+            er_btype_applicable = building_type in ["Hospitality", "Health Care"]
+
+            if not er_btype_applicable:
+                st.markdown(
+                    f'<div class="exc-box">🔶 6.3.11 applies to <b>Hospitality</b> and '
+                    f'<b>Healthcare</b> occupancies only. This building type '
+                    f'({building_type}) is <b>not subject</b> to 6.3.11.</div>',
                     unsafe_allow_html=True,
                 )
                 er_6311_pass = True
             else:
-                er_sources = st.multiselect(
-                    "Exhaust air sources served",
-                    ["General HVAC", "Kitchen", "Laundry", "Operation Theater / ICU", "Laboratory"],
-                    default=["General HVAC"],
-                    key="er_src_6311",
+                er_cap_6311 = st.number_input(
+                    "Energy recovery system capacity (m³/hr)",
+                    min_value=0.0, value=8000.0, step=500.0, key="er_cap_6311",
+                )
+                min_oa_pct = st.number_input(
+                    "Minimum outdoor air supply as % of total supply air",
+                    min_value=0.0, max_value=100.0, value=70.0, step=1.0,
+                    key="er_oa_6311",
                 )
 
-                non_exempt_6311 = [s for s in er_sources if s not in EXEMPT_ER]
-
-                if not non_exempt_6311:
+                if er_cap_6311 <= 7560 or min_oa_pct < 70:
                     st.markdown(
-                        '<div class="exc-box">🔶 <b>Exception 6.3.11</b>: Only exempt exhaust sources '
-                        '(Kitchen/Laundry/OR/ICU/Lab) — energy recovery NOT required.</div>',
+                        f'<div class="exc-box">🔶 Energy recovery NOT mandatory: '
+                        f'capacity {er_cap_6311:,.0f} m³/hr '
+                        f'{"≤ 7,560 m³/hr" if er_cap_6311 <= 7560 else ""}'
+                        f'{"and OA% " + str(min_oa_pct) + "% < 70%" if min_oa_pct < 70 else ""}.'
+                        f'</div>',
                         unsafe_allow_html=True,
                     )
                     er_6311_pass = True
                 else:
-                    er_ok_6311 = st.selectbox(
-                        "Air-to-air heat recovery with min 60% effectiveness provided for non-exempt exhaust?",
-                        ["Yes", "No", "N/A"], key="er_ok_6311",
+                    er_sources = st.multiselect(
+                        "Exhaust air sources served",
+                        ["General HVAC", "Kitchen", "Laundry", "Operation Theater / ICU", "Laboratory"],
+                        default=["General HVAC"],
+                        key="er_src_6311",
                     )
-                    er_eff_6311 = st.number_input(
-                        "Actual recovery effectiveness (%)",
-                        min_value=0.0, max_value=100.0, value=65.0, step=1.0,
-                        key="er_eff_6311",
-                    )
-                    er_eff_pass = er_eff_6311 >= 60.0
-                    st.markdown(
-                        f"{check_icon(er_eff_pass)} Effectiveness: {er_eff_6311:.0f}% vs min 60%"
-                    )
-                    er_6311_pass = er_ok_6311 in ["Yes", "N/A"] and er_eff_pass
 
-    with c2:
-        hvac_results["6.3.11 Energy Recovery"] = er_6311_pass
-        st.markdown(f"**Status:** {check_icon(er_6311_pass)}")
+                    non_exempt_6311 = [s for s in er_sources if s not in EXEMPT_ER]
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 6.3.12  TOTAL SYSTEM EFFICIENCY – ALTERNATE COMPLIANCE APPROACH
-# ─────────────────────────────────────────────────────────────────────────────
-with st.expander("**6.3.12 – Total System Efficiency (Alternate Compliance Approach)**"):
-    c1, c2 = st.columns([2, 1])
-    req_tse = TOTAL_SYS_EFF[compliance_level]
+                    if not non_exempt_6311:
+                        st.markdown(
+                            '<div class="exc-box">🔶 <b>Exception 6.3.11</b>: Only exempt exhaust sources '
+                            '(Kitchen/Laundry/OR/ICU/Lab) — energy recovery NOT required.</div>',
+                            unsafe_allow_html=True,
+                        )
+                        er_6311_pass = True
+                    else:
+                        er_ok_6311 = st.selectbox(
+                            "Air-to-air heat recovery with min 60% effectiveness provided for non-exempt exhaust?",
+                            ["Yes", "No", "N/A"], key="er_ok_6311",
+                        )
+                        er_eff_6311 = st.number_input(
+                            "Actual recovery effectiveness (%)",
+                            min_value=0.0, max_value=100.0, value=65.0, step=1.0,
+                            key="er_eff_6311",
+                        )
+                        er_eff_pass = er_eff_6311 >= 60.0
+                        st.markdown(
+                            f"{check_icon(er_eff_pass)} Effectiveness: {er_eff_6311:.0f}% vs min 60%"
+                        )
+                        er_6311_pass = er_ok_6311 in ["Yes", "N/A"] and er_eff_pass
 
-    with c1:
-        use_tse = st.checkbox(
-            "Using Total System Efficiency alternate compliance path (6.3.12)?",
-            key="use_tse_6312",
-            help="Alternate to individual equipment requirements under 6.3. Applies to central chilled water plant.",
-        )
+        with c2:
+            hvac_results["6.3.11 Energy Recovery"] = er_6311_pass
+            st.markdown(f"**Status:** {check_icon(er_6311_pass)}")
 
-        if use_tse:
-            st.markdown(
-                f'<div class="info-box"><b>Maximum System Efficiency Threshold '
-                f'({compliance_level})</b>: ≤ <b>{req_tse} kW/kWr</b><br>'
-                f'Scope: Chillers + chilled water pumps + condenser water pumps + cooling tower fans.<br>',
-                unsafe_allow_html=True,
+    # ─────────────────────────────────────────────────────────────────────────────
+    # 6.3.12  TOTAL SYSTEM EFFICIENCY – ALTERNATE COMPLIANCE APPROACH
+    # ─────────────────────────────────────────────────────────────────────────────
+    with st.expander("**6.3.12 – Total System Efficiency (Alternate Compliance Approach)**"):
+        c1, c2 = st.columns([2, 1])
+        req_tse = TOTAL_SYS_EFF[compliance_level]
+
+        with c1:
+            use_tse = st.checkbox(
+                "Using Total System Efficiency alternate compliance path (6.3.12)?",
+                key="use_tse_6312",
+                help="Alternate to individual equipment requirements under 6.3. Applies to central chilled water plant.",
             )
 
-            st.markdown("**TSE = Annual Chiller Plant Energy (kWh) ÷ Annual Cooling Generation (kWrh)**")
-
-            annual_energy_kwh = st.number_input(
-                "Annual chiller plant energy consumption (kWh)",
-                min_value=0.0, value=500000.0, step=10000.0, key="ae_6312",
-            )
-            annual_cooling_kwrh = st.number_input(
-                "Annual chiller plant cooling generation (kWrh)",
-                min_value=1.0, value=2200000.0, step=10000.0, key="ac_6312",
-            )
-
-            tse_val = annual_energy_kwh / annual_cooling_kwrh if annual_cooling_kwrh > 0 else 0.0
-            tse_pass = tse_val <= req_tse
-            st.markdown(
-                f"**Calculated TSE = {tse_val:.4f} kW/kWr** vs max **{req_tse} kW/kWr** "
-                f"{check_icon(tse_pass)}"
-            )
-
-            st.markdown("**6.3.12-(a) Documentation Requirements:**")
-            tse_doc1 = st.selectbox(
-                "Summary with annual energy/cooling results and simulation software stated?",
-                ["Yes", "No", "N/A"], key="tse_d1",
-            )
-            tse_doc2 = st.selectbox(
-                "Project brief (location, stories, space types, areas, hours) submitted?",
-                ["Yes", "No", "N/A"], key="tse_d2",
-            )
-            tse_doc3 = st.selectbox(
-                "List of energy-related building features submitted?",
-                ["Yes", "No", "N/A"], key="tse_d3",
-            )
-            tse_doc4 = st.selectbox(
-                "Mandatory requirements compliance list submitted?",
-                ["Yes", "No", "N/A"], key="tse_d4",
-            )
-            tse_doc5 = st.selectbox(
-                "Simulation input/output reports (energy + chilled water) submitted?",
-                ["Yes", "No", "N/A"], key="tse_d5",
-            )
-            tse_doc6 = st.selectbox(
-                "Modelling assumptions and error messages explained?",
-                ["Yes", "No", "N/A"], key="tse_d6",
-            )
-
-            doc_items = [tse_doc1, tse_doc2, tse_doc3, tse_doc4, tse_doc5, tse_doc6]
-            doc_pass = all(x in ["Yes", "N/A"] for x in doc_items)
-
-            tse_6312_pass = tse_pass and doc_pass
-        else:
-            tse_6312_pass = None  # not using this path
-
-    with c2:
-        hvac_results["6.3.12 Total System Efficiency"] = tse_6312_pass
-        st.markdown(f"**Status:** {check_icon(tse_6312_pass)}")
-        if tse_6312_pass is None:
-            st.markdown('<span class="na-badge">Not selected</span>', unsafe_allow_html=True)
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 6.3.13  LOW-ENERGY COMFORT SYSTEMS
-# ─────────────────────────────────────────────────────────────────────────────
-with st.expander(f"**6.3.13 – Low-Energy Comfort Systems**"):
-    c1, c2 = st.columns([2, 1])
-
-    with c1:
-        has_lecs = st.checkbox(
-            "Project uses an approved Low-Energy Comfort System (LECS)?",
-            key="has_lecs_6313",
-        )
-
-        if has_lecs:
-            st.markdown(
-                '<div class="info-box">6.3.13: Low-energy systems are deemed to meet minimum '
-                'equipment efficiency (6.2.2) but must still comply with all other mandatory '
-                'provisions of 6.2, and where applicable 6.3 / 6.3.12.</div>',
-                unsafe_allow_html=True,
-            )
-
-            lecs_selected = st.multiselect(
-                "Approved LECS type(s) installed",
-                LOW_ENERGY_SYSTEMS,
-                key="lecs_type_6313",
-            )
-
-            if lecs_selected:
-                total_cap_kwr = st.number_input(
-                    "Total building cooling + heating capacity requirement (kWr)",
-                    min_value=1.0, value=500.0, step=10.0, key="total_cap_6313",
-                )
-                lecs_cap_kwr = st.number_input(
-                    "LECS installed capacity (kWr)",
-                    min_value=0.0, value=300.0, step=10.0, key="lecs_cap_6313",
-                )
-                lecs_pct = (lecs_cap_kwr / total_cap_kwr * 100) if total_cap_kwr > 0 else 0.0
-
-                if lecs_pct >= 90:
-                    deemed_level = "Super ECSBC"
-                    lecs_color = "#d4edda"
-                elif lecs_pct >= 50:
-                    deemed_level = "ECSBC+"
-                    lecs_color = "#fff3cd"
-                else:
-                    deemed_level = "Below ECSBC+ threshold"
-                    lecs_color = "#f8d7da"
-
+            if use_tse:
                 st.markdown(
-                    f'<div style="background:{lecs_color};border-radius:8px;padding:10px 14px;margin-bottom:8px;">'
-                    f'<b>LECS Coverage: {lecs_pct:.1f}%</b> of total capacity<br>'
-                    f'Deemed compliance level: <b>{deemed_level}</b>'
-                    f'{"<br>≥50% → deemed ECSBC+" if lecs_pct >= 50 else ""}'
-                    f'{"<br>≥90% → deemed Super ECSBC" if lecs_pct >= 90 else ""}'
-                    f'</div>',
+                    f'<div class="info-box"><b>Maximum System Efficiency Threshold '
+                    f'({compliance_level})</b>: ≤ <b>{req_tse} kW/kWr</b><br>'
+                    f'Scope: Chillers + chilled water pumps + condenser water pumps + cooling tower fans.<br>',
                     unsafe_allow_html=True,
                 )
 
-                st.markdown("**6.3.13-(a) Documentation Requirements:**")
-                lecs_doc1 = st.selectbox(
-                    "LECS type, capacity and efficiency documented?",
-                    ["Yes", "No", "N/A"], key="lecs_d1",
+                st.markdown("**TSE = Annual Chiller Plant Energy (kWh) ÷ Annual Cooling Generation (kWrh)**")
+
+                annual_energy_kwh = st.number_input(
+                    "Annual chiller plant energy consumption (kWh)",
+                    min_value=0.0, value=500000.0, step=10000.0, key="ae_6312",
                 )
-                lecs_doc2 = st.selectbox(
-                    "Compliance with mandatory and standardised requirements (6.3.13) documented?",
-                    ["Yes", "No", "N/A"], key="lecs_d2",
-                )
-                lecs_doc3 = st.selectbox(
-                    "Comparison of LECS vs conventional system with energy consumption calculations?",
-                    ["Yes", "No", "N/A"], key="lecs_d3",
+                annual_cooling_kwrh = st.number_input(
+                    "Annual chiller plant cooling generation (kWrh)",
+                    min_value=1.0, value=2200000.0, step=10000.0, key="ac_6312",
                 )
 
-                doc_lecs_pass = all(x in ["Yes", "N/A"] for x in [lecs_doc1, lecs_doc2, lecs_doc3])
-                lecs_6313_pass = len(lecs_selected) > 0 and doc_lecs_pass
+                tse_val = annual_energy_kwh / annual_cooling_kwrh if annual_cooling_kwrh > 0 else 0.0
+                tse_pass = tse_val <= req_tse
+                st.markdown(
+                    f"**Calculated TSE = {tse_val:.4f} kW/kWr** vs max **{req_tse} kW/kWr** "
+                    f"{check_icon(tse_pass)}"
+                )
+
+                st.markdown("**6.3.12-(a) Documentation Requirements:**")
+                tse_doc1 = st.selectbox(
+                    "Summary with annual energy/cooling results and simulation software stated?",
+                    ["Yes", "No", "N/A"], key="tse_d1",
+                )
+                tse_doc2 = st.selectbox(
+                    "Project brief (location, stories, space types, areas, hours) submitted?",
+                    ["Yes", "No", "N/A"], key="tse_d2",
+                )
+                tse_doc3 = st.selectbox(
+                    "List of energy-related building features submitted?",
+                    ["Yes", "No", "N/A"], key="tse_d3",
+                )
+                tse_doc4 = st.selectbox(
+                    "Mandatory requirements compliance list submitted?",
+                    ["Yes", "No", "N/A"], key="tse_d4",
+                )
+                tse_doc5 = st.selectbox(
+                    "Simulation input/output reports (energy + chilled water) submitted?",
+                    ["Yes", "No", "N/A"], key="tse_d5",
+                )
+                tse_doc6 = st.selectbox(
+                    "Modelling assumptions and error messages explained?",
+                    ["Yes", "No", "N/A"], key="tse_d6",
+                )
+
+                doc_items = [tse_doc1, tse_doc2, tse_doc3, tse_doc4, tse_doc5, tse_doc6]
+                doc_pass = all(x in ["Yes", "N/A"] for x in doc_items)
+
+                tse_6312_pass = tse_pass and doc_pass
             else:
-                st.warning("Please select at least one approved LECS type.")
-                lecs_6313_pass = False
-        else:
-            lecs_6313_pass = None  # optional path, not used
+                tse_6312_pass = None  # not using this path
 
-    with c2:
-        hvac_results["6.3.13 Low-Energy Comfort Systems"] = lecs_6313_pass
-        st.markdown(f"**Status:** {check_icon(lecs_6313_pass)}")
-        if lecs_6313_pass is None:
-            st.markdown('<span class="na-badge">Not selected</span>', unsafe_allow_html=True)
+        with c2:
+            hvac_results["6.3.12 Total System Efficiency"] = tse_6312_pass
+            st.markdown(f"**Status:** {check_icon(tse_6312_pass)}")
+            if tse_6312_pass is None:
+                st.markdown('<span class="na-badge">Not selected</span>', unsafe_allow_html=True)
+
+    # ─────────────────────────────────────────────────────────────────────────────
+    # 6.3.13  LOW-ENERGY COMFORT SYSTEMS
+    # ─────────────────────────────────────────────────────────────────────────────
+    with st.expander(f"**6.3.13 – Low-Energy Comfort Systems**"):
+        c1, c2 = st.columns([2, 1])
+
+        with c1:
+            has_lecs = st.checkbox(
+                "Project uses an approved Low-Energy Comfort System (LECS)?",
+                key="has_lecs_6313",
+            )
+
+            if has_lecs:
+                st.markdown(
+                    '<div class="info-box">6.3.13: Low-energy systems are deemed to meet minimum '
+                    'equipment efficiency (6.2.2) but must still comply with all other mandatory '
+                    'provisions of 6.2, and where applicable 6.3 / 6.3.12.</div>',
+                    unsafe_allow_html=True,
+                )
+
+                lecs_selected = st.multiselect(
+                    "Approved LECS type(s) installed",
+                    LOW_ENERGY_SYSTEMS,
+                    key="lecs_type_6313",
+                )
+
+                if lecs_selected:
+                    total_cap_kwr = st.number_input(
+                        "Total building cooling + heating capacity requirement (kWr)",
+                        min_value=1.0, value=500.0, step=10.0, key="total_cap_6313",
+                    )
+                    lecs_cap_kwr = st.number_input(
+                        "LECS installed capacity (kWr)",
+                        min_value=0.0, value=300.0, step=10.0, key="lecs_cap_6313",
+                    )
+                    lecs_pct = (lecs_cap_kwr / total_cap_kwr * 100) if total_cap_kwr > 0 else 0.0
+
+                    if lecs_pct >= 90:
+                        deemed_level = "Super ECSBC"
+                        lecs_color = "#d4edda"
+                    elif lecs_pct >= 50:
+                        deemed_level = "ECSBC+"
+                        lecs_color = "#fff3cd"
+                    else:
+                        deemed_level = "Below ECSBC+ threshold"
+                        lecs_color = "#f8d7da"
+
+                    st.markdown(
+                        f'<div style="background:{lecs_color};border-radius:8px;padding:10px 14px;margin-bottom:8px;">'
+                        f'<b>LECS Coverage: {lecs_pct:.1f}%</b> of total capacity<br>'
+                        f'Deemed compliance level: <b>{deemed_level}</b>'
+                        f'{"<br>≥50% → deemed ECSBC+" if lecs_pct >= 50 else ""}'
+                        f'{"<br>≥90% → deemed Super ECSBC" if lecs_pct >= 90 else ""}'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
+
+                    st.markdown("**6.3.13-(a) Documentation Requirements:**")
+                    lecs_doc1 = st.selectbox(
+                        "LECS type, capacity and efficiency documented?",
+                        ["Yes", "No", "N/A"], key="lecs_d1",
+                    )
+                    lecs_doc2 = st.selectbox(
+                        "Compliance with mandatory and standardised requirements (6.3.13) documented?",
+                        ["Yes", "No", "N/A"], key="lecs_d2",
+                    )
+                    lecs_doc3 = st.selectbox(
+                        "Comparison of LECS vs conventional system with energy consumption calculations?",
+                        ["Yes", "No", "N/A"], key="lecs_d3",
+                    )
+
+                    doc_lecs_pass = all(x in ["Yes", "N/A"] for x in [lecs_doc1, lecs_doc2, lecs_doc3])
+                    lecs_6313_pass = len(lecs_selected) > 0 and doc_lecs_pass
+                else:
+                    st.warning("Please select at least one approved LECS type.")
+                    lecs_6313_pass = False
+            else:
+                lecs_6313_pass = None  # optional path, not used
+
+        with c2:
+            hvac_results["6.3.13 Low-Energy Comfort Systems"] = lecs_6313_pass
+            st.markdown(f"**Status:** {check_icon(lecs_6313_pass)}")
+            if lecs_6313_pass is None:
+                st.markdown('<span class="na-badge">Not selected</span>', unsafe_allow_html=True)
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 4: LIGHTING
 # ══════════════════════════════════════════════════════════════════════════════
@@ -3226,7 +3226,7 @@ with tabs[3]:
         # Display / Accent Lighting
         has_display = st.checkbox(
             "Building has display/accent lighting in areas ≥ 300 m²?", key="disp_exists"
-        )
+        )            
         if has_display:
             disp_ctrl = st.selectbox(
                 " Separate controls for display/accent lighting?",
@@ -3290,7 +3290,7 @@ with tabs[3]:
             light_results[" Demonstration Lighting Control"] = True
 
     # ── §7.2.7 Lighting Power / Efficacy ─────────────────────────────────────
-    st.markdown("#### Exterior Luminaire Efficacy (§7.2.7)")
+    st.markdown("#### Exterior Luminaire Efficacy (7.2.7)")
     with st.expander("**7.2.7 – Exterior Luminaire Efficacy**"):
         st.markdown(
             '<div class="info-box">External luminaires emitting white light (CCT 2700K–6500K) '
@@ -3348,7 +3348,7 @@ with tabs[3]:
     )
 
     st.markdown(
-        f'##### Multiple Independent Lighting Systems <span class="new-badge">§7.3.3 / §7.3.4</span>',
+        f'##### Multiple Independent Lighting Systems',
         unsafe_allow_html=True,
     )
     multi_lighting_systems = st.checkbox(
