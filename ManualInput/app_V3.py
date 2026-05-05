@@ -147,6 +147,43 @@ LPD_TABLE = {
     "Performing arts theater":    {"ECSBC":16.3,"ECSBC+":13.0,"Super ECSBC":8.2},
     "Museum":                     {"ECSBC":10.2,"ECSBC+":8.2,"Super ECSBC":5.1},
 }
+RATING_50_KVA_TABLE = {
+    "16":            {"ECSBC":150,"ECSBC+":135,"Super ECSBC":120},
+    "25":                  {"ECSBC":210,"ECSBC+":190,"Super ECSBC":175},
+    "63":                     {"ECSBC":380,"ECSBC+":340,"Super ECSBC":300},
+    "100":              {"ECSBC":520,"ECSBC+":475,"Super ECSBC":435},
+    "160":     {"ECSBC":770,"ECSBC+":670,"Super ECSBC":570},
+    "200":                    {"ECSBC":890,"ECSBC+":780,"Super ECSBC":670},
+    "250":                  {"ECSBC":1050,"ECSBC+":980,"Super ECSBC":920},
+    "315": {"ECSBC":1100,"ECSBC+":1025,"Super ECSBC":955},
+    "400":{"ECSBC":1300,"ECSBC+":1225,"Super ECSBC":1150},
+    "500":             {"ECSBC":1600,"ECSBC+":1510,"Super ECSBC":1430},
+    "630":                  {"ECSBC":2000,"ECSBC+":1860,"Super ECSBC":1745},
+    "1000":                  {"ECSBC":3000,"ECSBC+":2790,"Super ECSBC":2620},
+    "1250":             {"ECSBC":3600,"ECSBC+":3300,"Super ECSBC":3220},
+    "1600":          {"ECSBC":4500,"ECSBC+":4200,"Super ECSBC":3970},
+    "2000":     {"ECSBC":5400,"ECSBC+":5050,"Super ECSBC":4790},
+    "1500":             {"ECSBC":6500,"ECSBC+":6150,"Super ECSBC":5900},
+}
+
+RATING_100_KVA_TABLE = {
+    "16":            {"ECSBC":480,"ECSBC+":440,"Super ECSBC":400},
+    "25":                  {"ECSBC":695,"ECSBC+":635,"Super ECSBC":595},
+    "63":                     {"ECSBC":1250,"ECSBC+":1140,"Super ECSBC":1050},
+    "100":              {"ECSBC":1800,"ECSBC+":1650,"Super ECSBC":1500},
+    "160":     {"ECSBC":2200,"ECSBC+":1950,"Super ECSBC":1700},
+    "200":                    {"ECSBC":2700,"ECSBC+":2300,"Super ECSBC":2100},
+    "250":                  {"ECSBC":3150,"ECSBC+":2930,"Super ECSBC":2700},
+    "315": {"ECSBC":3275,"ECSBC+":3100,"Super ECSBC":2750},
+    "400":{"ECSBC":3875,"ECSBC+":3450,"Super ECSBC":3330},
+    "500":             {"ECSBC":4750,"ECSBC+":4300,"Super ECSBC":4100},
+    "630":                  {"ECSBC":5855,"ECSBC+":5300,"Super ECSBC":4850},
+    "1000":                  {"ECSBC":9000,"ECSBC+":7700,"Super ECSBC":7000},
+    "1250":             {"ECSBC":10750,"ECSBC+":9200,"Super ECSBC":8400},
+    "1600":          {"ECSBC":13500,"ECSBC+":11800,"Super ECSBC":11300},
+    "2000":     {"ECSBC":17000,"ECSBC+":15000,"Super ECSBC":14100},
+    "1500":             {"ECSBC":20000,"ECSBC+":18500,"Super ECSBC":17500},
+}
 
 # CHILLER_COP   = {"ECSBC":5.20,"ECSBC+":5.80,"Super ECSBC":6.10}
 # CHILLER_IPLV  = {"ECSBC":6.10,"ECSBC+":7.00,"Super ECSBC":8.00}
@@ -3480,94 +3517,178 @@ with tabs[4]:
 
     if project_type == "Addition or Alteration to Existing Building":
         st.markdown('<div class="exc-box">🔶 <b>§3.3.2 Active</b>: Existing electrical systems need not comply. Only newly installed equipment must meet the requirements below.</div>', unsafe_allow_html=True)
-
-    st.markdown("#### Transformers (§8.2.1)")
-    c1, c2 = st.columns(2)
-    with c1:
-        tx_type     = st.selectbox("Transformer Type", ["Dry Type","Oil Type"])
-        tx_kva      = st.number_input("kVA Rating", min_value=0.0, value=500.0)
-        tx_loss_50  = st.number_input("Losses at 50% load (kW)",  min_value=0.0, value=2.5, step=0.1)
-        tx_loss_100 = st.number_input("Losses at 100% load (kW)", min_value=0.0, value=4.5, step=0.1)
-    with c2:
-        tm1 = st.selectbox("0.5-class calibrated meters installed?",     ["Yes","No","N/A"], key="tm1")
-        tm2 = st.selectbox("Transformer loss documentation submitted?",  ["Yes","No","N/A"], key="tm2")
-        tx_pass = all(x=="Yes" for x in [tm1,tm2])
-        elec_results["8.2.1 Transformers"] = tx_pass
-        st.markdown(f"**Status:** {check_icon(tx_pass)}")
-
-    st.markdown("#### Motors (§8.2.4)")
-    c1, c2 = st.columns(2)
-    with c1:
-        motor_class     = st.selectbox("Motor Efficiency Class", IE_ORDER[1:])
-        motor_nameplate = st.selectbox("Nameplate shows efficiency & power factor?", ["Yes","No","N/A"], key="mo1")
-    with c2:
-        req_motor  = PUMP_IE_CLASS[compliance_level]
-        motor_pass = ie_gte(motor_class, req_motor) and motor_nameplate=="Yes"
-        elec_results[f"Motors ≥ {req_motor}"] = motor_pass
-        st.markdown(f"{check_icon(motor_pass)} {motor_class} (req: {req_motor}+)")
-
-    st.markdown("#### Standby Generator Sets (§8.2.5)")
-    if gross_area <= DG_BUA_THRESHOLD:
-        st.markdown(f'<div class="exc-box">🔶 BEE star-rated DG set requirement applies only to BUA &gt;20,000 m². This project BUA = {gross_area:,.0f} m² — DG star labelling is <b>NOT mandatory</b>.</div>', unsafe_allow_html=True)
-        elec_results["DG Set (BUA ≤ 20,000 m² — not mandatory)"] = True
-    else:
-        req_dg = DG_STAR_REQUIRED[compliance_level]
+    with st.expander("8.2.1 - Transformers"):
+        st.markdown("#### Transformers (§8.2.1)")
         c1, c2 = st.columns(2)
-        with c1: dg_star = st.selectbox("DG Set BEE Star Rating", [3,4,5])
+        with c1:
+            tx_type     = st.selectbox("Transformer Type", ["Dry Type","Oil Type"])
+            if tx_type == "Dry Type":
+                tx_load = st.selectbox("kVA", [16,25,63,100,160,200,250,315,400,500,630,1000,1250,1600,2000,2500])
+                kva_key = str(tx_load)
+                if kva_key in RATING_50_KVA_TABLE and RATING_100_KVA_TABLE:
+                    limit_value = RATING_50_KVA_TABLE[kva_key][compliance_level]
+                    limit_value100 = RATING_100_KVA_TABLE[kva_key][compliance_level]
+                    tx_loss_50  = st.number_input("Losses at 50% load (kW)",  min_value=0, value=25, step=1)
+                    tx_loss_100 = st.number_input("Losses at 100% load (kW)", min_value=0, value=45, step=1)
+                    if tx_loss_50 < limit_value:
+                        tx_load_50_pass = True
+                        elec_results["50% Load"] = tx_load_50_pass
+                        st.markdown(f"**Status for 50% Load:** {check_icon(tx_load_50_pass)}")
+
+                    else:
+                        tx_load_pass = False
+                        elec_results["50% Load"] = tx_load_50_pass
+                        st.markdown(f"**Status for 50% Load:** {check_icon(tx_load_50_pass)}")
+                    if tx_loss_100 < limit_value100:
+                        tx_load_pass = True
+                        elec_results["100% Load"] = tx_load_pass
+                        st.markdown(f"**Status for 100% Load:** {check_icon(tx_load_pass)}")
+                    else:
+                        tx_load_pass = False
+                        elec_results["100% Load"] = tx_load_pass
+                        st.markdown(f"**Status for 100% Load:** {check_icon(tx_load_pass)}")
+
+                else:
+                    st.warning("Selected kVA not found in rating table")
+            
+            if tx_type == "Oil Type":
+                if compliance_level == 'ECSBC':
+                    tm01 = st.checkbox("ECSBC building - Confroming to BEE 3-star labelling requirement.")
+                elif compliance_level == 'ECSBC+':
+                    tm01 = st.checkbox("ECSBC Plus building - Conforming to BEE 4-star labelling requirement.")
+                else:
+                    tm01 = st.checkbox("ECSBC Super building - Conforming to BEE 5-star labelling requirement.")
+                tx_pass_oil = tm01 == "Yes"
+                st.markdown(f"**Status:** {check_icon(tx_pass_oil)}")
+                elec_results["8.2.1 Compliance of Power distribution transformers (oil type)"] = tx_pass_oil
+
+
         with c2:
-            dg_pass = dg_star >= req_dg
-            elec_results[f"DG Set ≥ {req_dg}★"] = dg_pass
-            st.markdown(f"{check_icon(dg_pass)} {dg_star}★ (req: {req_dg}★+)")
+            tm1 = st.selectbox("0.5-class calibrated meters installed?",     ["Yes","No","N/A"], key="tm1")
+            tm2 = st.selectbox("Transformer loss documentation submitted?",  ["Yes","No","N/A"], key="tm2")
+            tx_pass = all(x=="Yes" for x in [tm1,tm2])
+            elec_results["8.2.1 Transformers"] = tx_pass
+            st.markdown(f"**Status:** {check_icon(tx_pass)}")
 
-    st.markdown("#### Check-Metering & Monitoring (§8.2.6)")
-    c1, c2 = st.columns(2)
-    with c1:
-        me1 = st.selectbox("Permanent electrical metering per load thresholds?", ["Yes","No","N/A"], key="me1")
-        me2 = st.selectbox("M&V-capable metering for commissioning?",             ["Yes","No","N/A"], key="me2")
-    with c2:
-        meter_pass = all(x=="Yes" for x in [me1,me2])
-        elec_results["8.2.6 Metering"] = meter_pass
-        st.markdown(f"**Status:** {check_icon(meter_pass)}")
+    with st.expander("8.2.3 - Voltage Drop"):
+        c1, c2 = st.columns(2)
+        with c1:
+            vd_feeder = st.number_input("Voltage Drop at Feeder (%)", min_value=0.0, max_value=10.0, value=1.8, step=0.1)
+            vd_branch = st.number_input("Voltage Drop at Branch (%)", min_value=0.0, max_value=10.0, value=2.5, step=0.1)
+        with c2:
+            vd_pass = vd_feeder <= 2.0 and vd_branch <= 3.0
+            elec_results["Voltage Drop (Feeder ≤2%, Branch ≤3%)"] = vd_pass
+            st.markdown(f"Feeder: {check_icon(vd_feeder<=2.0)} {vd_feeder}%  |  Branch: {check_icon(vd_branch<=3.0)} {vd_branch}%")
 
-    st.markdown("#### Power Factor (§8.2.7)")
-    pf1 = st.selectbox("Power factor maintained at point of connection?", ["Yes","No","N/A"], key="pf1")
-    elec_results["8.2.7 Power Factor"] = pf1=="Yes"
+    with st.expander("8.2.4 - Energy Efficient Motors"):
 
-    st.markdown("#### Renewable Energy (§8.2.11)")
-    st.markdown('<div class="info-box">RE type set in sidebar — shared with Water tab for §9.3.5(b) sanitary ware exception.</div>', unsafe_allow_html=True)
-    c1, c2 = st.columns(2)
-    with c1:
-        re_cap   = st.number_input("Total RE Capacity (kW)", min_value=0.0, value=50.0)
-        regz_pct = st.number_input("REGZ as % of roof area", min_value=0.0, max_value=100.0, value=55.0)
-    with c2:
-        re_ok   = len(re_type_sidebar) > 0 and "None" not in re_type_sidebar
-        regz_ok = regz_pct >= 50.0
-        elec_results["8.2.11 RE Systems"] = re_ok
-        elec_results["8.2.11 REGZ ≥ 50%"] = regz_ok
-        st.markdown(f"**RE:** {check_icon(re_ok)} {', '.join(re_type_sidebar) if re_ok else 'None'}  |  **REGZ ≥ 50%:** {check_icon(regz_ok)} {regz_pct:.0f}%")
+        c1, c2 = st.columns(2)
+        with c1:
+            motor_class     = st.selectbox("Motor Efficiency Class", IE_ORDER[1:])
+            motor_nameplate = st.selectbox("Nameplate shows efficiency & power factor?", ["Yes","No","N/A"], key="mo1")
+        with c2:
+            req_motor  = PUMP_IE_CLASS[compliance_level]
+            motor_pass = ie_gte(motor_class, req_motor) and motor_nameplate=="Yes"
+            elec_results[f"Motors ≥ {req_motor}"] = motor_pass
+            st.markdown(f"{check_icon(motor_pass)} {motor_class} (req: {req_motor}+)")
 
-    st.markdown("#### UPS Efficiency (§8.2.10)")
-    c1, c2 = st.columns(2)
-    with c1:
-        ups_eff = st.number_input("UPS Efficiency at 100% load (%)", min_value=0.0, max_value=100.0, value=96.0, step=0.5)
-    with c2:
-        ups_pass = ups_eff >= 95.0
-        elec_results["UPS ≥ 95%"] = ups_pass
-        st.markdown(f"{check_icon(ups_pass)} {ups_eff}%")
+    with st.expander("8.2.5 - Standby Generator Sets"):
+        if gross_area <= DG_BUA_THRESHOLD:
+            st.markdown(f'<div class="exc-box">🔶 BEE star-rated DG set requirement applies only to BUA &gt;20,000 m². This project BUA = {gross_area:,.0f} m² — DG star labelling is <b>NOT mandatory</b>.</div>', unsafe_allow_html=True)
+            elec_results["DG Set (BUA ≤ 20,000 m² — not mandatory)"] = True
+        else:
+            req_dg = DG_STAR_REQUIRED[compliance_level]
+            c1, c2 = st.columns(2)
+            with c1: dg_star = st.selectbox("DG Set BEE Star Rating", [3,4,5])
+            with c2:
+                dg_pass = dg_star >= req_dg
+                elec_results[f"DG Set ≥ {req_dg}★"] = dg_pass
+                st.markdown(f"{check_icon(dg_pass)} {dg_star}★ (req: {req_dg}★+)")
 
-    st.markdown("#### EV Charging (§8.2.11-e)")
-    ev1 = st.selectbox("EV charging infrastructure per CEA guidelines?", ["Yes","No","N/A"], key="ev1")
-    elec_results["8.2.11-e EV Charging"] = ev1=="Yes"
+    with st.expander("8.2.6 - Check-Metering & Monitoring"):
+        st.markdown("#### Check-Metering & Monitoring (§8.2.6)")
+        c1, c2 = st.columns(2)
+        with c1:
+            st.write("At Building mains, installed meters shall monitor Energy use (kWh, kVARh, kVAh), Energy Demand (kW/ kVA), THD (V and I) on a half hour basis. The metering shall also be displaying current (in each phase and the neutral), voltage (between phases and between each phase and neutral).")
+            st.write("Building services sub-meters hsall comprise of the following: ")
 
-    st.markdown("#### Voltage Drop (§8.2.3)")
-    c1, c2 = st.columns(2)
-    with c1:
-        vd_feeder = st.number_input("Voltage Drop at Feeder (%)", min_value=0.0, max_value=10.0, value=1.8, step=0.1)
-        vd_branch = st.number_input("Voltage Drop at Branch (%)", min_value=0.0, max_value=10.0, value=2.5, step=0.1)
-    with c2:
-        vd_pass = vd_feeder <= 2.0 and vd_branch <= 3.0
-        elec_results["Voltage Drop (Feeder ≤2%, Branch ≤3%)"] = vd_pass
-        st.markdown(f"Feeder: {check_icon(vd_feeder<=2.0)} {vd_feeder}%  |  Branch: {check_icon(vd_branch<=3.0)} {vd_branch}%")
+            kva = st.number_input("Load (in kVA)", key = "kva")
+            me1 = False
+            me2 = False
+            if kva >= 1000:
+                me1 = st.selectbox("Services 1,000 kVA and above shall have permanently installed electrical metering to record demand (kVA), energy (kWh), and total power factor on half hourly basis. The metering shall display current, voltage and total harmonic distortion (THD)?", ["Yes","No","N/A"], key="me1")
+            elif kva >= 65 and kva <= 1000:
+                me1 = st.selectbox("Permanently installed electric metering to record demand (kW/kVA), energy (kWh/kVAh), and total power factor (or kVARh) on half hourly basis.",["Yes","No","N/A"], key="me2" )
+            else:
+                me1 = st.selectbox("Permanently installed electrical meteing to record eneryg (kWh) on hourly basis.",["Yes","No","N/A"], key="me4")
+            
+            st.write("**Mandatory requirement of sub-metering of services**")
+
+            me01 = False
+            if building_type == "Shopping Complex":
+                mandatory_req = st.checkbox("Facade lighting, Common Area lighting and exterior lighting", key="man_req_1")
+                if mandatory_req:
+                    me01 = True
+            if building_type == "Business":
+                mandatory_req = st.checkbox("Data centres and Floor loads", key="man_req_2")
+                if mandatory_req:
+                    me01 = True
+            if building_type == "Hospitality":
+                mandatory_req = st.checkbox("Commercial kitchens, laundry & Total Guest rooms", key="man_req_3")
+                if mandatory_req:
+                    me01 = True
+            if building_type == "Hospital":
+                mandatory_req = st.checkbox("Medical Equipment, UPS power, total IPD rooms, Kitchen, and Laundry", key="man_req_4")
+                if mandatory_req:
+                    me01 = True
+
+            mandatory_req_pass = me01 
+
+
+            
+        with c2:
+            meter_pass = me1 == "Yes"
+            elec_results["8.2.6 Metering"] = meter_pass
+            st.markdown(f"**Status:** {check_icon(meter_pass)}")
+            st.markdown(f"**Mandatory Requirement Status:** {check_icon(mandatory_req_pass)}")
+
+
+    with st.expander("8.2.7 - Power Factor"):
+        st.markdown("#### Power Factor (§8.2.7)")
+        pf1 = st.selectbox("Power factor maintained at point of connection?", ["Yes","No","N/A"], key="pf1")
+        elec_results["8.2.7 Power Factor"] = pf1=="Yes"
+
+        
+    with st.expander("8.2.10 - UPS Efficiency"):
+        
+        c1, c2 = st.columns(2)
+        with c1:
+            ups_eff = st.number_input("UPS Efficiency at 100% load (%)", min_value=0.0, max_value=100.0, value=96.0, step=0.5)
+        with c2:
+            ups_pass = ups_eff >= 95.0
+            elec_results["UPS ≥ 95%"] = ups_pass
+            st.markdown(f"{check_icon(ups_pass)} {ups_eff}%")
+
+        st.markdown("#### EV Charging (§8.2.11-e)")
+        ev1 = st.selectbox("EV charging infrastructure per CEA guidelines?", ["Yes","No","N/A"], key="ev1")
+        elec_results["8.2.11-e EV Charging"] = ev1=="Yes"
+    
+    with st.expander("8.2.11 - Renewable Energy"):
+        st.markdown("#### Renewable Energy (§8.2.11)")
+        st.markdown('<div class="info-box">RE type set in sidebar — shared with Water tab for §9.3.5(b) sanitary ware exception.</div>', unsafe_allow_html=True)
+        c1, c2 = st.columns(2)
+        with c1:
+            re_cap   = st.number_input("Total RE Capacity (kW)", min_value=0.0, value=50.0)
+            regz_pct = st.number_input("REGZ as % of roof area", min_value=0.0, max_value=100.0, value=55.0)
+        with c2:
+            re_ok   = len(re_type_sidebar) > 0 and "None" not in re_type_sidebar
+            regz_ok = regz_pct >= 50.0
+            elec_results["8.2.11 RE Systems"] = re_ok
+            elec_results["8.2.11 REGZ ≥ 50%"] = regz_ok
+            st.markdown(f"**RE:** {check_icon(re_ok)} {', '.join(re_type_sidebar) if re_ok else 'None'}  |  **REGZ ≥ 50%:** {check_icon(regz_ok)} {regz_pct:.0f}%")
+
+
+
 
     results["Electrical & RE"] = elec_results
 
