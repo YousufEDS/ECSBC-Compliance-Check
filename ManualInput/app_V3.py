@@ -3644,8 +3644,6 @@ with tabs[4]:
 
             mandatory_req_pass = me01 
 
-
-            
         with c2:
             meter_pass = me1 == "Yes"
             elec_results["8.2.6 Metering"] = meter_pass
