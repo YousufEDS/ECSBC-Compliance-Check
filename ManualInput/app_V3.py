@@ -2,6 +2,8 @@ import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
 from datetime import date
+import base64
+import requests
 
 # ─── PAGE CONFIG ───────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -36,6 +38,24 @@ st.markdown("""
     .metric-highlight { text-align:center; padding:12px; border-radius:10px; background:#f8fafc; border:1px solid #e0e7ef; font-size:0.9rem; }
     div[data-testid="stExpander"] { border:1px solid #e0e7ef; border-radius:8px; }
     .new-badge { background:#cce5ff; color:#004085; border-radius:4px; padding:1px 7px; font-size:0.75rem; font-weight:700; margin-left:6px; vertical-align:middle; }
+    .ai-user-msg {
+        background:#e8f4fd; border-radius:12px 12px 4px 12px;
+        padding:12px 16px; margin:8px 0 8px 40px; border:1px solid #bee3f8;
+        font-size:0.9rem;
+    }
+    .ai-bot-msg {
+        background:#f0f5fb; border-radius:12px 12px 12px 4px;
+        padding:12px 16px; margin:8px 40px 8px 0; border-left:4px solid #2d6a9f;
+        font-size:0.9rem;
+    }
+    .ai-header {
+        background: linear-gradient(135deg, #1a3c5e 0%, #2d6a9f 100%);
+        padding: 16px 24px; border-radius: 12px; color: white; margin-bottom: 20px;
+    }
+    .ai-empty-state {
+        text-align:center; color:#888; padding:40px 20px;
+        border:2px dashed #e0e7ef; border-radius:12px; margin:10px 0;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -44,6 +64,144 @@ st.markdown("""
         .block-container { padding-top: 1.8rem; padding-bottom: 0.8rem; }
     </style>
 """, unsafe_allow_html=True)
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ─── AI MODEL & RAG ───────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+
+OLLAMA_URL   = "http://localhost:11434"
+OLLAMA_MODEL = "gemma3:4b"
+
+
+def check_ollama() -> tuple[bool, str | None]:
+    """Ping Ollama and confirm gemma3:4b is available. Returns (ok, error_msg)."""
+    try:
+        r = requests.get(f"{OLLAMA_URL}/api/tags", timeout=4)
+        r.raise_for_status()
+        names = [m["name"] for m in r.json().get("models", [])]
+        if not any(OLLAMA_MODEL in n for n in names):
+            return False, f"`{OLLAMA_MODEL}` not found in Ollama. Run: ollama pull {OLLAMA_MODEL}"
+        return True, None
+    except requests.exceptions.ConnectionError:
+        return False, "Ollama is not running. Start it with: ollama serve"
+    except Exception as e:
+        return False, str(e)
+
+
+def query_ollama(prompt: str, img_b64: str | None = None) -> str:
+    """Send a chat message to Ollama and return the response text."""
+    message: dict = {"role": "user", "content": prompt}
+    if img_b64:
+        message["images"] = [img_b64]
+
+    r = requests.post(
+        f"{OLLAMA_URL}/api/chat",
+        json={"model": OLLAMA_MODEL, "messages": [message], "stream": False},
+        timeout=180,
+    )
+    r.raise_for_status()
+    return r.json()["message"]["content"]
+
+ECSBC_KNOWLEDGE_BASE = """
+You are an expert in ECSBC 2024 (Energy Conservation and Sustainable Building Code of India).
+
+KEY REQUIREMENTS SUMMARY:
+
+BUILDING ENVELOPE (Section 5):
+- Roof U-Factor max: 0.26 W/m²·K (ECSBC), 0.20 (ECSBC+), 0.18 (Super ECSBC) — all climates
+- Wall U-Factor (Composite/Hot/Humid): 0.44 / 0.34 / 0.22 W/m²·K
+- Wall U-Factor (Temperate): 0.55 / 0.44 / 0.34 W/m²·K
+- Wall U-Factor (Cold): 0.34 / 0.22 / 0.18 W/m²·K
+- Fenestration U-Factor (Composite): max 2.20 / 1.80 / 1.80 W/m²·K
+- SHGC Non-North max: 0.25 / 0.20 / 0.25 (ECSBC/ECSBC+/Super ECSBC) for non-cold climates
+- Min VLT: 0.27 | Max WWR: 40% | Max SRR: 5%
+- Cool Roof: Solar Reflectance ≥ 0.70, Thermal Emittance ≥ 0.75
+- Skylight: U ≤ 4.25 W/m²·K, SHGC ≤ 0.35
+- Exceptions: Hospitality AGA ≥ 10,000 m² gets relaxed roof U; AGA < 10,000 m² gets relaxed wall U for No Star Hotel, Business, School
+
+LIGHTING (Section 7):
+- LPD limits (ECSBC / ECSBC+ / Super ECSBC in W/m²):
+  Office: 9.5 / 7.6 / 5.0 | Hospitals: 9.7 / 7.8 / 4.9 | Hotels: 9.5 / 7.6 / 4.8
+  Shopping Mall: 14.1 / 11.3 / 7.0 | Schools: 11.2 / 9.0 / 6.0
+- Occupancy sensors mandatory for spaces > 25 m²
+- Daylight sensors with auto-dimming for daylit zones
+- Emergency lighting on separate circuit
+
+HVAC & COMFORT (Section 6):
+- Chiller COP min: 5.20 / 5.80 / 6.10 (ECSBC / ECSBC+ / Super ECSBC)
+- Chiller IPLV min: 6.10 / 7.00 / 8.00
+- Pump IE class: IE3 / IE4 / IE5
+- DCV required when outdoor air > 5400 m³/hr in AC spaces
+- CO sensors in basement parking ≥ 600 m²
+- VFD on pumps and AHU fans > 5 kW
+- Pipe insulation R-values per Tables 6.4–6.6
+
+WATER MANAGEMENT (Section 9):
+- Rainwater harvesting mandatory for BUA ≥ 500 m²
+- Sub-metering for each floor/zone
+- Low-flow fixtures: WCs ≤ 6 LPF, faucets ≤ 8 LPM, showers ≤ 10 LPM, urinals ≤ 1.9 LPF
+- STP required for BUA ≥ 5,000 m²; treated water reuse for flushing/irrigation
+
+RENEWABLE ENERGY (Section 8):
+- Solar PV: Mandatory for BUA ≥ 500 m²; capacity per Table 8.1
+- DG Sets: BEE 3/4/5 star rating for BUA ≥ 20,000 m²
+- EV charging: Mandatory parking provision
+
+SITE & PLANNING (Section 4):
+- Topsoil preservation with ICAR-lab fertility test
+- Tree preservation with authority letter if trees removed
+- Cool roof mandatory on ≥ 75% net exposed roof area
+- Bicycle parking within 90 m of main entrance
+- Public transit access within 800 m
+
+INDOOR ENVIRONMENT (Section 11):
+- Air filters: ISO 16890 rated
+- CO2 sensors in spaces > 50 m² with DCV link
+- Acoustic insulation per Table 11.4; NIC per Table 11.7
+- Thermal simulation ≤ 300 unmet hours
+- RH control: 30–70% year-round
+
+COMPLIANCE PATHS:
+1. Prescriptive (component-by-component) — most common
+2. Envelope Trade-off (EPF) — only if WWR ≤ 40%
+3. Whole Building Performance Simulation — required if WWR > 40%
+"""
+
+
+def build_compliance_context(cl, cz, btype, bstype, bua, aga_m, lat, results_dict):
+    """Build a dynamic RAG context string from the current project's compliance state."""
+    req_r = ROOF_U[cl][cz]
+    req_w = WALL_U[cl][cz]
+    req_f = FENE_U[cl][cz]
+    req_s = SHGC_NON_NORTH[cl][cz]
+
+    failed, passed = [], []
+    for section, checks in results_dict.items():
+        for item, val in checks.items():
+            if val is False:
+                failed.append(f"  • [{section}] {item}")
+            elif val is True:
+                passed.append(f"  • [{section}] {item}")
+
+    ctx = f"""
+CURRENT PROJECT STATE:
+- Building: {btype} / {bstype} in {cz} climate zone
+- Compliance Level: {cl} | BUA: {bua:,.0f} m² | AGA: {aga_m:,.0f} m² | Latitude: {lat:.1f}°N
+
+PROJECT-SPECIFIC CODE LIMITS:
+- Roof U-Factor: ≤ {req_r} W/m²·K
+- Wall U-Factor: ≤ {req_w} W/m²·K
+- Fenestration U-Factor: ≤ {req_f} W/m²·K
+- SHGC Non-North: ≤ {req_s}
+
+FAILED CHECKS ({len(failed)} items requiring attention):
+{chr(10).join(failed) if failed else "  None — all checks passed!"}
+
+PASSED CHECKS ({len(passed)} items):
+{chr(10).join(passed[:12]) if passed else "  None yet"}{"" if len(passed) <= 12 else f"  ...and {len(passed)-12} more"}
+"""
+    return ctx
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # ─── CODE DATA ────────────────────────────────────────────────────────────────
@@ -591,6 +749,7 @@ tabs = st.tabs([
     "🗑️ Waste Mgmt",
     "🌬️ Indoor Environment",
     "📊 Summary",
+    "🤖 Ask AI",
 ])
 
 results = {}
@@ -3685,9 +3844,6 @@ with tabs[4]:
             elec_results["8.2.11 REGZ ≥ 50%"] = regz_ok
             st.markdown(f"**RE:** {check_icon(re_ok)} {', '.join(re_type_sidebar) if re_ok else 'None'}  |  **REGZ ≥ 50%:** {check_icon(regz_ok)} {regz_pct:.0f}%")
 
-
-
-
     results["Electrical & RE"] = elec_results
 
 
@@ -4031,4 +4187,176 @@ with tabs[8]:
         st.plotly_chart(fig_r, width='stretch')
     with c2:
         pass
-    
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# TAB 10: ASK AI  (Ollama · gemma3:4b)
+# ══════════════════════════════════════════════════════════════════════════════
+with tabs[9]:
+    st.markdown("""
+    <div class="ai-header">
+        <h2 style="margin:0;font-size:1.4rem">🤖 ECSBC AI Compliance Assistant</h2>
+        <p style="margin:4px 0 0 0;opacity:0.85;font-size:0.9rem">
+            Powered by Ollama · gemma3:4b &nbsp;|&nbsp; Upload compliance reports, ask questions, get ECSBC 2024 suggestions
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Session state ─────────────────────────────────────────────────────────
+    if "ai_messages" not in st.session_state:
+        st.session_state.ai_messages = []
+
+    # ── Check Ollama (fast — 4 s timeout, runs every tab render) ─────────────
+    _ollama_ok, _ollama_err = check_ollama()
+
+    # ── Build RAG context from current project state ──────────────────────────
+    project_rag = build_compliance_context(
+        compliance_level, climate_zone, building_type, building_subtype,
+        gross_area, aga, latitude, results,
+    )
+    full_rag = ECSBC_KNOWLEDGE_BASE + project_rag
+
+    # ── Layout: controls (left) + chat (right) ────────────────────────────────
+    col_ctrl, col_chat = st.columns([1, 2], gap="medium")
+
+    with col_ctrl:
+        st.markdown("#### ⚙️ Ollama Status")
+        if _ollama_ok:
+            st.success(f"✅ Connected · {OLLAMA_MODEL}")
+        else:
+            st.error(f"❌ {_ollama_err}")
+            st.code("ollama serve", language="bash")
+
+        st.markdown("---")
+        st.markdown("#### 📄 Upload Compliance Report")
+        uploaded_report = st.file_uploader(
+            "Image of report (JPG / PNG)",
+            type=["jpg", "jpeg", "png"],
+            help="Upload a scanned or photographed compliance report for AI analysis",
+        )
+        if uploaded_report:
+            st.image(uploaded_report, caption="Uploaded report", use_container_width=True)
+
+        st.markdown("---")
+        st.markdown("#### ⚡ Quick Actions")
+
+        qa_analyze  = st.button("📊 Analyze All Failures & Suggest Fixes",  use_container_width=True, disabled=not _ollama_ok)
+        qa_envelope = st.button("🧱 Building Envelope Recommendations",      use_container_width=True, disabled=not _ollama_ok)
+        qa_hvac     = st.button("❄️ HVAC Compliance Tips",                  use_container_width=True, disabled=not _ollama_ok)
+        qa_lighting = st.button("💡 Lighting Optimisation",                  use_container_width=True, disabled=not _ollama_ok)
+        qa_report   = st.button("🔍 Analyze Uploaded Report",               use_container_width=True,
+                                 disabled=(not _ollama_ok or uploaded_report is None))
+
+        st.markdown("---")
+        if st.button("🗑️ Clear Chat", use_container_width=True):
+            st.session_state.ai_messages = []
+            st.rerun()
+
+    # ── Encode uploaded image to base64 for Ollama multimodal ────────────────
+    img_b64: str | None = None
+    if uploaded_report is not None:
+        img_b64 = base64.b64encode(uploaded_report.getvalue()).decode("utf-8")
+
+    # ── Helper: send prompt (+ optional image) to Ollama ─────────────────────
+    def _run_query(user_text: str, image_b64: str | None = None) -> None:
+        st.session_state.ai_messages.append({"role": "user", "content": user_text})
+
+        system_ctx = (
+            "You are an expert ECSBC 2024 compliance advisor. "
+            "Use the provided knowledge base and project state to give specific, "
+            "actionable recommendations with ECSBC 2024 section references.\n\n"
+            + full_rag
+        )
+        full_prompt = f"{system_ctx}\n\nUser: {user_text}"
+
+        with col_chat:
+            with st.spinner("Gemma is thinking…"):
+                try:
+                    response = query_ollama(full_prompt, image_b64)
+                except Exception as exc:
+                    response = f"⚠️ Ollama error: {exc}"
+
+        st.session_state.ai_messages.append({"role": "assistant", "content": response})
+        st.rerun()
+
+    # ── Handle quick-action buttons ───────────────────────────────────────────
+    if qa_analyze:
+        _run_query(
+            f"Analyze the compliance status for this {building_type} ({building_subtype}) "
+            f"in the {climate_zone} climate zone targeting {compliance_level}. "
+            f"List every failed check and provide specific ECSBC 2024-referenced corrective actions.",
+            img_b64,
+        )
+    if qa_envelope:
+        _run_query(
+            f"What building envelope improvements are needed to achieve {compliance_level} "
+            f"compliance under ECSBC 2024 for a {building_type} in {climate_zone}? "
+            f"Include specific U-factor and SHGC targets, insulation types, and glazing specs.",
+            img_b64,
+        )
+    if qa_hvac:
+        _run_query(
+            f"What HVAC system requirements must be met for {compliance_level} compliance "
+            f"under ECSBC 2024 for a {building_type} ({building_subtype})? "
+            f"Cover chiller COP, pump efficiency class, DCV, VFD requirements, and pipe insulation.",
+            img_b64,
+        )
+    if qa_lighting:
+        _run_query(
+            f"How can I optimise lighting to meet {compliance_level} ECSBC 2024 requirements "
+            f"for a {building_type}? Include LPD targets, lamp types, control strategies, "
+            f"and daylight integration methods.",
+            img_b64,
+        )
+    if qa_report:
+        _run_query(
+            "Please analyse this uploaded compliance report image. Identify any ECSBC 2024 "
+            "non-compliance issues visible in the report and suggest specific corrective measures.",
+            img_b64,
+        )
+
+    # ── Chat display ──────────────────────────────────────────────────────────
+    with col_chat:
+        st.markdown("#### 💬 Chat with ECSBC AI")
+
+        chat_box = st.container(height=480)
+        with chat_box:
+            if not st.session_state.ai_messages:
+                st.markdown("""
+                <div class="ai-empty-state">
+                    <h3 style="margin:0 0 8px 0">👋 Hello!</h3>
+                    <p style="margin:0">I'm your ECSBC 2024 compliance assistant running on<br>
+                    <b>Ollama · gemma3:4b</b> locally.<br><br>
+                    Use the quick-action buttons or type a question below.</p>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                for msg in st.session_state.ai_messages:
+                    if msg["role"] == "user":
+                        st.markdown(
+                            f'<div class="ai-user-msg"><b>You:</b><br>{msg["content"]}</div>',
+                            unsafe_allow_html=True,
+                        )
+                    else:
+                        st.markdown(
+                            f'<div class="ai-bot-msg"><b>🤖 AI Assistant:</b><br>{msg["content"]}</div>',
+                            unsafe_allow_html=True,
+                        )
+
+        st.markdown("---")
+        c_inp, c_send = st.columns([5, 1])
+        with c_inp:
+            user_q = st.text_input(
+                "Ask anything about ECSBC 2024…",
+                placeholder="e.g. What insulation R-value do I need for my chilled water pipes?",
+                key="ai_text_input",
+                label_visibility="collapsed",
+            )
+        with c_send:
+            send_clicked = st.button(
+                "Send", type="primary", use_container_width=True,
+                disabled=not _ollama_ok,
+            )
+
+        if send_clicked and user_q.strip():
+            _run_query(user_q.strip(), img_b64)
