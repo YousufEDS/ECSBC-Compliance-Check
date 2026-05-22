@@ -4107,6 +4107,22 @@ with tabs[8]:
 
     st.markdown("---")
 
+    st.markdown("#### Compliance Radar")
+    r_sections = list(section_stats.keys())
+    r_scores   = [round(section_stats[s]["passed"] / (section_stats[s]["passed"]+section_stats[s]["failed"])*100)
+                  if (section_stats[s]["passed"]+section_stats[s]["failed"])>0 else 0 for s in r_sections]
+    fig_r = go.Figure(go.Scatterpolar(
+        r=r_scores + [r_scores[0]], theta=r_sections + [r_sections[0]],
+        fill="toself", line_color="#2d6a9f", fillcolor="rgba(45,106,159,0.25)"))
+    fig_r.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0,100])),
+        showlegend=False, height=420, margin=dict(t=20,b=20,l=20,r=20))
+
+    c1, c2 = st.columns([3,2])
+    with c1:
+        st.plotly_chart(fig_r, width='stretch')
+    with c2:
+        pass
+
     if section_stats:
         snames = list(section_stats.keys())
         pvals  = [section_stats[s]["passed"] for s in snames]
@@ -4172,21 +4188,6 @@ with tabs[8]:
     st.dataframe(pd.DataFrame(lpd_rows), width='stretch', hide_index=True)
 
     st.markdown("---")
-    st.markdown("#### Compliance Radar")
-    r_sections = list(section_stats.keys())
-    r_scores   = [round(section_stats[s]["passed"] / (section_stats[s]["passed"]+section_stats[s]["failed"])*100)
-                  if (section_stats[s]["passed"]+section_stats[s]["failed"])>0 else 0 for s in r_sections]
-    fig_r = go.Figure(go.Scatterpolar(
-        r=r_scores + [r_scores[0]], theta=r_sections + [r_sections[0]],
-        fill="toself", line_color="#2d6a9f", fillcolor="rgba(45,106,159,0.25)"))
-    fig_r.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0,100])),
-        showlegend=False, height=420, margin=dict(t=20,b=20,l=20,r=20))
-
-    c1, c2 = st.columns([3,2])
-    with c1:
-        st.plotly_chart(fig_r, width='stretch')
-    with c2:
-        pass
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -4197,7 +4198,7 @@ with tabs[9]:
     <div class="ai-header">
         <h2 style="margin:0;font-size:1.4rem">🤖 ECSBC AI Compliance Assistant</h2>
         <p style="margin:4px 0 0 0;opacity:0.85;font-size:0.9rem">
-            Powered by Ollama · gemma3:4b &nbsp;|&nbsp; Upload compliance reports, ask questions, get ECSBC 2024 suggestions
+            Upload compliance reports, ask questions, get ECSBC 2024 suggestions
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -4220,7 +4221,7 @@ with tabs[9]:
     col_ctrl, col_chat = st.columns([1, 2], gap="medium")
 
     with col_ctrl:
-        st.markdown("#### ⚙️ Ollama Status")
+        st.markdown("#### ⚙️ AI model Status")
         if _ollama_ok:
             st.success(f"✅ Connected · {OLLAMA_MODEL}")
         else:
@@ -4230,9 +4231,9 @@ with tabs[9]:
         st.markdown("---")
         st.markdown("#### 📄 Upload Compliance Report")
         uploaded_report = st.file_uploader(
-            "Image of report (JPG / PNG)",
-            type=["jpg", "jpeg", "png"],
-            help="Upload a scanned or photographed compliance report for AI analysis",
+            "PDF of report",
+            type=["pdf"],
+            help="Upload a pdf compliance report for AI analysis",
         )
         if uploaded_report:
             st.image(uploaded_report, caption="Uploaded report", use_container_width=True)
@@ -4270,7 +4271,7 @@ with tabs[9]:
         full_prompt = f"{system_ctx}\n\nUser: {user_text}"
 
         with col_chat:
-            with st.spinner("Gemma is thinking…"):
+            with st.spinner("model is thinking…"):
                 try:
                     response = query_ollama(full_prompt, image_b64)
                 except Exception as exc:
